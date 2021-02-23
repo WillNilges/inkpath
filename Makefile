@@ -1,4 +1,7 @@
 cc=gcc
 
-all:
-	gcc main.c `pkg-config --libs autotrace` `pkg-config --cflags autotrace`
+whitetrace:
+	gcc main.c `pkg-config --libs autotrace` `pkg-config --cflags autotrace` -o whitetrace
+
+clean:
+	rm whitetrace
