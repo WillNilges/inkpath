@@ -58,7 +58,9 @@ void remove_bg(char* input_file, char* output_file)
     }
 
     // Array to store our colors in
-    char colors[2][6];
+    int max_colors = 2;
+    int colors_found = 0;
+    char colors[max_colors][7];
 
     /* Open the file for reading */
     char *line_buf = NULL;
@@ -85,11 +87,27 @@ void remove_bg(char* input_file, char* output_file)
         int b, e;
         char *match=regexp(line_buf, &hex_regex, &b, &e);
         if (match)
-            printf("-> %s <-\n(b=%d e=%d)\n", match, b, e); //Debug
-
+        {
+            // printf("-> %s <-\n(b=%d e=%d)\n", match, b, e); //Debug
+            char current_color[8];
+            strncpy(current_color, match+1, 6);
+            // printf("%s\n", current_color);
+            int new_color = 1;
+            for (int i = 0; i < max_colors; i++)
+            {
+                if (strcmp(current_color, colors[i]) == 0)
+                    new_color = 0;
+            }
+            if (new_color == 1)
+                strncpy(colors[colors_found++], current_color, 6);
+        }
 
         /* Get the next line */
         line_size = getline(&line_buf, &line_buf_size, fp);
+    }
+
+    for (int i = 0; i < max_colors; i++) {
+        printf("%s\n", colors[i]);
     }
 
     /* Free the allocated line buffer */
