@@ -1,7 +1,7 @@
 cc=gcc
 
 inkpath:
-	gcc main.c `pkg-config --libs autotrace` `pkg-config --cflags autotrace` -o build/inkpath
+	gcc main.c `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
 
 clean:
 	rm build/inkpath
