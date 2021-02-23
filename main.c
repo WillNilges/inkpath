@@ -10,10 +10,10 @@
 #include <glib.h>
 
 
-void invoke_autotrace(char* input_file, char* output_file, char* background)
+void invoke_autotrace(char* input_file, char* output_file, int color_count, char* background)
 {
-    at_fitting_opts_type * opts = at_fitting_opts_new();
-    opts->color_count = 2;
+    at_fitting_opts_type* opts = at_fitting_opts_new();
+    opts->color_count = color_count;
     if (background)
     {
         // opts->background_color = at_color_parse(background, NULL);
@@ -40,13 +40,13 @@ void invoke_autotrace(char* input_file, char* output_file, char* background)
         // input_opts->background_color = at_color_copy(fitting_opts->background_color);
     }
     at_input_read_func rfunc = at_input_get_handler(input_file);
-    at_bitmap_type * bitmap ;
-    at_splines_type * splines;
+    at_bitmap_type* bitmap ;
+    at_splines_type* splines;
     at_output_write_func wfunc = at_output_get_handler_by_suffix("svg");
 
     bitmap = at_bitmap_read(rfunc, input_file, NULL, NULL, NULL);
     splines = at_splines_new(bitmap, opts, NULL, NULL);
-    FILE *fptr;
+    FILE* fptr;
     fptr = fopen(output_file,"w");
     at_splines_write(wfunc, fptr, "", NULL, splines, NULL, NULL);
     fclose(fptr);
@@ -155,26 +155,28 @@ int main(int argc, char *argv[])
     //     return 1;
     // }
 
-    invoke_autotrace(argv[1], argv[2], NULL);
-    int* colors = get_colors(argv[2], 2);
-    int brightest_color = 0;
-    for (int i = 0; i < sizeof(colors)/sizeof(colors[0]); i++)
-    {
-        if (colors[i] > brightest_color)
-            brightest_color = colors[i];
-    }
+    int color_count = 2;
 
-    printf("%X\n", brightest_color);
+    invoke_autotrace(argv[1], argv[2], color_count, "FFFFFF");
+    // int* colors = get_colors(argv[2], 2);
+    // int brightest_color = 0;
+    // for (int i = 0; i < sizeof(colors)/sizeof(colors[0]); i++)
+    // {
+    //     if (colors[i] > brightest_color)
+    //         brightest_color = colors[i];
+    // }
 
-    char s_color[7];
-    snprintf(s_color, 7, "%x", brightest_color);
+    // printf("%X\n", brightest_color);
 
-    printf("%s\n", s_color);
+    // char s_color[7];
+    // snprintf(s_color, 7, "%x", brightest_color);
 
-    invoke_autotrace(argv[1], argv[2], s_color);
+    // printf("%s\n", s_color);
+
+    // invoke_autotrace(argv[1], argv[2], color_count, s_color);
 
     // remove_brightest(argv[2], "processed_out.svg", colors);
 
-    free(colors);
+    // free(colors);
     return 0;
 }
