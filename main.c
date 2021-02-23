@@ -14,10 +14,29 @@ void invoke_autotrace(char* input_file, char* output_file, char* background)
 {
     at_fitting_opts_type * opts = at_fitting_opts_new();
     opts->color_count = 2;
-    if (true)
+    if (background)
     {
         // opts->background_color = at_color_parse(background, NULL);
-        opts->background_color = at_color_new(188, 187, 183);
+        char s_red[3];
+        char s_grn[3];
+        char s_blu[3];
+
+        // printf("%s\n", background);
+
+        strncpy(s_red, background+0, 2);
+        strncpy(s_grn, background+2, 2);
+        strncpy(s_blu, background+4, 2);
+        printf("%d %d %d\n",
+            (int)strtol(s_red, NULL, 16),
+            (int)strtol(s_grn, NULL, 16),
+            (int)strtol(s_blu, NULL, 16)
+        );
+
+        opts->background_color = at_color_new(
+            (char)strtol(s_red, NULL, 16),
+            (char)strtol(s_grn, NULL, 16),
+            (char)strtol(s_blu, NULL, 16)
+        );
         // input_opts->background_color = at_color_copy(fitting_opts->background_color);
     }
     at_input_read_func rfunc = at_input_get_handler(input_file);
@@ -128,86 +147,6 @@ int* get_colors(char* input_file, int max_colors)
     return colors;
 }
 
-void remove_brightest(char* input_file, char* output_file, int* colors) {
-
-    // Set up the regex for hex codes
-    regex_t hex_regex;
-    if (regcomp(&hex_regex,"#[0-9a-f]{6}", REG_ICASE | REG_EXTENDED) == 0)
-        printf("Regular expression compiled successfully.\n");
-    else {
-        printf("Compilation error.\n");
-        return;
-    }
-
-    // Open writing file
-    FILE *fptr;
-    fptr = fopen(output_file,"w");
-
-    // Array to store our colors in
-    int max_colors = sizeof(colors)/sizeof(colors[0]);
-    // int colors_found = 0;
-    // int colors[max_colors];
-    // int* colors = malloc(sizeof(int)*max_colors);
-
-    /* Open the file for reading */
-    char *line_buf = NULL;
-    size_t line_buf_size = 0;
-    int line_count = 0;
-    ssize_t line_size;
-    FILE *fp = fopen(input_file, "r");
-    if (!fp)
-    {
-        fprintf(stderr, "Error opening file '%s'\n", input_file);
-        return ;
-    }
-
-    /* Get the first line of the file. */
-    line_size = getline(&line_buf, &line_buf_size, fp);
-
-    /* Loop through until we are done with the file. */
-    while (line_size >= 0)
-    {
-        /* Increment our line count */
-        line_count++;
-
-        /* Collect the line details */
-        int b, e;
-        char *match=regexp(line_buf, &hex_regex, &b, &e);
-        if (match)
-        {
-            // printf("-> %s <-\n(b=%d e=%d)\n", match, b, e); //Debug
-            char current_color[8];
-            strncpy(current_color, match+1, 6);
-            int i_current_color = (int)strtol(current_color, NULL, 16);
-            
-            int high_color = 1;
-            for (int i = 0; i < max_colors; i++)
-            {
-                if (i_current_color < colors[i])
-                    high_color = 0;
-            }
-            if (high_color == 0)
-                fprintf(fptr, line_buf);
-                
-        } else {
-            fprintf(fptr, line_buf);
-        }
-
-        /* Get the next line */
-        line_size = getline(&line_buf, &line_buf_size, fp);
-    }
-
-    /* Free the allocated line buffer */
-    free(line_buf);
-    line_buf = NULL;
-
-    regfree(&hex_regex);
-
-    /* Close the file now that we are done with it */
-    fclose(fp);
-    fclose(fptr);
-}
-
 int main(int argc, char *argv[])
 {
     // if (sizeof(*argv)/sizeof(argv[0]) != 3)
@@ -217,15 +156,25 @@ int main(int argc, char *argv[])
     // }
 
     invoke_autotrace(argv[1], argv[2], NULL);
-    // int* colors = get_colors(argv[2], 2);
-    // invoke_autotrace(argv[1], argv[2], )
+    int* colors = get_colors(argv[2], 2);
+    int brightest_color = 0;
+    for (int i = 0; i < sizeof(colors)/sizeof(colors[0]); i++)
+    {
+        if (colors[i] > brightest_color)
+            brightest_color = colors[i];
+    }
 
-    // for (int i = 0; i < 2; i++) {
-    //     printf("%X\n", colors[i]);
-    // }
+    printf("%X\n", brightest_color);
+
+    char s_color[7];
+    snprintf(s_color, 7, "%x", brightest_color);
+
+    printf("%s\n", s_color);
+
+    invoke_autotrace(argv[1], argv[2], s_color);
 
     // remove_brightest(argv[2], "processed_out.svg", colors);
 
-    // free(colors);
+    free(colors);
     return 0;
 }
