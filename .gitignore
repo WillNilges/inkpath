@@ -3,3 +3,4 @@ data/*
 out*
 *.out
 build/
+*.svg

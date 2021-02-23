@@ -1,7 +1,7 @@
 cc=gcc
 
-whitetrace:
-	gcc main.c `pkg-config --libs autotrace` `pkg-config --cflags autotrace` -o whitetrace
+inkpath:
+	gcc main.c `pkg-config --libs autotrace` `pkg-config --cflags autotrace` -o build/inkpath
 
 clean:
-	rm whitetrace
+	rm build/inkpath

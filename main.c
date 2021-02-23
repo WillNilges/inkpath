@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 
   char * fname = argv[1];
   at_fitting_opts_type * opts = at_fitting_opts_new();
+  opts->color_count = 2;
   at_input_read_func rfunc = at_input_get_handler(fname);
   at_bitmap_type * bitmap ;
   at_splines_type * splines;
