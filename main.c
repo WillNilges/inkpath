@@ -173,29 +173,74 @@ void dump_to_xopp() {
     // fprintf(outptr, "<stroke tool=\"pen\" ts=\"0ll\" fn=\"\" color=\"#3333ccff\" width=\"1.41000000\">");
 
     // File head
-    fprintf(outptr, "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n<stroke tool=\"pen\" color=\"black\" width=\"1.41\">");
+    fprintf(outptr, "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n<stroke tool=\"pen\" color=\"black\" width=\"1.41\">\n");
 
     /* Get the first line of the file. */
     line_size = getline(&line_buf, &line_buf_size, fp);
-    char x_coord[50];
-    char y_coord[50];
 
     char* xy_split;
     int splitloc;
 
+    char* x_coord = malloc(50);
+    char* y_coord = malloc(50);
+
+    double x_double;
+    double y_double;
+
     /* Loop through until we are done with the file. */
     while (line_size >= 0)
     {
-        xy_split = strchr(line_buf, ',');
-        splitloc = xy_split-line_buf+1;
-        strncpy(x_coord, line_buf, splitloc-1);
-        strncpy(y_coord, line_buf+splitloc, strlen(line_buf) - splitloc-1);
-        printf("%s, %s\n", x_coord, y_coord);
 
+        /*
+            This code will take a line buffer in that looks like this:
+            1675.2338981628418,3409.3245763778687
+            It then locates the position in memory of the comma,
+            and uses it to split the x and y coords into their own
+            char*.
+            The line_buf address is assumed to be the start of x, and
+            that chunk of memory is copied into x_coord. The length of
+            that memory is specified by the location of the comma minus
+            the location of the beginning of the string.
+            The location of the comma is assumed to be the start of y,
+            and that chunk of memory is copied into y_coord. The length
+            of that memory is specified by the total length of the line_buf
+            minus the relative location of the comma.
+
+            Makes sense? Good! Let's continue :)
+        */
+
+        xy_split = strchr(line_buf, ',');
+        if (xy_split)
+        {
+            splitloc = xy_split-line_buf;
+
+            int y_length = strlen(line_buf)-splitloc;
+            char* y_substring = line_buf+splitloc+1;
+
+            snprintf(x_coord, 50, "%.*s", splitloc, line_buf);
+            snprintf(y_coord, 50, "%.*s", y_length, y_substring);
+
+            // line_buf[splitloc] = ' '; // This is fucked. Don't do this.
+            printf("%s | %s\n", x_coord, y_coord);
+
+            x_double = atof(x_coord);
+            y_double = atof(y_coord);
+
+            // WACK
+            x_double /= 10.0;
+            y_double /= 10.0;
+
+            fprintf(outptr, "%f %f ", x_double, y_double);
+        }
+
+        
         /* Get the next line */
         line_size = getline(&line_buf, &line_buf_size, fp);
         // break;
     }
+
+    free(x_coord);
+    free(y_coord);
 
     /* Free the allocated line buffer */
     free(line_buf);
