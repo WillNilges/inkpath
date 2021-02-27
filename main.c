@@ -177,12 +177,25 @@ void dump_to_xopp() {
 
     /* Get the first line of the file. */
     line_size = getline(&line_buf, &line_buf_size, fp);
+    char x_coord[50];
+    char y_coord[50];
+
+    char* xy_split;
+    int splitloc;
 
     /* Loop through until we are done with the file. */
-    // while (line_size >= 0)
-    // {
-        
-    // }
+    while (line_size >= 0)
+    {
+        xy_split = strchr(line_buf, ',');
+        splitloc = xy_split-line_buf+1;
+        strncpy(x_coord, line_buf, splitloc-1);
+        strncpy(y_coord, line_buf+splitloc, strlen(line_buf) - splitloc-1);
+        printf("%s, %s\n", x_coord, y_coord);
+
+        /* Get the next line */
+        line_size = getline(&line_buf, &line_buf_size, fp);
+        // break;
+    }
 
     /* Free the allocated line buffer */
     free(line_buf);
