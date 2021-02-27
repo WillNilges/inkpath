@@ -8,9 +8,9 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 
 # CFLAGS += -std=gnu99
 
-build/inkpath: main.c util.c util.h
+build/inkpath: src/main.c src/util.c src/util.h
 	mkdir -p build
-	$(CC) $(WARNINGS) $(CFLAGS) main.c util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
+	$(CC) $(WARNINGS) $(CFLAGS) src/main.c src/util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
 
 .PHONY: clean
 clean:
