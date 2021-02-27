@@ -9,6 +9,9 @@
 #include <string.h>
 #include <glib.h>
 
+#define NANOSVG_IMPLEMENTATION
+#include "nanosvg.h"
+
 // TODO: Move to header file
 void invoke_autotrace(char* input_file, char* output_file, int color_count, char* background);
 char *regexp (char* string, regex_t* rgT, int* begin, int* end);
@@ -151,8 +154,8 @@ int* get_colors(char* input_file, int max_colors)
     return colors;
 }
 
-void dump_to_xopp() {
-    char* input_file  = "data/points.txt";
+void dump_to_xoj() {
+    char* input_file  = "pointlist.txt";
     char* output_file = "out.temp";
 
     /* Open the file for reading */
@@ -255,12 +258,57 @@ void dump_to_xopp() {
 
 }
 
+void get_points() {
+
+    int i;
+
+    /* Open output file for writing */
+    char* output_file = "pointlist.txt";
+    FILE* outptr;
+    outptr = fopen(output_file, "w");
+
+    NSVGimage* g_image = NULL;
+    NSVGshape* shape;
+	NSVGpath* path;
+
+	g_image = nsvgParseFromFile("data/testsvg.svg", "px", 96.0f);
+	if (g_image == NULL) {
+		printf("Could not open SVG image.\n");
+		return;
+	}
+
+    for (shape = g_image->shapes; shape != NULL; shape = shape->next)
+    {
+		for (path = shape->paths; path != NULL; path = path->next)
+        {
+			// drawPath(path->pts, path->npts, path->closed, px * 1.5f);
+			// drawControlPts(path->pts, path->npts);
+            float* pts = path->pts;
+            int npts = path->npts;
+            for (i = 0; i < npts-1; i += 3)
+            {
+                float* p = &pts[i*2];
+                // glVertex2f(p[6],p[7]);
+                fprintf(outptr, "%f,%f\n", p[6],p[7]);
+
+                // glVertex2f(p[2],p[3]);
+                // glVertex2f(p[4],p[5]);
+                // glVertex2f(p[6],p[7]);
+            }
+		}
+	}
+
+    fclose(outptr);
+	nsvgDelete(g_image);
+}
+
 int main(int argc, char *argv[])
 {
     int color_count = 2;
 
-    // invoke_autotrace(argv[1], argv[2], color_count, "FFFFFF");
-    dump_to_xopp();
+    invoke_autotrace(argv[1], argv[2], color_count, "FFFFFF");
+    get_points();
+    dump_to_xoj();
 
     return 0;
 }
