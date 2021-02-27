@@ -1,7 +1,17 @@
-cc=gcc
+CC=gcc
 
-inkpath:
-	gcc main.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
+# Warnings
+WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
+	-Wmissing-include-dirs -Wformat-nonliteral -Wnested-externs \
+	-Wno-unused-parameter -Wold-style-definition -Wredundant-decls -Wshadow \
+	-Wstrict-prototypes -Wwrite-strings
 
+# CFLAGS += -std=gnu99
+
+build/inkpath: main.c util.c util.h
+	mkdir -p build
+	$(CC) $(WARNINGS) $(CFLAGS) main.c util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
+
+.PHONY: clean
 clean:
-	rm build/inkpath
+	rm -rf build
