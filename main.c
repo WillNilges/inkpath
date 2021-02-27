@@ -120,14 +120,12 @@ int* get_colors(char* input_file, int max_colors)
 
         /* Collect the line details */
         int b, e;
-        char *match=regexp(line_buf, &hex_regex, &b, &e);
+        char* match = regexp(line_buf, &hex_regex, &b, &e);
         if (match)
         {
-            // printf("-> %s <-\n(b=%d e=%d)\n", match, b, e); //Debug
             char current_color[8];
             strncpy(current_color, match+1, 6);
             int i_current_color = (int)strtol(current_color, NULL, 16);
-            // printf("%s\n", current_color);
             int new_color = 1;
             for (int i = 0; i < max_colors; i++)
             {
@@ -236,7 +234,6 @@ void dump_to_xoj() {
             fprintf(outptr, "%f %f ", x_double, y_double);
         }
 
-        
         /* Get the next line */
         line_size = getline(&line_buf, &line_buf_size, fp);
     }
@@ -258,8 +255,16 @@ void dump_to_xoj() {
 }
 
 void get_points() {
+    char* xoj_header = "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n";
+
+    char* start_stroke = "<stroke tool=\"pen\" color=\"black\" width=\"1.41\">\n";
+
+    char* end_stroke = "\n</stroke>\n";
+
+    char* xoj_footer = "</layer>\n</page>\n</xournal>\n";
+
     /* Open output file for writing */
-    char* output_file = "pointlist.txt";
+    char* output_file = "testes";
     FILE* outptr;
     outptr = fopen(output_file, "w");
 
@@ -273,24 +278,28 @@ void get_points() {
 		return;
 	}
 
+    fprintf(outptr, "%s", xoj_header);
     for (shape = g_image->shapes; shape != NULL; shape = shape->next)
     {
 		for (path = shape->paths; path != NULL; path = path->next)
         {
+            fprintf(outptr, "%s", start_stroke);
             float* pts = path->pts;
             int npts = path->npts;
             for (int i = 0; i < npts-1; i += 3)
             {
                 float* p = &pts[i*2];
                 // glVertex2f(p[6],p[7]);
-                fprintf(outptr, "%f,%f\n", p[6],p[7]);
+                fprintf(outptr, "%f %f ", p[6] / 10, p[7] / 10);
 
                 // glVertex2f(p[2],p[3]);
                 // glVertex2f(p[4],p[5]);
                 // glVertex2f(p[6],p[7]);
             }
+            fprintf(outptr, "%s", end_stroke);
 		}
 	}
+    fprintf(outptr, "%s", xoj_footer);
 
     fclose(outptr);
 	nsvgDelete(g_image);
@@ -302,7 +311,7 @@ int main(int argc, char *argv[])
 
     invoke_autotrace(argv[1], argv[2], color_count, "FFFFFF");
     get_points();
-    dump_to_xoj();
+    // dump_to_xoj();
 
     return 0;
 }
