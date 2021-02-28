@@ -3,6 +3,14 @@
 #define NANOSVG_IMPLEMENTATION
 #include "nanosvg.h"
 
+const char* xoj_header = "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n";
+
+const char* start_stroke = "<stroke tool=\"pen\" color=\"black\" width=\"1.41\">\n";
+
+const char* end_stroke = "\n</stroke>\n";
+
+const char* xoj_footer = "</layer>\n</page>\n</xournal>\n";
+
 void invoke_autotrace(char* input_file, char* output_file, int color_count, char* background)
 {
     at_fitting_opts_type* opts = at_fitting_opts_new();
@@ -64,17 +72,9 @@ char* regexp(char* string, regex_t* rgT, int* begin, int* end)
     return word;
 }
 
-void get_points(char* input_file, char* output_file) {
-    char* xoj_header = "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n";
-
-    char* start_stroke = "<stroke tool=\"pen\" color=\"black\" width=\"1.41\">\n";
-
-    char* end_stroke = "\n</stroke>\n";
-
-    char* xoj_footer = "</layer>\n</page>\n</xournal>\n";
-
+void svg_to_xoj(char* input_file, char* output_file)
+{
     /* Open output file for writing */
-    // char* output_file = "testes";
     FILE* outptr;
     outptr = fopen(output_file, "w");
 
@@ -113,4 +113,38 @@ void get_points(char* input_file, char* output_file) {
 
     fclose(outptr);
 	nsvgDelete(g_image);
+}
+
+void xoj_compress(char* input_file, char* output_file) {
+    gzFile outp = gzopen(output_file , "wb");
+
+    /* Open the file for reading */
+    char *line_buf = NULL;
+    size_t line_buf_size = 0;
+    ssize_t line_size;
+    FILE *fp = fopen(input_file, "r");
+    if (!fp)
+    {
+        fprintf(stderr, "Error opening file '%s'\n", input_file);
+        return;
+    }
+
+    /* Get the first line of the file. */
+    line_size = getline(&line_buf, &line_buf_size, fp);
+
+    /* Loop through until we are done with the file. */
+    while (line_size >= 0)
+    {
+        gzwrite (outp, line_buf, line_size);
+
+        /* Get the next line */
+        line_size = getline(&line_buf, &line_buf_size, fp);
+    }
+
+    /* Free the allocated line buffer */
+    free(line_buf);
+    line_buf = NULL;
+    fclose(fp);
+    gzclose(outp);
+
 }

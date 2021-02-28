@@ -4,6 +4,4 @@ out*
 *.out
 build/
 *.svg
-
 do.sh
-
