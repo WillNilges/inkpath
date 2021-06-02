@@ -1,8 +1,5 @@
 #include "util.h"
 
-#define NANOSVG_IMPLEMENTATION
-#include "nanosvg.h"
-
 const char* xoj_header = "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n";
 
 const char* start_stroke = "<stroke tool=\"pen\" color=\"black\" width=\"1.41\">\n";
@@ -25,11 +22,6 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
         strncpy(s_red, background+0, 2);
         strncpy(s_grn, background+2, 2);
         strncpy(s_blu, background+4, 2);
-        // printf("%d %d %d\n",
-        //     (int)strtol(s_red, NULL, 16),
-        //     (int)strtol(s_grn, NULL, 16),
-        //     (int)strtol(s_blu, NULL, 16)
-        // );
 
         opts->background_color = at_color_new(
             (char)strtol(s_red, NULL, 16),
@@ -37,14 +29,11 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
             (char)strtol(s_blu, NULL, 16)
         );
 
-        // TODO: WTF is this?
-        // input_opts->background_color = at_color_copy(fitting_opts->background_color);
     }
 
     at_input_read_func rfunc = at_input_get_handler(input_file);
     at_bitmap_type* bitmap;
     at_splines_type* splines;
-    // at_output_write_func wfunc = at_output_get_handler_by_suffix("svg");
 
     bitmap = at_bitmap_read(rfunc, input_file, NULL, NULL, NULL);
     splines = at_splines_new(bitmap, opts, NULL, NULL);
@@ -55,31 +44,8 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
     outptr = fopen(output_file, "w");
     fprintf(outptr, "%s", xoj_header);
 
-    // TODO: Calculate a series of points from splines.
-    // at_spline_type s = ;
-    // printf("%d\n", splines->data->length);
-    // // printf("%d\n", splines->length);
-    // for (int h = 0; h < splines->length; h++) {
-    //     for (int i = 0; i < splines->data->length; i++){
-
-    //         fprintf(outptr, "%s", start_stroke);
-    //         // printf("%f,%f %f,%f %f,%f %f,%f \n",
-    //         // splines->data->data[i].v[0].x, splines->data->data[i].v[0].y,
-    //         // splines->data->data[i].v[1].x, splines->data->data[i].v[1].y,
-    //         // splines->data->data[i].v[2].x, splines->data->data[i].v[2].y,
-    //         // splines->data->data[i].v[3].x, splines->data->data[i].v[3].y);
-
-    //         double x_arr[4] = {splines->data->data[i].v[0].x, splines->data->data[i].v[1].x, splines->data->data[i].v[2].x, splines->data->data[i].v[3].x};
-
-    //         double y_arr[4] = {splines->data->data[i].v[0].y, splines->data->data[i].v[1].y, splines->data->data[i].v[2].y, splines->data->data[i].v[3].y};
-    //         bezierCurve(x_arr, y_arr, outptr);
-    //         fprintf(outptr, "%s", end_stroke);
-    //     }
-    // }
-
     unsigned this_list;
     spline_list_type list;
-    // at_color last_color = { 0, 0, 0 };
 
     for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
         unsigned this_spline;
@@ -88,20 +54,16 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
         list = SPLINE_LIST_ARRAY_ELT(*splines, this_list);
         first = SPLINE_LIST_ELT(list, 0);
 
-        // fprintf(file, "M%g %g", START_POINT(first).x, START_POINT(first).y);
         double start_x = START_POINT(first).x;
         double start_y = START_POINT(first).y;
         for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
             spline_type s = SPLINE_LIST_ELT(list, this_spline);
 
             if (SPLINE_DEGREE(s) == LINEARTYPE) {
-                // fprintf(file, "L%g %g", END_POINT(s).x, END_POINT(s).y);
                 fprintf(outptr, "%s", start_stroke);
                 fprintf(outptr, "%f %f %f %f ", start_x/10.0, start_y/-10.0 + 500, END_POINT(s).x/10.0, END_POINT(s).y/-10.0 + 500);
                 fprintf(outptr, "%s", end_stroke);
             } else {
-                // fprintf(file, "C%g %g %g %g %g %g", CONTROL1(s).x, CONTROL1(s).y, CONTROL2(s).x, CONTROL2(s).y, END_POINT(s).x, END_POINT(s).y);
-
                 double x_arr[4] = {start_x, CONTROL1(s).x, CONTROL2(s).x, END_POINT(s).x};
                 double y_arr[4] = {start_y, CONTROL1(s).y, CONTROL2(s).y, END_POINT(s).y};
                 fprintf(outptr, "%s", start_stroke);
@@ -113,11 +75,6 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
         }
     }
 
-    // // Or just dump to a file
-    // FILE* fptr;
-    // fptr = fopen(output_file,"w");
-    // at_splines_write(wfunc, fptr, "", NULL, splines, NULL, NULL);
-    // fclose(fptr);
     fprintf(outptr, "%s", xoj_footer);
     fclose(outptr);
 }
@@ -130,153 +87,14 @@ Inputs: 4 x coords and 4 y coords
 void bezierCurve(double x[] , double y[], FILE* outptr)
 {
     double xu = 0.0 , yu = 0.0 , u = 0.0;
-    // int i = 0;
     for(u = 0.0 ; u <= 1.0 ; u += 0.0001)
     {
-        xu = pow(1-u,3)*x[0]+3*u*pow(1-u,2)*x[1]+3*pow(u,2)*(1-u)*x[2]
-             +pow(u,3)*x[3];
-        yu = pow(1-u,3)*y[0]+3*u*pow(1-u,2)*y[1]+3*pow(u,2)*(1-u)*y[2]
-            +pow(u,3)*y[3];
-        // printf("%d, %d\n", (int) (xu/10.0), (int) (yu/10.0));
+        xu = (1-u)*(1-u)*(1-u)*x[0]+3*u*(1-u)*(1-u)*x[1]+3*u*u*(1-u)*x[2]
+             +u*u*u*x[3];
+        yu = (1-u)*(1-u)*(1-u)*y[0]+3*u*(1-u)*(1-u)*y[1]+3*u*u*(1-u)*y[2]
+            +u*u*u*y[3];
         fprintf(outptr, "%f %f ", (xu/10.0), (yu/10.0)*(-1.0)+500);
     }
-}
-
-// ##########################
-// ##########################
-// ##########################
-
-// http://members.chello.at/~easyfilter/bresenham.html
-void plotQuadBezierSeg(int x0, int y0, int x1, int y1, int x2, int y2)
-{                            
-  int sx = x2-x1, sy = y2-y1;
-  long xx = x0-x1, yy = y0-y1, xy;         /* relative values for checks */
-  double dx, dy, err, cur = xx*sy-yy*sx;                    /* curvature */
-
-//   assert(xx*sx <= 0 && yy*sy <= 0);  /* sign of gradient must not change */
-
-  if (sx*(long)sx+sy*(long)sy > xx*xx+yy*yy) { /* begin with longer part */ 
-    x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur;  /* swap P0 P2 */
-  }  
-  if (cur != 0) {                                    /* no straight line */
-    xx += sx; xx *= sx = x0 < x2 ? 1 : -1;           /* x step direction */
-    yy += sy; yy *= sy = y0 < y2 ? 1 : -1;           /* y step direction */
-    xy = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
-    if (cur*sx*sy < 0) {                           /* negated curvature? */
-      xx = -xx; yy = -yy; xy = -xy; cur = -cur;
-    }
-    dx = 4.0*sy*cur*(x1-x0)+xx-xy;             /* differences 1st degree */
-    dy = 4.0*sx*cur*(y0-y1)+yy-xy;
-    xx += xx; yy += yy; err = dx+dy+xy;                /* error 1st step */    
-    do {                              
-    //   setPixel(x0,y0);                                     /* plot curve */
-      printf("%d, %d\n", x0, y0);
-      if (x0 == x2 && y0 == y2) return;  /* last pixel -> curve finished */
-      y1 = 2*err < dx;                  /* save value for test of y step */
-      if (2*err > dy) { x0 += sx; dx -= xy; err += dy += yy; } /* x step */
-      if (    y1    ) { y0 += sy; dy -= xy; err += dx += xx; } /* y step */
-    } while (dy < dx );           /* gradient negates -> algorithm fails */
-  }
-//   plotLine(x0,y0, x2,y2);                  /* plot remaining part to end */
-}  
-
-// https://cboard.cprogramming.com/c-programming/117525-regex-h-extracting-matches.html
-char* regexp(char* string, regex_t* rgT, int* begin, int* end)
-{ 
-    int i, w=0, len;                  
-    char *word = NULL;
-    regmatch_t match;
-    if ((regexec(rgT,string,1,&match,0)) == 0) {
-            *begin = (int)match.rm_so;
-            *end = (int)match.rm_eo;
-            len = *end-*begin;
-            word=malloc(len+1);
-            for (i=*begin; i<*end; i++) {
-                    word[w] = string[i];
-                    w++; }
-            word[w]=0;
-    }
-    // regfree(&rgT);
-    return word;
-}
-
-void svg_to_xoj(char* input_file, char* output_file)
-{
-
-    // Set up the regex for svg
-    // regex_t svg_regex;
-    // int code;
-    // if ((code = regcomp(&svg_regex,"([mMzZlLhHvVcCsSqGtTaA])(?:\\s*(-?\\d*\\.?\\d+))?(?:\\s*(-?\\d*\\.?\\d+))?(?:\\s*(-?\\d*\\.?\\d+))?(?:\\s*(-?\\d*\\.?\\d+))?(?:\\s*(-?\\d*\\.?\\d+))?(?:\\s*(-?\\d*\\.?\\d+))", REG_ICASE | REG_EXTENDED)) == 0)
-    //     printf("Regular expression compiled successfully.\n");
-    // else {
-    //     printf("Regex compilation error: %d.\n", code);
-    //     return;
-    // }
-
-    FILE* svg_in;
-    svg_in = fopen(input_file, "r");
-
-    /* Open output file for writing */
-    FILE* xoj_out;
-    xoj_out = fopen(output_file, "w");
-
-    // This is stupid.
-   size_t BUFF_SIZE = 20;
-   char* buffer = malloc(BUFF_SIZE);
-   char* p;
-
-   long int pos;
-   pos = ftell(svg_in);
-
-    while (fgets(buffer, BUFF_SIZE, svg_in)) {
-        // If the buffer is ever too small, this'll just increase it and start
-        // over.
-        while (strlen(buffer)+10 >= BUFF_SIZE) {
-            fseek (svg_in, pos, SEEK_SET);
-            BUFF_SIZE *= 10; // Maybe exponentially growing the buffer will make it faster?
-            buffer = realloc(buffer, BUFF_SIZE);
-            fgets(buffer, BUFF_SIZE, svg_in);
-        }
-
-    //   // Sanitize for bad characters
-    //   int buffContentSize = strlen(buffer);
-    //   for (int i = 0; i < buffContentSize; i++) {
-    //      if (buffer[i] == '\n' || buffer[i] == '\r') {
-    //         buffer[i] = '\0';
-    //      }
-    //   }
-
-        // int bezi_pos = 0;
-        // float* bezi_list = malloc(sizeof(float)*BUFF_SIZE); // Definitely too big, but fuck it.
-
-        if (strstr(buffer, "<path") != NULL) {
-
-            // int curvecount = 0;
-
-            // begin parsing
-            p = strtok(buffer," \t");
-
-            // Parse until no tokens left
-            while ( p != NULL) {
-                // Parse the next token, returns NULL for none
-                p = strtok(NULL, " \t");
-                if (strlen(p) > 0)
-                    printf("%s\n", p);
-                // if (strchr(p, 'C') != NULL) {
-                //     p[0] = '0';
-                //     // bezi_list[bezi_pos] = atof()
-                // }
-            }
-        }
-        // int b, e;
-        // char* match = regexp(buffer, &svg_regex, &b, &e);
-        // if (match) {
-        //     printf("%s\n", match);
-        // }
-   }
-
-    fclose(xoj_out);
-    fclose(svg_in);
 }
 
 void xoj_compress(char* input_file, char* output_file) {
