@@ -8,6 +8,8 @@
 #include <glib.h>
 #include <zlib.h>
 
+#include "spline.h"
+
 extern const char* xoj_header;
 extern const char* start_stroke;
 extern const char* end_stroke;
@@ -19,8 +21,17 @@ void invoke_autotrace(
     int color_count,
     char* background
 );
-char *regexp (char* string, regex_t* rgT, int* begin, int* end);
-void svg_to_xoj(char* input_file, char* output_file);
-void xoj_compress(char* input_file, char* output_file);
+
+void xoj_compress(
+    char* input_file,
+    char* output_file
+);
+
+void bezierCurve(
+    double x[],
+    double y[],
+    FILE* outptr
+);
+
 
 #endif

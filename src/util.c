@@ -1,8 +1,5 @@
 #include "util.h"
 
-#define NANOSVG_IMPLEMENTATION
-#include "nanosvg.h"
-
 const char* xoj_header = "<?xml version=\"1.0\" standalone=\"no\"?>\n<xournal version=\"0.4.8.2016\">\n<title>Xournal document - see http://math.mit.edu/~auroux/software/xournal/</title>\n<page width=\"612.00\" height=\"792.00\">\n<background type=\"solid\" color=\"white\" style=\"lined\" />\n<layer>\n";
 
 const char* start_stroke = "<stroke tool=\"pen\" color=\"black\" width=\"1.41\">\n";
@@ -15,6 +12,7 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
 {
     at_fitting_opts_type* opts = at_fitting_opts_new();
     opts->color_count = color_count;
+    opts->centerline = 1;
     if (background)
     {
         char s_red[3];
@@ -24,11 +22,6 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
         strncpy(s_red, background+0, 2);
         strncpy(s_grn, background+2, 2);
         strncpy(s_blu, background+4, 2);
-        printf("%d %d %d\n",
-            (int)strtol(s_red, NULL, 16),
-            (int)strtol(s_grn, NULL, 16),
-            (int)strtol(s_blu, NULL, 16)
-        );
 
         opts->background_color = at_color_new(
             (char)strtol(s_red, NULL, 16),
@@ -36,83 +29,72 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
             (char)strtol(s_blu, NULL, 16)
         );
 
-        // TODO: WTF is this?
-        // input_opts->background_color = at_color_copy(fitting_opts->background_color);
     }
+
     at_input_read_func rfunc = at_input_get_handler(input_file);
     at_bitmap_type* bitmap;
     at_splines_type* splines;
-    at_output_write_func wfunc = at_output_get_handler_by_suffix("svg");
 
     bitmap = at_bitmap_read(rfunc, input_file, NULL, NULL, NULL);
     splines = at_splines_new(bitmap, opts, NULL, NULL);
-    FILE* fptr;
-    fptr = fopen(output_file,"w");
-    at_splines_write(wfunc, fptr, "", NULL, splines, NULL, NULL);
-    fclose(fptr);
-}
 
-// https://cboard.cprogramming.com/c-programming/117525-regex-h-extracting-matches.html
-char* regexp(char* string, regex_t* rgT, int* begin, int* end)
-{ 
-    int i, w=0, len;                  
-    char *word = NULL;
-    regmatch_t match;
-    if ((regexec(rgT,string,1,&match,0)) == 0) {
-            *begin = (int)match.rm_so;
-            *end = (int)match.rm_eo;
-            len = *end-*begin;
-            word=malloc(len+1);
-            for (i=*begin; i<*end; i++) {
-                    word[w] = string[i];
-                    w++; }
-            word[w]=0;
-    }
-    // regfree(&rgT);
-    return word;
-}
 
-void svg_to_xoj(char* input_file, char* output_file)
-{
     /* Open output file for writing */
     FILE* outptr;
     outptr = fopen(output_file, "w");
-
-    NSVGimage* g_image = NULL;
-    NSVGshape* shape;
-	NSVGpath* path;
-
-	g_image = nsvgParseFromFile(input_file, "px", 96.0f);
-	if (g_image == NULL) {
-		printf("Could not open SVG image.\n");
-		return;
-	}
-
     fprintf(outptr, "%s", xoj_header);
-    for (shape = g_image->shapes; shape != NULL; shape = shape->next)
-    {
-		for (path = shape->paths; path != NULL; path = path->next)
-        {
-            fprintf(outptr, "%s", start_stroke);
-            float* pts = path->pts;
-            int npts = path->npts;
-            for (int i = 0; i < npts-1; i += 3)
-            {
-                float* p = &pts[i*2];
-                // glVertex2f(p[6],p[7]);
-                fprintf(outptr, "%f %f ", p[6] / 10, p[7] / 10);
 
-                // glVertex2f(p[2],p[3]);
-                // glVertex2f(p[4],p[5]);
-                // glVertex2f(p[6],p[7]);
+    unsigned this_list;
+    spline_list_type list;
+
+    for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
+        unsigned this_spline;
+        spline_type first;
+
+        list = SPLINE_LIST_ARRAY_ELT(*splines, this_list);
+        first = SPLINE_LIST_ELT(list, 0);
+
+        double start_x = START_POINT(first).x;
+        double start_y = START_POINT(first).y;
+        for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
+            spline_type s = SPLINE_LIST_ELT(list, this_spline);
+
+            if (SPLINE_DEGREE(s) == LINEARTYPE) {
+                fprintf(outptr, "%s", start_stroke);
+                fprintf(outptr, "%f %f %f %f ", start_x/10.0, start_y/-10.0 + 500, END_POINT(s).x/10.0, END_POINT(s).y/-10.0 + 500);
+                fprintf(outptr, "%s", end_stroke);
+            } else {
+                double x_arr[4] = {start_x, CONTROL1(s).x, CONTROL2(s).x, END_POINT(s).x};
+                double y_arr[4] = {start_y, CONTROL1(s).y, CONTROL2(s).y, END_POINT(s).y};
+                fprintf(outptr, "%s", start_stroke);
+                bezierCurve(x_arr, y_arr, outptr);
+                fprintf(outptr, "%s", end_stroke);
             }
-            fprintf(outptr, "%s", end_stroke);
-		}
-	}
-    fprintf(outptr, "%s", xoj_footer);
+            start_x = END_POINT(s).x;
+            start_y = END_POINT(s).y;
+        }
+    }
 
+    fprintf(outptr, "%s", xoj_footer);
     fclose(outptr);
-	nsvgDelete(g_image);
+}
+
+// https://www.geeksforgeeks.org/cubic-bezier-curve-implementation-in-c/
+/* Function that take input as Control Point x_coordinates and
+Control Point y_coordinates and draw bezier curve
+Inputs: 4 x coords and 4 y coords
+*/
+void bezierCurve(double x[] , double y[], FILE* outptr)
+{
+    double xu = 0.0 , yu = 0.0 , u = 0.0;
+    for(u = 0.0 ; u <= 1.0 ; u += 0.0001)
+    {
+        xu = (1-u)*(1-u)*(1-u)*x[0]+3*u*(1-u)*(1-u)*x[1]+3*u*u*(1-u)*x[2]
+             +u*u*u*x[3];
+        yu = (1-u)*(1-u)*(1-u)*y[0]+3*u*(1-u)*(1-u)*y[1]+3*u*u*(1-u)*y[2]
+            +u*u*u*y[3];
+        fprintf(outptr, "%f %f ", (xu/10.0), (yu/10.0)*(-1.0)+500);
+    }
 }
 
 void xoj_compress(char* input_file, char* output_file) {
