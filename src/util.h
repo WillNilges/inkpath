@@ -22,5 +22,7 @@ void invoke_autotrace(
 char *regexp (char* string, regex_t* rgT, int* begin, int* end);
 void svg_to_xoj(char* input_file, char* output_file);
 void xoj_compress(char* input_file, char* output_file);
+void plotQuadBezierSeg(int x0, int y0, int x1, int y1, int x2, int y2);
+
 
 #endif
