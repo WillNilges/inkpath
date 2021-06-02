@@ -25,11 +25,11 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
         strncpy(s_red, background+0, 2);
         strncpy(s_grn, background+2, 2);
         strncpy(s_blu, background+4, 2);
-        printf("%d %d %d\n",
-            (int)strtol(s_red, NULL, 16),
-            (int)strtol(s_grn, NULL, 16),
-            (int)strtol(s_blu, NULL, 16)
-        );
+        // printf("%d %d %d\n",
+        //     (int)strtol(s_red, NULL, 16),
+        //     (int)strtol(s_grn, NULL, 16),
+        //     (int)strtol(s_blu, NULL, 16)
+        // );
 
         opts->background_color = at_color_new(
             (char)strtol(s_red, NULL, 16),
@@ -44,38 +44,107 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
     at_input_read_func rfunc = at_input_get_handler(input_file);
     at_bitmap_type* bitmap;
     at_splines_type* splines;
-    at_output_write_func wfunc = at_output_get_handler_by_suffix("svg");
+    // at_output_write_func wfunc = at_output_get_handler_by_suffix("svg");
 
     bitmap = at_bitmap_read(rfunc, input_file, NULL, NULL, NULL);
     splines = at_splines_new(bitmap, opts, NULL, NULL);
-    
+
+
+    /* Open output file for writing */
+    FILE* outptr;
+    outptr = fopen(output_file, "w");
+    fprintf(outptr, "%s", xoj_header);
 
     // TODO: Calculate a series of points from splines.
-    // at_spline_type s = splines->data->data[0];
+    // at_spline_type s = ;
+    // printf("%d\n", splines->data->length);
+    // // printf("%d\n", splines->length);
+    // for (int h = 0; h < splines->length; h++) {
+    //     for (int i = 0; i < splines->data->length; i++){
 
-    // Or just dump to a file
-    FILE* fptr;
-    fptr = fopen(output_file,"w");
-    at_splines_write(wfunc, fptr, "", NULL, splines, NULL, NULL);
-    fclose(fptr);
+    //         fprintf(outptr, "%s", start_stroke);
+    //         // printf("%f,%f %f,%f %f,%f %f,%f \n",
+    //         // splines->data->data[i].v[0].x, splines->data->data[i].v[0].y,
+    //         // splines->data->data[i].v[1].x, splines->data->data[i].v[1].y,
+    //         // splines->data->data[i].v[2].x, splines->data->data[i].v[2].y,
+    //         // splines->data->data[i].v[3].x, splines->data->data[i].v[3].y);
+
+    //         double x_arr[4] = {splines->data->data[i].v[0].x, splines->data->data[i].v[1].x, splines->data->data[i].v[2].x, splines->data->data[i].v[3].x};
+
+    //         double y_arr[4] = {splines->data->data[i].v[0].y, splines->data->data[i].v[1].y, splines->data->data[i].v[2].y, splines->data->data[i].v[3].y};
+    //         bezierCurve(x_arr, y_arr, outptr);
+    //         fprintf(outptr, "%s", end_stroke);
+    //     }
+    // }
+
+    unsigned this_list;
+    spline_list_type list;
+    // at_color last_color = { 0, 0, 0 };
+
+    for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
+        unsigned this_spline;
+        spline_type first;
+
+        list = SPLINE_LIST_ARRAY_ELT(*splines, this_list);
+        first = SPLINE_LIST_ELT(list, 0);
+
+        // fprintf(file, "M%g %g", START_POINT(first).x, START_POINT(first).y);
+        double start_x = START_POINT(first).x;
+        double start_y = START_POINT(first).y;
+        for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
+            spline_type s = SPLINE_LIST_ELT(list, this_spline);
+
+            if (SPLINE_DEGREE(s) == LINEARTYPE) {
+                // fprintf(file, "L%g %g", END_POINT(s).x, END_POINT(s).y);
+                fprintf(outptr, "%s", start_stroke);
+                fprintf(outptr, "%f %f %f %f ", start_x/10.0, start_y/-10.0 + 500, END_POINT(s).x/10.0, END_POINT(s).y/-10.0 + 500);
+                fprintf(outptr, "%s", end_stroke);
+            } else {
+                // fprintf(file, "C%g %g %g %g %g %g", CONTROL1(s).x, CONTROL1(s).y, CONTROL2(s).x, CONTROL2(s).y, END_POINT(s).x, END_POINT(s).y);
+
+                double x_arr[4] = {start_x, CONTROL1(s).x, CONTROL2(s).x, END_POINT(s).x};
+                double y_arr[4] = {start_y, CONTROL1(s).y, CONTROL2(s).y, END_POINT(s).y};
+                fprintf(outptr, "%s", start_stroke);
+                bezierCurve(x_arr, y_arr, outptr);
+                fprintf(outptr, "%s", end_stroke);
+            }
+            start_x = END_POINT(s).x;
+            start_y = END_POINT(s).y;
+        }
+    }
+
+    // // Or just dump to a file
+    // FILE* fptr;
+    // fptr = fopen(output_file,"w");
+    // at_splines_write(wfunc, fptr, "", NULL, splines, NULL, NULL);
+    // fclose(fptr);
+    fprintf(outptr, "%s", xoj_footer);
+    fclose(outptr);
 }
 
-// // https://www.geeksforgeeks.org/cubic-bezier-curve-implementation-in-c/
-// /* Function that take input as Control Point x_coordinates and
-// Control Point y_coordinates and draw bezier curve */
-// void bezierCurve(int x_start , int y_start, int x_ctrl , int y_ctrl, int x_start , int y_start)
-// {
-//     double xu = 0.0 , yu = 0.0 , u = 0.0 ;
-//     int i = 0 ;
-//     for(u = 0.0 ; u <= 1.0 ; u += 0.0001)
-//     {
-//         xu = pow(1-u,3)*x[0]+3*u*pow(1-u,2)*x[1]+3*pow(u,2)*(1-u)*x[2]
-//              +pow(u,3)*x[3];
-//         yu = pow(1-u,3)*y[0]+3*u*pow(1-u,2)*y[1]+3*pow(u,2)*(1-u)*y[2]
-//             +pow(u,3)*y[3];
-//         SDL_RenderDrawPoint(renderer , (int)xu , (int)yu) ;
-//     }
-// }
+// https://www.geeksforgeeks.org/cubic-bezier-curve-implementation-in-c/
+/* Function that take input as Control Point x_coordinates and
+Control Point y_coordinates and draw bezier curve
+Inputs: 4 x coords and 4 y coords
+*/
+void bezierCurve(double x[] , double y[], FILE* outptr)
+{
+    double xu = 0.0 , yu = 0.0 , u = 0.0;
+    // int i = 0;
+    for(u = 0.0 ; u <= 1.0 ; u += 0.0001)
+    {
+        xu = pow(1-u,3)*x[0]+3*u*pow(1-u,2)*x[1]+3*pow(u,2)*(1-u)*x[2]
+             +pow(u,3)*x[3];
+        yu = pow(1-u,3)*y[0]+3*u*pow(1-u,2)*y[1]+3*pow(u,2)*(1-u)*y[2]
+            +pow(u,3)*y[3];
+        // printf("%d, %d\n", (int) (xu/10.0), (int) (yu/10.0));
+        fprintf(outptr, "%f %f ", (xu/10.0), (yu/10.0)*(-1.0)+500);
+    }
+}
+
+// ##########################
+// ##########################
+// ##########################
 
 // http://members.chello.at/~easyfilter/bresenham.html
 void plotQuadBezierSeg(int x0, int y0, int x1, int y1, int x2, int y2)
@@ -177,12 +246,12 @@ void svg_to_xoj(char* input_file, char* output_file)
     //      }
     //   }
 
-        int bezi_pos = 0;
-        float* bezi_list = malloc(sizeof(float)*BUFF_SIZE); // Definitely too big, but fuck it.
+        // int bezi_pos = 0;
+        // float* bezi_list = malloc(sizeof(float)*BUFF_SIZE); // Definitely too big, but fuck it.
 
         if (strstr(buffer, "<path") != NULL) {
 
-            int curvecount = 0;
+            // int curvecount = 0;
 
             // begin parsing
             p = strtok(buffer," \t");
@@ -191,12 +260,12 @@ void svg_to_xoj(char* input_file, char* output_file)
             while ( p != NULL) {
                 // Parse the next token, returns NULL for none
                 p = strtok(NULL, " \t");
-                if (p != NULL)
+                if (strlen(p) > 0)
                     printf("%s\n", p);
-                if (strchr(p, 'C') != NULL) {
-                    p[0] = '0';
-                    // bezi_list[bezi_pos] = atof()
-                }
+                // if (strchr(p, 'C') != NULL) {
+                //     p[0] = '0';
+                //     // bezi_list[bezi_pos] = atof()
+                // }
             }
         }
         // int b, e;
