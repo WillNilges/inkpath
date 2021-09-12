@@ -8,8 +8,7 @@ your other notes. This is the problem.
 
 ![image](https://user-images.githubusercontent.com/42927786/109400114-cff24500-7914-11eb-8af2-292bfe65543e.png)
 
-![image](https://user-images.githubusercontent.com/42927786/109400097-b5b86700-7914-11eb-9344-49d06bff9367.png)
-
+![image](https://user-images.githubusercontent.com/42927786/120553464-85c2a900-c3c6-11eb-84b9-33e9931e8190.png)
 
 Inktrace is a project designed to crunch those whiteboard photos into easily
 editable [Xournalpp](https://github.com/xournalpp) note files so that you can
