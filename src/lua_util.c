@@ -79,7 +79,6 @@ int process_image(char* input_file, int color_count, char* background, double** 
     output_idx = 0;
 
     for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
-        stroke_idx = 0; // Prepare for a new stroke.
         unsigned this_spline;
         spline_type first;
 
@@ -101,13 +100,16 @@ int process_image(char* input_file, int color_count, char* background, double** 
             }
         }
 
+        stroke_idx = 0; // Prepare for a new stroke.
+        stroke = (double*) malloc(sizeof(double) * RAM_required);
+
         for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
             spline_type s = SPLINE_LIST_ELT(list, this_spline);
 
             if (SPLINE_DEGREE(s) == LINEARTYPE) {
                 // fprintf(outptr, "%f %f %f %f ", start_x/10.0, start_y/-10.0 + 500, END_POINT(s).x/10.0, END_POINT(s).y/-10.0 + 500);
                 printf("Allocating spline\n");
-                stroke = (double*) malloc(sizeof(double) * 4);
+//                stroke = (double*) malloc(sizeof(double) * 4);
                 // If we can, just use a straight line
                 stroke[stroke_idx] = start_x/10.0;
                 stroke[stroke_idx++] = start_y/-10.0 + 500.0;
@@ -139,8 +141,7 @@ Inputs: 4 x coords and 4 y coords
 void bezierCurve(double x[] , double y[], double* stroke, int* stroke_idx)
 {
     printf("Allocating a FUCKTON of splines.\n");
-    stroke = (double*) malloc(sizeof(double) * 25000);
-    int stroke_idx2 = 0;
+//    stroke = (double*) malloc(sizeof(double) * 25000);
     double xu = 0.0 , yu = 0.0 , u = 0.0;
     for(u = 0.0 ; u <= 1.0 ; u += 0.0001)
     {
@@ -150,11 +151,11 @@ void bezierCurve(double x[] , double y[], double* stroke, int* stroke_idx)
         yu = (1-u)*(1-u)*(1-u)*y[0]+3*u*(1-u)*(1-u)*y[1]+3*u*u*(1-u)*y[2]
             +u*u*u*y[3];
 //        fprintf(outptr, "%f %f ", (xu/10.0), (yu/10.0)*(-1.0)+500);
-        stroke[stroke_idx2] = (xu/10.0);
-        stroke[stroke_idx2++] = (yu/10.0)*(-1.0)+500.0;
-        stroke_idx2++;
+        stroke[(*stroke_idx)] = (xu/10.0);
+        stroke[(*stroke_idx)++] = (yu/10.0)*(-1.0)+500.0;
+        stroke_idx++;
     }
-    printf("Used %d points\n", stroke_idx2);
+    printf("Used %d points\n", *stroke_idx);
 }
 
 //library to be registered
