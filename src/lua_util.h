@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef LUA_UTIL_H
+#define LUA_UTIL_H
 #include <autotrace/autotrace.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,11 +23,11 @@ extern const char* xoj_footer;
 
 int transcribe_image(lua_State *L);
 
-void process_image(
+int process_image(
     char* input_file,
     int color_count,
     char* background,
-    double* output
+    double** output
 );
 
 void bezierCurve(
