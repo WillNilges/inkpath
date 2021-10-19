@@ -94,13 +94,14 @@ int process_image(char* input_file, int color_count, char* background, double** 
             spline_type s = SPLINE_LIST_ELT(list, this_spline);
 
             if (SPLINE_DEGREE(s) == LINEARTYPE) {
-                RAM_required += 8;
+                RAM_required += 8; // This is doubled
             } else {
-                RAM_required += 25000;
+                RAM_required += 25000; // This is +5000
             }
         }
 
-        stroke_idx = 0; // Prepare for a new stroke.
+        // Prepare for a new stroke.
+        stroke_idx = 0;
         stroke = (double*) malloc(sizeof(double) * RAM_required);
 
         for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
@@ -124,7 +125,7 @@ int process_image(char* input_file, int color_count, char* background, double** 
             start_x = END_POINT(s).x;
             start_y = END_POINT(s).y;
         }
-
+        printf("Used %d points\n", stroke_idx);
         // Save that stroke to the output, go to the next one.
         output[output_idx] = stroke;
         output_idx++;
@@ -153,9 +154,8 @@ void bezierCurve(double x[] , double y[], double* stroke, int* stroke_idx)
 //        fprintf(outptr, "%f %f ", (xu/10.0), (yu/10.0)*(-1.0)+500);
         stroke[(*stroke_idx)] = (xu/10.0);
         stroke[(*stroke_idx)++] = (yu/10.0)*(-1.0)+500.0;
-        stroke_idx++;
+        (*stroke_idx)++;
     }
-    printf("Used %d points\n", *stroke_idx);
 }
 
 //library to be registered
