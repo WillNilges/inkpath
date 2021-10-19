@@ -18,15 +18,17 @@ int transcribe_image(lua_State *L)
     printf("Going to process strokes. Hold my beer.\n");
     int stroke_count = process_image(image_path, color_count, "FFFFFF", points);
     
-    printf("Stroke count has been retrieved.\n");
+    printf("Stroke count (%d strokes) has been retrieved.\n", stroke_count);
 
     // Push results to Lua stack, array by array
     for (int i = 0; i < stroke_count; i++)
     {
-        printf("Pushing stroke...");
+        printf("Pushing stroke %d/%d...\n", i, stroke_count);
         lua_newtable(L);
+        printf("Size of array: %ld\n", sizeof(*points[i])/sizeof(double));
         for(int j = 0; j < sizeof(*points[i])/sizeof(double); j++)
         {
+            printf("Fuck\n");
             lua_pushnumber(L, points[i][j]);
             lua_rawseti(L,-2,i + 1);
         }
@@ -130,7 +132,7 @@ int process_image(char* input_file, int color_count, char* background, double** 
         output[output_idx] = stroke;
         output_idx++;
     }
-    printf("We're done!");
+    printf("We're done!\n");
     return output_idx; // We want to push the number of strokes to the Lua stack when we're done.
 }
 

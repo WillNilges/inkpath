@@ -12,6 +12,8 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
+#define LUA_MINSTACK 100
+
 #include "spline.h"
 
 /*
