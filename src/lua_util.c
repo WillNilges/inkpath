@@ -21,13 +21,28 @@ int transcribe_image(lua_State *L)
     invoke_autotrace(image_path, color_count, "FFFFFF", &strokes, &stroke_count);
     
     printf("Stroke count (%d strokes) has been retrieved.\n", stroke_count);
+    lua_newtable(L);
     for (int i = 0; i < stroke_count; i++)
     {
+        printf("Stroke %d has %d points. The final point is: %f, %f, \n", i, strokes[i].point_count, strokes[i].points[strokes[i].point_count-1].x, strokes[i].points[strokes[i].point_count-1].y);
+        lua_pushnumber(L, strokes[i].points[strokes[i].point_count-1].x);
+        lua_rawseti(L, -2, i + 1);
+        /*printf("== STROKE #%d==\n", i);
         for (int j = 0; j < strokes[i].point_count; i++)
         {
-            printf("Coord: %f, %f", strokes[i].points[j].x, strokes[i].points[j].y);
-        }
+            printf("Coord: %f, %f\n", strokes[i].points[j].x, strokes[i].points[j].y);
+        }*/
     }
+
+    for (int i = 0; i < stroke_count; i++)
+    {
+        printf("Freeing stroke %d\n", i);
+        free(strokes[i].points);
+        g_usleep(2000); // Sleep a bit to not overwhelm the computer.
+    }
+
+    printf("Freed stroke points.");
+    free(strokes);
 /*
     // Push results to Lua stack, array by array
     for (int i = 0; i < stroke_count; i++)
@@ -51,7 +66,7 @@ for (i=0; i<4; i++) {
         }
         //return 0;
     }*/
-    lua_pushinteger(L, stroke_count);
+    //lua_pushinteger(L, stroke_count);
     
     return 0;
 }
@@ -97,7 +112,7 @@ void invoke_autotrace(
     // Allocate memory for array of stroke arrays
     // We know we're gonna need N amount of arrays
     // (one array per stroke), so malloc that many right now
-    strokes = malloc(sizeof(inkpath_stroke*) * SPLINE_LIST_ARRAY_LENGTH(*splines));
+    *strokes = malloc(sizeof(inkpath_stroke) * SPLINE_LIST_ARRAY_LENGTH(*splines));
     *stroke_count = 0; 
 
     for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
@@ -129,36 +144,49 @@ void invoke_autotrace(
             // Initialize a stroke from the stroke array
             //inkpath_stroke test = { .point_count = 0, .points = NULL };
             //test.points = malloc(sizeof(inkpath_stroke_point) * RAM_required);
-            //strokes[*stroke_count]->points = (inkpath_stroke_point*) malloc(sizeof(inkpath_stroke_point) * RAM_required);
-            strokes[*stroke_count] = malloc(sizeof(inkpath_stroke));
-            strokes[*stroke_count]->point_count = 0;
+            //strokes[*stroke_count].points = (inkpath_stroke_point*) malloc(sizeof(inkpath_stroke_point) * RAM_required);
+            //(*strokes)[*stroke_count] = malloc(sizeof(inkpath_stroke));
+            //
+            inkpath_stroke* current_stroke = &(*strokes)[*stroke_count];
+            current_stroke->point_count = 0;
+            current_stroke->points = NULL;
+            //(*strokes)[*stroke_count].point_count = 0;
+            
+
 
             if (SPLINE_DEGREE(s) == LINEARTYPE) {
                 // fprintf(outptr, "%f %f %f %f ", start_x/10.0, start_y/-10.0 + 500, END_POINT(s).x/10.0, END_POINT(s).y/-10.0 + 500);
                 // If we can, just use a straight line
-                strokes[*stroke_count]->points = malloc(sizeof(inkpath_stroke_point) * 2);
+                current_stroke->points = malloc(sizeof(inkpath_stroke_point) * 2);
                 // Start Point
-                strokes[*stroke_count]->points[strokes[*stroke_count]->point_count].x = start_x/10.0;
-                strokes[*stroke_count]->points[strokes[*stroke_count]->point_count].y = start_y/-10.0 + 500.0;
+                current_stroke->points[current_stroke->point_count].x = start_x/10.0;
+                current_stroke->points[current_stroke->point_count].y = start_y/-10.0 + 500.0;
 
-                (strokes[*stroke_count]->point_count)++; // Go to next point
+                (current_stroke->point_count)++; // Go to next point
 
                 // End point
-                strokes[*stroke_count]->points[strokes[*stroke_count]->point_count].x = END_POINT(s).x/10.0;
-                strokes[*stroke_count]->points[strokes[*stroke_count]->point_count].y = END_POINT(s).y/-10.0 + 500.0;
-                (strokes[*stroke_count]->point_count)++; // Go to next point
+                current_stroke->points[current_stroke->point_count].x = END_POINT(s).x/10.0;
+                current_stroke->points[current_stroke->point_count].y = END_POINT(s).y/-10.0 + 500.0;
+                (current_stroke->point_count)++; // Go to next point
             } else {
-                strokes[*stroke_count]->points = malloc(sizeof(inkpath_stroke_point) * 11000);
+                current_stroke->points = malloc(sizeof(inkpath_stroke_point) * 11000);
                 double x_arr[4] = {start_x, CONTROL1(s).x, CONTROL2(s).x, END_POINT(s).x};
                 double y_arr[4] = {start_y, CONTROL1(s).y, CONTROL2(s).y, END_POINT(s).y};
-                bezierCurve(x_arr, y_arr, strokes[*stroke_count]);
+                bezierCurve(x_arr, y_arr, current_stroke);
             }
             // End stroke
+            /*printf("First point of stroke %d is: %f, %f\n",
+                *stroke_count,
+                (*strokes)[*stroke_count].points[0].x,
+                (*strokes)[*stroke_count].points[0].y
+            );*/
             (*stroke_count)++;
             start_x = END_POINT(s).x;
             start_y = END_POINT(s).y;
+            g_usleep(1000); // Sleep so we don't crash™
         }
     }
+    printf("We're done!\n");
 
 }
 
