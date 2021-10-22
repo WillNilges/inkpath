@@ -22,7 +22,7 @@ int transcribe_image(lua_State *L)
     process_image(image_path, color_count, "FFFFFF", strokes, &stroke_count, &point_counts);
     
     printf("Stroke count (%d strokes) has been retrieved.\n", stroke_count);
-    printf("Stroke #0 has %d points.", point_counts[100]);
+    printf("Stroke #0 has %d points.\n", point_counts[100]);
 
     // Push results to Lua stack, array by array
     for (int i = 0; i < stroke_count; i++)
@@ -36,17 +36,16 @@ for (i=0; i<4; i++) {
   lua_settable(L,-3);         // table
 }*/
 
-        printf("Pushing stroke %d/%d...\n", i, stroke_count);
-        // We've got our stroke at *points[i]
-        // lua_newtable(L); 
-        lua_createtable(L, point_counts[i], 0);
-        printf("Size of array: %d\n", point_counts[i]);
+        //lua_createtable(L, point_counts[i], 0);
+        //lua_newtable(L);
         for(int j = 0; j < point_counts[i]; j++)
         {
-            //printf("Pushing point %d. We're on Stroke %d\n", j, i);
-            lua_pushnumber(L, strokes[i][j]);
-            lua_rawseti(L,-2,j + 1);
+            return 0;
+            //printf("Stroke point: %f\n", strokes[i][j]);
+            //lua_pushnumber(L, strokes[i][j]);
+            //lua_rawseti(L, -2, j + 1);
         }
+        //return 0;
     }
     lua_pushinteger(L, stroke_count);
     
@@ -142,6 +141,7 @@ void process_image(char* input_file, int color_count, char* background, double**
                 double y_arr[4] = {start_y, CONTROL1(s).y, CONTROL2(s).y, END_POINT(s).y};
                 bezierCurve(x_arr, y_arr, stroke, &stroke_idx);
             }
+            printf("STROKE!? -> %f", stroke[stroke_idx]);
             start_x = END_POINT(s).x;
             start_y = END_POINT(s).y;
         }
