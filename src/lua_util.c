@@ -14,23 +14,38 @@ int transcribe_image(lua_State *L)
 {
     int color_count = 2;
     char* image_path = luaL_checkstring(L, 1);
-    double** points;
+    double** strokes;
+    int stroke_count;
+    int* point_counts;
+
     printf("Going to process strokes. Hold my beer.\n");
-    int stroke_count = process_image(image_path, color_count, "FFFFFF", points);
+    process_image(image_path, color_count, "FFFFFF", strokes, &stroke_count, &point_counts);
     
     printf("Stroke count (%d strokes) has been retrieved.\n", stroke_count);
+    printf("Stroke #0 has %d points.", point_counts[100]);
 
     // Push results to Lua stack, array by array
     for (int i = 0; i < stroke_count; i++)
     {
+/*
+int arr[4] = { 5,100,-20,0 };
+lua_newtable(L);              // table
+for (i=0; i<4; i++) {
+  lua_pushinteger(L, i+1);    // table,key
+  lua_pushinteger(L, arr[i]); // table,key,value
+  lua_settable(L,-3);         // table
+}*/
+
         printf("Pushing stroke %d/%d...\n", i, stroke_count);
-        lua_newtable(L);
-        printf("Size of array: %ld\n", sizeof(*points[i])/sizeof(double));
-        for(int j = 0; j < sizeof(*points[i])/sizeof(double); j++)
+        // We've got our stroke at *points[i]
+        // lua_newtable(L); 
+        lua_createtable(L, point_counts[i], 0);
+        printf("Size of array: %d\n", point_counts[i]);
+        for(int j = 0; j < point_counts[i]; j++)
         {
-            printf("Fuck\n");
-            lua_pushnumber(L, points[i][j]);
-            lua_rawseti(L,-2,i + 1);
+            //printf("Pushing point %d. We're on Stroke %d\n", j, i);
+            lua_pushnumber(L, strokes[i][j]);
+            lua_rawseti(L,-2,j + 1);
         }
     }
     lua_pushinteger(L, stroke_count);
@@ -38,9 +53,10 @@ int transcribe_image(lua_State *L)
     return 0;
 }
 
-int process_image(char* input_file, int color_count, char* background, double** output)
+void process_image(char* input_file, int color_count, char* background, double** output, int* stroke_count, int** point_counts_ptr)
 {
-    double* stroke;
+    int* point_counts; // Array for the amount of points in a stroke
+    double* stroke; // The points in a stroke
     int output_idx;
     int stroke_idx;
 
@@ -62,7 +78,6 @@ int process_image(char* input_file, int color_count, char* background, double** 
             (char)strtol(s_grn, NULL, 16),
             (char)strtol(s_blu, NULL, 16)
         );
-
     }
 
     at_input_read_func rfunc = at_input_get_handler(input_file);
@@ -76,9 +91,12 @@ int process_image(char* input_file, int color_count, char* background, double** 
     spline_list_type list;
 
     printf("Allocating spline array.\n");
-    // We know we're gonna need N amount of arrays, so malloc that many right now :)
+    // We know we're gonna need N amount of arrays (one array per stroke), so malloc that many right now
     output = malloc(sizeof(double*) * SPLINE_LIST_ARRAY_LENGTH(*splines));
     output_idx = 0;
+
+    // We're also going to need N point counts. We need to keep track of how long those arrays are.
+    point_counts = malloc(sizeof(int) * SPLINE_LIST_ARRAY_LENGTH(*splines));
 
     for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
         unsigned this_spline;
@@ -127,13 +145,16 @@ int process_image(char* input_file, int color_count, char* background, double** 
             start_x = END_POINT(s).x;
             start_y = END_POINT(s).y;
         }
-        printf("Used %d points\n", stroke_idx);
+        point_counts[output_idx] = stroke_idx; // Save the amount of points in this stroke.
+        printf("Used %d points\n", point_counts[output_idx]);
         // Save that stroke to the output, go to the next one.
         output[output_idx] = stroke;
         output_idx++;
     }
     printf("We're done!\n");
-    return output_idx; // We want to push the number of strokes to the Lua stack when we're done.
+    printf("Arbitrary Point Count: %d\n", point_counts[19]);
+    *point_counts_ptr = point_counts;
+    *stroke_count = output_idx; // We want to push the number of strokes to the Lua stack when we're done.
 }
 
 // https://www.geeksforgeeks.org/cubic-bezier-curve-implementation-in-c/

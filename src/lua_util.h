@@ -12,8 +12,6 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-#define LUA_MINSTACK 100
-
 #include "spline.h"
 
 /*
@@ -25,11 +23,13 @@ extern const char* xoj_footer;
 
 int transcribe_image(lua_State *L);
 
-int process_image(
+void process_image(
     char* input_file,
     int color_count,
     char* background,
-    double** output
+    double** output,
+    int* stroke_count,
+    int** point_counts
 );
 
 void bezierCurve(

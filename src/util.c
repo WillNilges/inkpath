@@ -56,23 +56,25 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
 
         double start_x = START_POINT(first).x;
         double start_y = START_POINT(first).y;
+
+        // TODO: Figure out if it looks better or worse to separate each
+        // spline as its own stroke.
+        // https://github.com/WillNilges/inkpath/issues/4
+        fprintf(outptr, "%s", start_stroke);
         for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
             spline_type s = SPLINE_LIST_ELT(list, this_spline);
 
             if (SPLINE_DEGREE(s) == LINEARTYPE) {
-                fprintf(outptr, "%s", start_stroke);
                 fprintf(outptr, "%f %f %f %f ", start_x/10.0, start_y/-10.0 + 500, END_POINT(s).x/10.0, END_POINT(s).y/-10.0 + 500);
-                fprintf(outptr, "%s", end_stroke);
             } else {
                 double x_arr[4] = {start_x, CONTROL1(s).x, CONTROL2(s).x, END_POINT(s).x};
                 double y_arr[4] = {start_y, CONTROL1(s).y, CONTROL2(s).y, END_POINT(s).y};
-                fprintf(outptr, "%s", start_stroke);
                 bezierCurve(x_arr, y_arr, outptr);
-                fprintf(outptr, "%s", end_stroke);
             }
             start_x = END_POINT(s).x;
             start_y = END_POINT(s).y;
         }
+        fprintf(outptr, "%s", end_stroke);
     }
 
     fprintf(outptr, "%s", xoj_footer);
