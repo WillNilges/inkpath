@@ -22,20 +22,25 @@ typedef struct {
     inkpath_stroke_point* points;
 } inkpath_stroke;
 
+typedef struct {
+    int point_count;
+    inkpath_stroke_point* points;
+} inkpath_pointset;
+
 int transcribe_image(lua_State *L);
 
-void invoke_autotrace(
+inkpath_pointset invoke_autotrace(
     char* input_file,
     int color_count,
-    char* background,
-    inkpath_stroke** strokes,
-    int* stroke_count
+    char* background
 );
-
+/*
 void bezierCurve(
     double x[],
     double y[],
-    inkpath_stroke* stroke
+    inkpath_stroke** stroke,
+    int* stroke_count,
+    int* point_count
 );
-
+*/
 #endif
