@@ -21,8 +21,29 @@ int transcribe_image(lua_State *L)
     inkpath_pointset points = invoke_autotrace(image_path, color_count, "FFFFFF");
     
     printf("%d points have been retrieved.\n", points.point_count);
-    lua_pushnumber(L, 3.14);
-   
+    
+    // Push data into lua table
+    //lua_newtable(L);
+    //for (int i = 0; i < 50; i++){
+    //    printf("Pushing number... ");
+    //    printf("%f and %f\n", points.points[i].x, points.points[i].y);
+
+    //    lua_pushnumber(L, points.points[i].x);
+    //    lua_pushnumber(L, points.points[i].y);
+    //}
+    lua_newtable(L);
+
+    for (int i = 0; i < points.point_count; i++) {
+        lua_newtable(L);
+        lua_pushnumber(L, points.points[i].x);
+        lua_rawseti(L, -2, 1);
+        lua_pushnumber(L, points.points[i].y);
+        lua_rawseti(L, -2, 2);
+
+        lua_rawseti(L, -2, i+1);
+    }
+    free(points.points);
+    //return points.point_count * 2;
     return 1;
 }
 
@@ -64,7 +85,8 @@ inkpath_pointset invoke_autotrace(
     spline_list_type list;
 
     // Allocate enough memory for every spline to be turned into a bezier curve
-    inkpath_stroke_point* points = malloc(SPLINE_LIST_ARRAY_LENGTH(*splines) * sizeof(inkpath_stroke_point) * 10001);
+    // *2 to account for delimiting points
+    inkpath_stroke_point* points = malloc(SPLINE_LIST_ARRAY_LENGTH(*splines) * 2 * sizeof(inkpath_stroke_point) * 10001);
     int point_count = 0;
 
     for (this_list = 0; this_list < SPLINE_LIST_ARRAY_LENGTH(*splines); this_list++) {
@@ -77,6 +99,7 @@ inkpath_pointset invoke_autotrace(
         double start_x = START_POINT(first).x;
         double start_y = START_POINT(first).y; 
 
+        // Start stroke
         for (this_spline = 0; this_spline < SPLINE_LIST_LENGTH(list); this_spline++) {
 
             spline_type s = SPLINE_LIST_ELT(list, this_spline);
@@ -109,11 +132,14 @@ inkpath_pointset invoke_autotrace(
                     (point_count)++;
                 }
             }
-            // End stroke
-            //(*stroke_count)++;
             start_x = END_POINT(s).x;
             start_y = END_POINT(s).y;
         }
+        // End stroke
+        // I'm gonna say that a point with coords -1, -1 is the end of a "stroke".
+        points[point_count].x = -1.0;
+        points[point_count].y = -1.0;
+        (point_count)++;
     }
     printf("We're done!\n");
     inkpath_pointset product;
