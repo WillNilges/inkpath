@@ -15,8 +15,9 @@ build/inkpath: src/main.c src/util.c src/util.h
 	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/main.c src/util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
 
 lua-module: build/inkpath
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c -g `pkg-config --libs lua autotrace glib-2.0` `pkg-config --cflags lua autotrace glib-2.0` -fPIC -shared -o build/inkpath.so
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c -g `pkg-config --libs lua autotrace glib-2.0` `pkg-config --cflags lua autotrace glib-2.0` -fPIC -shared -o ImageTranscription/inkpath.so
 
 .PHONY: clean
 clean:
 	rm -rf build
+	rm ImageTranscription/inkpath.so
