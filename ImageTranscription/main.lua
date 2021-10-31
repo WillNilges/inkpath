@@ -14,31 +14,24 @@ function initUi()
 end
 
 -- Callback if the menu item is executed
--- TODO: Place stroke on page
 function drawStroke()
-  -- result = app.msgbox("Test123", {[1] = "Yes", [2] = "No"});
   -- app.msgbox("Processing image; Please wait.", {})
   inkpath = require 'inkpath'
   local inspect = require 'inspect'
   path = app.getFilePath()
-  -- strokes = inkpath.transcribe_image("/home/wilnil/inkpath/data/20211019_181644.jpg")
-  --strokes = inkpath.transcribe_image("/home/wilnil/inkpath/data/cropped/input_fixed_01.jpg")
   strokes = inkpath.transcribe_image(path)
-  print("Here are our strokes.")
+  print("Strokes retrieved.")
 
-  single_stroke = {}
-  stroke_count = 0
+  single_stroke = {} -- Each stroke will be composed of a number of splines.
   for key, value in pairs(strokes) do
-      if value[1] == -1.0 and value[2] == -1.0 then
-        app.drawStroke(single_stroke)
+      if value[1] == -1.0 and value[2] == -1.0 then -- If we get a delimiting pair, submit our stroke for processing.
+        app.drawSplineStroke(single_stroke)
         single_stroke = {}
-        stroke_count = stroke_count + 1;
       else
-        table.insert(single_stroke, value[2]) -- Y coord
-        table.insert(single_stroke, value[1]) -- X coord
+        table.insert(single_stroke, value[1]) -- Y coord
+        table.insert(single_stroke, value[2]) -- X coord
       end
   end
-  print("Stroke count is: ", stroke_count)
   app.refreshPage()
   print("done")
 end

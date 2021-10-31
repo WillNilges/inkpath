@@ -17,17 +17,6 @@ typedef struct {
     double y;
 } inkpath_stroke_point;
 
-typedef struct {
-    int point_count;
-    inkpath_stroke_point* points;
-} inkpath_pointset;
-
 int transcribe_image(lua_State *L);
-
-inkpath_pointset invoke_autotrace(
-    char* input_file,
-    int color_count,
-    char* background
-);
 
 #endif
