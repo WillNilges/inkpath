@@ -1,5 +1,13 @@
 #include "lua_util.h"
 
+#define LUA_PUTPOINT(x, y) \
+    lua_newtable(L);       \
+    lua_pushnumber(L, x);  \
+    lua_rawseti(L, -2, 1); \
+    lua_pushnumber(L, y);  \
+    lua_rawseti(L, -2, 2); \
+    lua_rawseti(L, -2, point_count++);
+
 int transcribe_image(lua_State *L)
 {
     int color_count = 2;
@@ -8,6 +16,84 @@ int transcribe_image(lua_State *L)
 
     printf("Processing strokes...\n");
 
+    // Potrace Magic™
+    // TODO:
+    // process_file
+    //  potrace_state_t *st = potrace_trace(info.param, bm);
+
+    /*
+    struct info_s info;
+    info.backend = 
+    potrace_bitmap_t* bm = NULL;
+    bm_read(fin, info.blacklevel, &bm);
+*/
+    potrace_bitmap_t* bm = NULL;
+    potrace_param_t* param = potrace_param_default();
+    param->turdsize = 3;
+    potrace_state_t* st = potrace_trace(param, bm);
+    potrace_path_t* p;
+    int n, i;
+    potrace_dpoint_t (*c)[3];
+
+    FILE* fin = fopen(image_path, "rb");
+    bm_read(fin, 0.5, &bm);
+
+    // So anyway we create the stroke table
+    lua_newtable(L);
+    int point_count = 1;
+    
+    // And we've got some offsets to position our points correctly on the canvas
+    double offset_x = 50.0;
+    double offset_y = 500.0;
+    double scaling = 0.1;
+
+    p = st->plist;
+    while (p != NULL)
+    {
+        n = p->curve.n;
+        //tag = p->curve.tag;
+        c = p->curve.c;       
+        
+        LUA_PUTPOINT(c[n-1][2].x * scaling * offset_x, c[n-1][2].y * scaling * offset_y);
+        //printf("%f %f moveto\n", c[n-1][2].x, c[n-1][2].y); // Move to the end of the last curve (the second control point of the last curve)
+        for (i=0; i<n; i++) {
+            LUA_PUTPOINT(c[i][0].x * scaling * offset_x, c[i][0].y * scaling * offset_y);
+            LUA_PUTPOINT(c[i][1].x * scaling * offset_x, c[i][1].y * scaling * offset_y);
+            LUA_PUTPOINT(c[i][2].x * scaling * offset_x, c[i][2].y * scaling * offset_y);
+
+            /*
+            switch (tag[i]) {
+            case POTRACE_CORNER: // If it's a corner, create a line from the end of the last curve to the first control point, then from the first control point to the second control point
+              //printf("%f %f lineto\n", c[i][1].x, c[i][1].y);
+              //printf("%f %f lineto\n", c[i][2].x, c[i][2].y);
+              break;
+            case POTRACE_CURVETO: // Otherwise, create a bezier(?) curve from the end of the last curve to the end of this curve, using the first two points as control points. So, there's only three points per struct? Fucking weird.
+              //printf("%f %f %f %f %f %f curveto\n",-
+              //  c[i][0].x, c[i][0].y,
+              //  c[i][1].x, c[i][1].y,    
+              //  c[i][2].x, c[i][2].y);
+              break;
+            }
+            */
+        }
+        LUA_PUTPOINT(-1, -1);
+        /* at the end of a group of a positive path and its negative
+           children, fill. */
+        //if (p->next == NULL || p->next->sign == '+') {
+        //  printf("0 setgray fill\n");
+        //}
+        p = p->next;
+    }                                                  
+    //printf("grestore\n");
+    //printf("%%EOF\n");
+
+//    pathlist_free(st->plist);
+//    free(st);
+//    free(p);
+
+/*
+
+  // ======================================
     // AutoTrace Magic™
     at_fitting_opts_type* opts = at_fitting_opts_new();
     opts->color_count = color_count;
@@ -109,7 +195,7 @@ int transcribe_image(lua_State *L)
         lua_rawseti(L, -2, 2);
         lua_rawseti(L, -2, point_count++);
     }
-
+*/
     printf("Image transcription complete\n");
 
     return 1;
