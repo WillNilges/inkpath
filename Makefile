@@ -14,8 +14,11 @@ build/inkpath: src/main.c src/util.c src/util.h
 	mkdir -p build
 	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/main.c src/util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
 
-lua-module: build/inkpath
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c -g `pkg-config --libs lua autotrace glib-2.0` `pkg-config --cflags lua autotrace glib-2.0` -fPIC -shared -o ImageTranscription/inkpath.so
+bitmap:
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/include/bitmap_io.c -o bitmap_io
+
+lua-module: build/inkpath 
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c src/include/bitmap_io.c -g `pkg-config --libs lua autotrace glib-2.0` `pkg-config --cflags lua autotrace glib-2.0` -lpotrace -fPIC -shared -o ImageTranscription/inkpath.so
 
 .PHONY: clean
 clean:

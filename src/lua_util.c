@@ -10,9 +10,9 @@
 
 int transcribe_image(lua_State *L)
 {
-    int color_count = 2;
+    //int color_count = 2;
     char* image_path = luaL_checkstring(L, 1);
-    char* background = "FFFFFF";
+    //char* background = "FFFFFF";
 
     printf("Processing strokes...\n");
 
@@ -28,15 +28,15 @@ int transcribe_image(lua_State *L)
     bm_read(fin, info.blacklevel, &bm);
 */
     potrace_bitmap_t* bm = NULL;
+    FILE* fin = fopen(image_path, "rb");
+    bm_read(fin, 0.5, &bm);
+
     potrace_param_t* param = potrace_param_default();
     param->turdsize = 3;
     potrace_state_t* st = potrace_trace(param, bm);
     potrace_path_t* p;
     int n, i;
     potrace_dpoint_t (*c)[3];
-
-    FILE* fin = fopen(image_path, "rb");
-    bm_read(fin, 0.5, &bm);
 
     // So anyway we create the stroke table
     lua_newtable(L);
@@ -45,7 +45,7 @@ int transcribe_image(lua_State *L)
     // And we've got some offsets to position our points correctly on the canvas
     double offset_x = 50.0;
     double offset_y = 500.0;
-    double scaling = 0.1;
+    double scaling = 0.001;
 
     p = st->plist;
     while (p != NULL)
@@ -57,6 +57,12 @@ int transcribe_image(lua_State *L)
         LUA_PUTPOINT(c[n-1][2].x * scaling * offset_x, c[n-1][2].y * scaling * offset_y);
         //printf("%f %f moveto\n", c[n-1][2].x, c[n-1][2].y); // Move to the end of the last curve (the second control point of the last curve)
         for (i=0; i<n; i++) {
+            /*if (i == 0) {
+                LUA_PUTPOINT(c[n-1][2].x * scaling * offset_x, c[n-1][2].y * scaling * offset_y);
+            } else {
+                LUA_PUTPOINT(c[i-1][2].x * scaling * offset_x, c[i-1][2].y * scaling * offset_y);
+            }*/
+
             LUA_PUTPOINT(c[i][0].x * scaling * offset_x, c[i][0].y * scaling * offset_y);
             LUA_PUTPOINT(c[i][1].x * scaling * offset_x, c[i][1].y * scaling * offset_y);
             LUA_PUTPOINT(c[i][2].x * scaling * offset_x, c[i][2].y * scaling * offset_y);

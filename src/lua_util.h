@@ -2,7 +2,7 @@
 #define UTIL_H
 #include <autotrace/autotrace.h>
 #include <potracelib.h>
-#include <potrace/bitmap_io.h>
+#include "include/bitmap_io.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
