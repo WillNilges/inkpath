@@ -6,3 +6,4 @@ build/
 *.svg
 do.sh
 ImageTranscription/inkpath.so
+cv/env/*

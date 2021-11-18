@@ -35,6 +35,7 @@ int transcribe_image(lua_State *L)
     param->turdsize = 3;
     potrace_state_t* st = potrace_trace(param, bm);
     potrace_path_t* p;
+    int* tag;
     int n, i;
     potrace_dpoint_t (*c)[3];
 
@@ -45,18 +46,20 @@ int transcribe_image(lua_State *L)
     // And we've got some offsets to position our points correctly on the canvas
     double offset_x = 50.0;
     double offset_y = 300.0;
-    double scaling = 0.1;
+    double scaling = 0.3;
 
     p = st->plist;
     while (p != NULL)
     {
         n = p->curve.n;
-        //tag = p->curve.tag;
+        tag = p->curve.tag;
         c = p->curve.c;       
         
         //LUA_PUTPOINT(c[n-1][2].x * scaling * offset_x, c[n-1][2].y * scaling * offset_y);
         //printf("%f %f moveto\n", c[n-1][2].x, c[n-1][2].y); // Move to the end of the last curve (the second control point of the last curve)
         for (i=0; i<n; i++) {
+            if (tag[i] == 2) // Skip POTRACE_CORNER. We don't know how to handle those. 
+                continue;
             if (i == 0) {
                 LUA_PUTPOINT(c[n-1][2].x * scaling + offset_x, c[n-1][2].y * scaling * -1.0 + offset_y);
             } else {
