@@ -7,6 +7,7 @@ int transcribe_image(lua_State *L)
     char* background = "FFFFFF";
 
     printf("Processing strokes...\n");
+    printf("We're using %s.\n", image_path);
 
     // AutoTrace Magic™
     at_fitting_opts_type* opts = at_fitting_opts_new();
@@ -29,9 +30,10 @@ int transcribe_image(lua_State *L)
         );
 
     }
-
-    at_input_read_func rfunc = at_input_get_handler(image_path);
-    at_bitmap_type* bitmap;
+    
+    static at_bitmap_reader *rfunc = NULL;
+    rfunc = at_input_get_handler(image_path);
+    at_bitmap* bitmap;
     at_splines_type* splines;
 
     bitmap = at_bitmap_read(rfunc, image_path, NULL, NULL, NULL);
