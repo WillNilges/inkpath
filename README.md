@@ -1,15 +1,22 @@
 # Inkpath
 
+<div id="badges">
+<img src="https://forthebadge.com/images/badges/made-with-c.svg" alt="C badge" height="30px"/>
+<img src="https://forthebadge.com/images/badges/powered-by-energy-drinks.svg" alt="Coffee badge" height="30px"/>
+<img src="https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg" alt="60 percent badge" height="30px"/>
+</div>
+
 If you're anything like me, you're a ~~huge nerd~~ engineering major who enjoys
 working out problems both on whiteboards and digitally. You might also
 have six million photos of your whiteboard work trapped on your phone
 or in your Google Drive with no good way to easily group them in with
 your other notes.
 
-![image](https://user-images.githubusercontent.com/42927786/109400114-cff24500-7914-11eb-8af2-292bfe65543e.png)
+<p align="center">
+<!-- ![Makerfaire 2021 Card](https://user-images.githubusercontent.com/42927786/147401085-94773933-e4a3-4039-97e6-91cf2ea1ee6c.png) -->
+  <img src="https://user-images.githubusercontent.com/42927786/147401085-94773933-e4a3-4039-97e6-91cf2ea1ee6c.png" alt="Makerfaire 2021 Card" width="400px" style="display: block; margin: 0 auto"/>
 
-![image](https://user-images.githubusercontent.com/42927786/120553464-85c2a900-c3c6-11eb-84b9-33e9931e8190.png)
-
+</p>
 Inktrace is a project designed to crunch those whiteboard photos into easily
 editable [Xournalpp](https://github.com/xournalpp) note files so that you can
 drop your whiteboard scrawlings directly into your lecture notes. Convenient!
@@ -71,3 +78,5 @@ Run `make lua-plugin`, it will compile inkpath and place `inkpath.so` in the Ima
 You can also run `make` to compile a CLI utilility that you can pass a source image and an output file path. This is useful for testing, or just starting a document. It will take that Bezier curve data and transcribe it to xouranalpp file syntax.
 
 (See Makefile for dependencies)
+
+<img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
