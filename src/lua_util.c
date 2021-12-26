@@ -28,14 +28,14 @@ int transcribe_image(lua_State *L)
             (char)strtol(s_grn, NULL, 16),
             (char)strtol(s_blu, NULL, 16)
         );
-
     }
-    
+
+    // Prepare AutoTrace
+    autotrace_init();
     static at_bitmap_reader *rfunc = NULL;
     rfunc = at_input_get_handler(image_path);
     at_bitmap* bitmap;
     at_splines_type* splines;
-
     bitmap = at_bitmap_read(rfunc, image_path, NULL, NULL, NULL);
     splines = at_splines_new(bitmap, opts, NULL, NULL);
 

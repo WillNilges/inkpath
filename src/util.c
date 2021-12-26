@@ -28,11 +28,13 @@ void invoke_autotrace(char* input_file, char* output_file, int color_count, char
             (char)strtol(s_grn, NULL, 16),
             (char)strtol(s_blu, NULL, 16)
         );
-
     }
 
-    at_input_read_func rfunc = at_input_get_handler(input_file);
-    at_bitmap_type* bitmap;
+    autotrace_init();
+
+    // at_bitmap_reader* rfunc = at_input_get_handler_by_suffix("png"); // You could hardcode the file type like this
+    at_bitmap_reader* rfunc = at_input_get_handler(input_file);
+    at_bitmap* bitmap;
     at_splines_type* splines;
 
     bitmap = at_bitmap_read(rfunc, input_file, NULL, NULL, NULL);
