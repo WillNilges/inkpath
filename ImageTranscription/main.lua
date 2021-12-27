@@ -9,7 +9,8 @@ end
 -- Callback if the menu item is executed
 function drawStroke()
   inkpath = require 'inkpath'
-  path = app.getFilePath({'*.ppm', '*.png', '*.pbm', '*.pnm', '*.bmp', '*.tga', '*.yuv', '*.pgm', '*.gf'}) -- Autotrace 0.40.0 supports ppm, png, pbm, pnm, bmp, tga, yuv, pgm, gf
+  -- path = app.getFilePath({'*.ppm', '*.png', '*.pbm', '*.pnm', '*.bmp', '*.tga', '*.yuv', '*.pgm', '*.gf'}) -- Autotrace 0.40.0 supports ppm, png, pbm, pnm, bmp, tga, yuv, pgm, gf
+  path = app.getFilePath({'*.png'}) -- The current version of Autotrace I'm using only supports PNGs.
   strokes = inkpath.transcribe_image(path)
   print("Strokes retrieved.")
 

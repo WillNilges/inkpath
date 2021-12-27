@@ -22,21 +22,26 @@ editable [Xournalpp](https://github.com/xournalpp) note files so that you can
 drop your whiteboard scrawlings directly into your lecture notes. Convenient!
 
 This uses [autotrace](https://github.com/autotrace/autotrace) to translate whiteboard
-markings into splines. From there, it applies a bezier curve to approximate strokes as a series of points, then passes them to the Xournal++ Lua API for rendering.
+markings into splines. From there, it applies a bezier curve to approximate strokes
+as a series of points, then passes them to the Xournal++ Lua API for rendering.
 
 ## Installation and Usage
 
 **Debian:**
 
 Compile and install [autotrace](https://github.com/autotrace/autotrace).
-
+_We're going to be using a fork of autotrace that includes a few fixes.
+Upstream is currently broken (and likely to remain that way :frowning_face:)_
 ```
 # (From https://askubuntu.com/questions/1124651/how-to-install-autotrace-in-ubuntu-18-04)
 # Download Autotrace Dependencies
-apt-get install -y build-essential pkg-config autoconf intltool autopoint libtool libglib2.0-dev build-essential libmagickcore-dev libpstoedit-dev imagemagick pstoedit
+apt-get install -y build-essential pkg-config autoconf intltool autopoint \
+libtool libglib2.0-dev build-essential libmagickcore-dev libpstoedit-dev imagemagick pstoedit
 # Download and Build Autotrace
-git clone https://github.com/autotrace/autotrace.git
+# git clone https://github.com/autotrace/autotrace.git # Upstream is currently broken
+git clone https://github.com/yy502/autotrace.git
 cd autotrace
+git checkout 27bec55f2b32696b581f9f031ada3407e63518ed # Last tested, known "good" commit.
 ./autogen.sh
 #put everything into /usr/{bin,lib,share,include}
 LD_LIBRARY_PATH=/usr/local/lib ./configure --prefix=/usr
@@ -44,14 +49,15 @@ make
 sudo make install
 ```
 
-<!--TODO: Change build instructions for xournalpp to point at my fork-->
-Compile and install [xournalpp](https://github.com/xournalpp/xournalpp)
+Compile and install [xournalpp](https://github.com/willnilges/xournalpp).
+_My fork contains API extensions that are not yet upstreamed._
 ```
 # From (https://github.com/xournalpp/xournalpp/blob/master/readme/LinuxBuild.md)
 # Download Xournalpp dependencies
-apt-get install -y cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev dvipng texlive libxml2-dev liblua5.3-dev libzip-dev librsvg2-dev gettext lua-lgi
+apt-get install -y cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev \
+libsndfile-dev dvipng texlive libxml2-dev liblua5.3-dev libzip-dev librsvg2-dev gettext lua-lgi
 # Download and Build Xournalpp
-git clone http://github.com/xournalpp/xournalpp.git
+git clone http://github.com/willnilges/xournalpp.git
 cd xournalpp
 mkdir build
 cd build
