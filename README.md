@@ -26,9 +26,10 @@ markings into splines. From there, it applies a bezier curve to approximate stro
 
 ## Installation and Usage
 
+**Debian:**
+
 Compile and install [autotrace](https://github.com/autotrace/autotrace).
 
-Debian:
 ```
 # (From https://askubuntu.com/questions/1124651/how-to-install-autotrace-in-ubuntu-18-04)
 # Download Autotrace Dependencies
@@ -64,9 +65,8 @@ Compile and install Inkpath
 git clone https://github.com/willnilges/inkpath.git
 cd inkpath
 make lua-plugin
-
 # Copy resulting plugin files to plugin directory
-
+cp -r ImageTranscription/ ../xournalpp/plugins/; cp ImageTranscription/inkpath.so ../xournalpp/build/src/
 ```
 
 ### Plugin (recommended)

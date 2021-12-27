@@ -2,14 +2,14 @@
 
 -- Register all Toolbar actions and intialize all UI stuff
 function initUi()
-  ref = app.registerUi({["menu"] = "Transcribe Image", ["callback"] = "drawStroke", ["accelerator"] = "<Control><Shift>t"});
+  ref = app.registerUi({["menu"] = "Transcribe Image", ["callback"] = "drawStroke", ["accelerator"] = "<Control><Alt>t"});
   print("ImageTranscription registered\n");
 end
 
 -- Callback if the menu item is executed
 function drawStroke()
   inkpath = require 'inkpath'
-  path = app.getFilePath()
+  path = app.getFilePath({'*.ppm', '*.png', '*.pbm', '*.pnm', '*.bmp', '*.tga', '*.yuv', '*.pgm', '*.gf'}) -- Autotrace 0.40.0 supports ppm, png, pbm, pnm, bmp, tga, yuv, pgm, gf
   strokes = inkpath.transcribe_image(path)
   print("Strokes retrieved.")
 
