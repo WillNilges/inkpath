@@ -8,7 +8,12 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 
 LIGHT_WARNINGS = -Wall
 
+PLUGIN_NAME=ImageTranscription
+SO_INSTALL_PATH=/usr/local/lib/lua/5.3# Just one of many possible destinations :)
+
 # CFLAGS += -std=gnu99
+
+.PHONY: clean install uninstall
 
 build/inkpath: src/main.c src/util.c src/util.h
 	mkdir -p build
@@ -16,9 +21,17 @@ build/inkpath: src/main.c src/util.c src/util.h
 
 lua-plugin: 
 	mkdir -p build
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c -g `pkg-config --libs lua5.3 autotrace glib-2.0` `pkg-config --cflags lua5.3 autotrace glib-2.0` -fPIC -shared -o ImageTranscription/inkpath.so
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c -g `pkg-config --libs lua5.3 autotrace glib-2.0` `pkg-config --cflags lua5.3 autotrace glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
 
-.PHONY: clean
+install: lua-plugin
+	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
+	mkdir -p $(SO_INSTALL_PATH)
+	cp -r $(PLUGIN_NAME)/inkpath.so $(SO_INSTALL_PATH)/inkpath.so
+
+uninstall:
+	rm -rf /usr/share/xournalpp/plugins/$(PLUGIN_NAME)
+	rm $(SO_INSTALL_PATH)/inkpath.so
+
 clean:
 	rm -rf build
-	rm ImageTranscription/inkpath.so
+	rm $(PLUGIN_NAME)/inkpath.so
