@@ -11,7 +11,8 @@ function drawStroke()
   inkpath = require 'inkpath'
   -- path = app.getFilePath({'*.ppm', '*.png', '*.pbm', '*.pnm', '*.bmp', '*.tga', '*.yuv', '*.pgm', '*.gf'}) -- Autotrace 0.40.0 supports ppm, png, pbm, pnm, bmp, tga, yuv, pgm, gf
   path = app.getFilePath({'*.png'}) -- The current version of Autotrace I'm using only supports PNGs.
-  strokes = inkpath.transcribe_image(path)
+  image_scale = app.msgbox("Select tracing scale", {[1] = "Small", [2] = "Medium", [3] = "Large"})
+  strokes = inkpath.transcribe_image(path, image_scale)
   print("Strokes retrieved.")
 
   single_stroke = {} -- Each stroke will be composed of a number of splines.

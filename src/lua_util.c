@@ -5,9 +5,9 @@ int transcribe_image(lua_State *L)
     int color_count = 2;
     char* image_path = luaL_checkstring(L, 1);
     char* background = "FFFFFF";
+    int tracing_scale = luaL_checkinteger(L, 2);
 
-    printf("Processing strokes...\n");
-    printf("We're using %s.\n", image_path);
+    printf("Processing strokes for %s...\n", image_path);
 
     // AutoTrace Magic™
     at_fitting_opts_type* opts = at_fitting_opts_new();
@@ -47,7 +47,7 @@ int transcribe_image(lua_State *L)
     // and push each spline within that stroke one after the other. I think I still
     // want to store each point in its own Lua table, because that'll just be
     // so much easier to process after the fact
-    
+
     // So anyway we create the stroke table
     lua_newtable(L);
     int point_count = 1;
@@ -69,7 +69,18 @@ int transcribe_image(lua_State *L)
             double offset_x = 50.0;
             double offset_y = 500.0;
 
-            double scaling = 0.1; // Scale the points down.
+            double scaling = 0.1; // Scale the points down. Default is 0.1 (Small)
+            switch (tracing_scale) {
+            case 1:
+                scaling = 0.1;
+                break;
+            case 2:
+                scaling = 0.3;
+                break;
+            case 3:
+                scaling = 0.5;
+                break;
+            }
 
             // So this is a spline.
             lua_newtable(L); // One table per point
