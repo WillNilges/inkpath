@@ -2,7 +2,7 @@
 
 <div id="badges">
 <img src="https://forthebadge.com/images/badges/made-with-c.svg" alt="C badge" height="30px"/>
-<img src="https://forthebadge.com/images/badges/powered-by-energy-drinks.svg" alt="Coffee badge" height="30px"/>
+<img src="https://forthebadge.com/images/badges/powered-by-energy-drinks.svg" alt="Energy drink badge" height="30px"/>
 <img src="https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg" alt="60 percent badge" height="30px"/>
 </div>
 
@@ -17,19 +17,20 @@ your other notes.
   <img src="https://user-images.githubusercontent.com/42927786/147401085-94773933-e4a3-4039-97e6-91cf2ea1ee6c.png" alt="Makerfaire 2021 Card" width="400px" style="display: block; margin: 0 auto"/>
 
 </p>
-Inktrace is a project designed to crunch those whiteboard photos into easily
+Inkpath is a project designed to crunch those whiteboard photos into easily
 editable [Xournalpp](https://github.com/xournalpp) note files so that you can
 drop your whiteboard scrawlings directly into your lecture notes. Convenient!
 
-This uses [autotrace](https://github.com/autotrace/autotrace) to translate whiteboard
-markings into splines. From there, it applies a bezier curve to approximate strokes
-as a series of points, then passes them to the Xournal++ Lua API for rendering.
+This uses [autotrace](https://github.com/autotrace/autotrace) to translate
+whiteboard markings into splines. Those splines are then passed directly to the
+Xournal++ API and rasterized, before being placed onto the working layer.
 
 ## Installation and Usage
 
 **Debian:**
 
-Compile and install [autotrace](https://github.com/autotrace/autotrace).
+Compile and install [autotrace](https://github.com/yy502/autotrace).
+
 _We're going to be using a fork of autotrace that includes a few fixes.
 Upstream is currently broken (and likely to remain that way :frowning_face:)_
 ```
@@ -50,7 +51,8 @@ sudo make install
 ```
 
 Compile and install [xournalpp](https://github.com/willnilges/xournalpp).
-_My fork contains API extensions that are not yet upstreamed._
+
+_My fork contains API extensions that are not yet upstreamed. Follow progress [here](https://github.com/xournalpp/xournalpp/pull/3688)_
 ```
 # From (https://github.com/xournalpp/xournalpp/blob/master/readme/LinuxBuild.md)
 # Download Xournalpp dependencies

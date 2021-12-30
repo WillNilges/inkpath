@@ -1,5 +1,3 @@
--- This is an example Xournal++ Plugin - copy this to get started
-
 -- Register all Toolbar actions and intialize all UI stuff
 function initUi()
   ref = app.registerUi({["menu"] = "Transcribe Image", ["callback"] = "drawStroke", ["accelerator"] = "<Control><Alt>t"});
