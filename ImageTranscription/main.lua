@@ -16,13 +16,13 @@ function drawStroke()
   single_stroke = {} -- Each stroke will be composed of a number of splines.
   for key, value in pairs(strokes) do
     if value[1] == -1.0 and value[2] == -1.0 then -- If we get a delimiting pair, submit our stroke for processing.
-      app.drawStroke({
+      app.addSpline({
         ["splines"] = single_stroke,
         ["width"] = 1.5,
         ["color"] = 0xff000000,
         ["fill"] = 0,
         ["tool"] = "pen",
-        ["lineStyle"] = ""
+        ["lineStyle"] = "solid"
       })
       single_stroke = {}
     else
