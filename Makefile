@@ -33,10 +33,12 @@ uninstall:
 # Used to install the plugin into a source code repository of xournalpp
 dev-install:
 	cp -r $(PLUGIN_NAME) ../xournalpp/plugins
+	cp -r HACKING/StrokeTest ../xournalpp/plugins
 	cp $(PLUGIN_NAME)/inkpath.so ../xournalpp/build/
 
 dev-uninstall:
 	rm -rf ../xournalpp/plugins/$(PLUGIN_NAME)
+	rm -rf HACKING/StrokeTest ../xournalpp/plugins
 	rm ../xournalpp/build/inkpath.so
 
 clean:
