@@ -6,82 +6,65 @@ end
 
 -- Callback if the menu item is executed
 function drawStroke()
-    stroke_completeness = app.msgbox("Stroke type?", {[1] = "No data", [2] = "With data"})
+    print("ligma")
+    x = {
+      [1] = 110.0,
+      [2] = 120.0,
+      [3] = 130.0,
+      [4] = 140.0,
+      [5] = 150.0,
+      [6] = 160.0,
+      [7] = 170.0,
+      [8] = 170.0
+    }
+    y = {
+      [1] = 100.0,
+      [2] = 100.0,
+      [3] = 100.0,
+      [4] = 150.0,
+      [5] = 160.0,
+      [6] = 170.0,
+      [7] = 170.0,
+      [8] = 180.0,
+    }
+    pressure = {
+      [1] = 1.5,
+      [2] = 1.4,
+      [3] = 1.4,
+      [4] = 1.4,
+      [5] = 1.4,
+      [6] = 1.4,
+      [7] = 1.4,
+      [8] = 1.4,
+    }
+    stroke_completeness = app.msgbox("Stroke type?", {[1] = "No data", [2] = "With data", [3] = "With highlighter", [4] = "With eraser"})
     if stroke_completeness == 1 then
         app.addStroke({
-            ["x"] = {
-              [1] = 110.0,
-              [2] = 120.0,
-              [3] = 130.0,
-              [4] = 140.0,
-              [5] = 150.0,
-              [6] = 160.0,
-              [7] = 170.0,
-              [8] = 170.0
-            },
-            ["y"] = {
-              [1] = 100.0,
-              [2] = 100.0,
-              [3] = 100.0,
-              [4] = 150.0,
-              [5] = 160.0,
-              [6] = 170.0,
-              [7] = 170.0,
-              [8] = 180.0,
-            },
-            --["pressure"] = {
-            --  [1] = 1.5,
-            --  [2] = 1.4,
-            --  [3] = 1.4,
-            --  [4] = 1.4,
-            --  [5] = 1.4,
-            --  [6] = 1.4,
-            --  [7] = 1.4,
-            --  [8] = 1.4,
-            --},
-            --["width"] = 3.8,
-            --["color"] = 0xff0000,
-            --["fill"] = 0,
-            ["tool"] = "pen",
-            --["lineStyle"] = "solid"
+            ["x"] = x,
+            ["y"] = y,
         })
-    else
+    elseif stroke_completeness == 2 then
         app.addStroke({
-            ["x"] = {
-              [1] = 110.0,
-              [2] = 120.0,
-              [3] = 130.0,
-              [4] = 140.0,
-              [5] = 150.0,
-              [6] = 160.0,
-              [7] = 170.0,
-              [8] = 170.0
-            },
-            ["y"] = {
-              [1] = 100.0,
-              [2] = 100.0,
-              [3] = 100.0,
-              [4] = 150.0,
-              [5] = 160.0,
-              [6] = 170.0,
-              [7] = 170.0,
-              [8] = 180.0,
-            },
-            --["pressure"] = {
-            --  [1] = 1.5,
-            --  [2] = 1.4,
-            --  [3] = 1.4,
-            --  [4] = 1.4,
-            --  [5] = 1.4,
-            --  [6] = 1.4,
-            --  [7] = 1.4,
-            --  [8] = 1.4,
-            --},
+            ["x"] = x,
+            ["y"] = y,
+            --["pressure"] = pressure,
+            ["tool"] = "pen",
             ["width"] = 3.8,
             ["color"] = 0xff0000,
             ["fill"] = 0,
-            ["tool"] = "pen",
             ["lineStyle"] = "solid"
+        })
+    elseif stroke_completeness == 3 then
+        app.addStroke({
+            ["x"] = x,
+            ["y"] = y,
+            ["tool"] = "highlighter",
+        })
+    elseif stroke_completeness == 4 then
+        app.addStroke({
+            ["x"] = x,
+            ["y"] = y,
+            ["tool"] = "eraser",
         })
     end
     app.refreshPage()
