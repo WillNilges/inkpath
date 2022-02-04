@@ -6,7 +6,6 @@ end
 
 -- Callback if the menu item is executed
 function drawStroke()
-    print("ligma")
     x = {
       [1] = 110.0,
       [2] = 120.0,
@@ -37,7 +36,7 @@ function drawStroke()
       [7] = 1.4,
       [8] = 1.4,
     }
-    stroke_completeness = app.msgbox("Stroke type?", {[1] = "No data", [2] = "With data", [3] = "With highlighter", [4] = "With eraser"})
+    stroke_completeness = app.msgbox("Stroke type?", {[1] = "No data", [2] = "With data", [3] = "With highlighter", [4] = "With eraser (broken)", [5] = "No Undo Action"})
     if stroke_completeness == 1 then
         app.addStroke({
             ["x"] = x,
@@ -65,6 +64,12 @@ function drawStroke()
             ["x"] = x,
             ["y"] = y,
             ["tool"] = "eraser",
+        })
+    elseif stroke_completeness == 5 then
+        app.addStroke({
+            ["x"] = x,
+            ["y"] = y,
+            ["allowUndoRedoAction"] = false,
         })
     end
     app.refreshPage()

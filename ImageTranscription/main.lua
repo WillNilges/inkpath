@@ -18,7 +18,7 @@ function drawStroke()
     if value[1] == -1.0 and value[2] == -1.0 then -- If we get a delimiting pair, submit our stroke for processing.
       -- Not going to pass any options. I want to use the current tool options.
       app.addSpline({
-        ["splines"] = single_stroke,
+        ["coordinates"] = single_stroke,
       })
       single_stroke = {}
     else
