@@ -7,7 +7,7 @@ apt-get install -y build-essential pkg-config autoconf intltool autopoint libtoo
 apt-get install -y cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev \
 dvipng texlive libxml2-dev liblua5.3-dev libzip-dev librsvg2-dev gettext lua-lgi
 
-RUN cd && git clone https://github.com/autotrace/autotrace && \
+RUN cd && git clone https://github.com/yy502/autotrace && \
 cd autotrace && ./autogen.sh && LD_LIBRARY_PATH=/usr/local/lib ./configure --prefix=/usr && make && make install
 
 # Mount these yourself.

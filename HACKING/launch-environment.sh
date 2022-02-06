@@ -13,6 +13,7 @@ uname=$USER # Just trust me on this one.
 
 xauth_path=/tmp/xopp-dev-xauth
 
+rm -rf "$xauth_path"
 mkdir -p "$xauth_path"
 cp $HOME/.Xauthority "$xauth_path"
 chmod g+rwx "$xauth_path"/.Xauthority
@@ -22,5 +23,5 @@ podman unshare chown 1000:$uname "$xauth_path"/.Xauthority
 #sudo chown -R :$uname "$CODE_PATH"
 #sudo chown -R :$uname "$xauth_path"/.Xauthority
 
-podman run --name=xopp-dev --rm -it -e DISPLAY=$DISPLAY --network=host --cap-add=SYS_PTRACE -v "$xauth_path"/.Xauthority:/root/.Xauthority:rw -v "$CODE_PATH":/mnt/xopp_dev -v /tmp/.X11-unix:/tmp/.X11-unix xopp-dev
+podman run --name=xopp-dev --rm -it -e DISPLAY=$DISPLAY --network=host --cap-add=SYS_PTRACE -v "$xauth_path"/.Xauthority:/root/.Xauthority:rw -v "$CODE_PATH":/xopp-dev -v /tmp/.X11-unix:/tmp/.X11-unix xopp-dev
 rm -rf "$xauth_path"
