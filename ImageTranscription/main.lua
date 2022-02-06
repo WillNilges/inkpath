@@ -18,11 +18,6 @@ function drawStroke()
         if value[1] == -1.0 and value[2] == -1.0 then -- If we get a delimiting pair, add our current stroke to the stroke table.
             table.insert(strokes, {
                 ["coordinates"] = single_stroke,
-                ["tool"] = "pen",
-                ["width"] = 1.4,
-                ["color"] = 0xffff00,
-                ["fill"] = 0,
-                ["lineStyle"] = "plain",
             });
             single_stroke = {}
         else
@@ -34,6 +29,7 @@ function drawStroke()
     -- Not going to pass any options since I want to use the current tool options.
     app.addBatchStrokesFromSplines({
     ["strokes"] = strokes,
+    ["allowUndoRedoAction"] = "grouped",
     })
 
     -- ["allowUndoRedoAction"] = "together", -- (or "individual" or "none")
