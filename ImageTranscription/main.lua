@@ -27,12 +27,10 @@ function drawStroke()
     end
     -- When we've assembled our table of strokes, call the addSplines function
     -- Not going to pass any options since I want to use the current tool options.
-    app.addBatchStrokesFromSplines({
-    ["strokes"] = strokes,
-    ["allowUndoRedoAction"] = "grouped",
+    app.addSplines({
+        ["strokes"] = strokes,
+        ["allowUndoRedoAction"] = "grouped",
     })
-
-    -- ["allowUndoRedoAction"] = "together", -- (or "individual" or "none")
     app.refreshPage()
     print("done")
 end
