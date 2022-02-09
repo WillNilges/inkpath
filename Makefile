@@ -41,6 +41,12 @@ dev-uninstall:
 	rm -rf HACKING/StrokeTest ../xournalpp/plugins
 	rm ../xournalpp/build/inkpath.so
 
+stroketest:
+	cp -r HACKING/StrokeTest ../xournalpp/plugins
+
+stroketest-uninstall:
+	rm -rf HACKING/StrokeTest ../xournalpp/plugins
+
 clean:
 	rm -rf build
 	rm $(PLUGIN_NAME)/inkpath.so
