@@ -51,15 +51,14 @@ sudo make install
 ```
 
 Compile and install [xournalpp](https://github.com/willnilges/xournalpp).
-
-_My fork contains API extensions that are not yet upstreamed. Follow progress [here](https://github.com/xournalpp/xournalpp/pull/3688)_
+_I wrote API extensions that might not be available yet on your platform, so you're probably going to have to build from source._
 ```
 # From (https://github.com/xournalpp/xournalpp/blob/master/readme/LinuxBuild.md)
 # Download Xournalpp dependencies
 apt-get install -y cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev \
 libsndfile-dev dvipng texlive libxml2-dev liblua5.3-dev libzip-dev librsvg2-dev gettext lua-lgi
 # Download and Build Xournalpp
-git clone http://github.com/willnilges/xournalpp.git
+git clone http://github.com/xournalpp/xournalpp.git
 cd xournalpp
 mkdir build
 cd build
