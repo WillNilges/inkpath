@@ -19,3 +19,5 @@ Run this with:
 podman build . --tag xopp-dev
 podman run --name=xopp-dev -dit -e DISPLAY=$DISPLAY --network=host --cap-add=SYS_PTRACE -v /home/$USER/Code/inkpath_dev:/mnt/inkpath_dev -v /tmp/.X11-unix:/tmp/.X11-unix xopp-dev
 ```
+
+Or use the provided script.
