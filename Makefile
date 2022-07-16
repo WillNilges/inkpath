@@ -13,6 +13,8 @@ SO_INSTALL_PATH=/usr/local/lib/lua/5.3# Just one of many possible destinations :
 
 .PHONY: clean install uninstall dev-install dev-uninstall
 
+# TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
+
 build/inkpath: src/main.c src/util.c src/util.h
 	mkdir -p build
 	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/main.c src/util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
