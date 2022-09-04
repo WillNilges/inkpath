@@ -23,9 +23,6 @@
 
 #include <stdio.h>
 
-#include "types.h"
-#include "color.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif                          /* __cplusplus */
@@ -37,6 +34,9 @@ extern "C" {
 /* ===================================================================== *
  * Typedefs
  * ===================================================================== */
+
+#include "types.h"
+#include "color.h"
 
 /* Third degree is the highest we deal with.  */
   enum _at_polynomial_degree {

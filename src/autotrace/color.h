@@ -24,10 +24,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif                          /* __cplusplus */
-
 typedef struct _at_color at_color;
 struct _at_color {
   guint8 r;
@@ -47,7 +43,4 @@ void at_color_free(at_color * color);
 GType at_color_get_type(void);
 #define AT_TYPE_COLOR (at_color_get_type ())
 
-#ifdef __cplusplus
-}
-#endif                          /* __cplusplus */
 #endif /* not AT_COLOR_H */

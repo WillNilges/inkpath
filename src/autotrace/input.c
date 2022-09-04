@@ -130,7 +130,6 @@ at_bitmap_reader *at_input_get_handler(gchar * filename)
   if (ext == NULL)
     ext = "";
 
-  printf("Extension: %s\n", ext);
   return at_input_get_handler_by_suffix(ext);
 }
 
