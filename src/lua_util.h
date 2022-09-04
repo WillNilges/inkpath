@@ -5,7 +5,7 @@
 #include <string.h>
 #include <glib.h>
 
-#include "autotrace/src/autotrace.h"
+#include "autotrace/autotrace.h"
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"

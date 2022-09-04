@@ -16,7 +16,7 @@ SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destina
 
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
-at_source := $(wildcard src/autotrace/src/*.c src/autotrace/src/*.h)
+at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
 
 lua-plugin: src/lua_util.c $(at_source)
 	mkdir -p build
