@@ -1,0 +1,3 @@
+[submodule "src/autotrace"]
+	path = src/autotrace
+	url = https://github.com/willnilges/autotrace
