@@ -19,7 +19,7 @@ at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
 
 lua-plugin: src/lua_util.c $(at_source)
 	mkdir -p build
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c $(at_source) -g `pkg-config --libs lua glib-2.0` `pkg-config --cflags lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c $(at_source) -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
 
 install: lua-plugin
 	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
