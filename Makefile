@@ -7,7 +7,8 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 	-Wstrict-prototypes -Wwrite-strings
 #LIGHT_WARNINGS = -Wall
 PLUGIN_NAME=ImageTranscription
-SO_INSTALL_PATH=/usr/local/lib/lua/5.3# Just one of many possible destinations :)
+LUA_VERSION=5.4
+SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destinations :)
 
 # CFLAGS += -std=gnu99
 
@@ -15,7 +16,7 @@ SO_INSTALL_PATH=/usr/local/lib/lua/5.3# Just one of many possible destinations :
 
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
-at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
+at_source := $(wildcard src/autotrace/src/*.c src/autotrace/src/*.h)
 
 lua-plugin: src/lua_util.c $(at_source)
 	mkdir -p build
