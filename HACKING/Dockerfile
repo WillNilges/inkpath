@@ -2,10 +2,10 @@ FROM docker.io/debian
 
 RUN touch /root/.Xauthority && \
   apt-get update && \
-  apt-get install -y tmux git gdb vim x11-apps && \
-  apt-get install -y build-essential pkg-config autoconf intltool autopoint libtool libglib2.0-dev build-essential libmagickcore-dev libpstoedit-dev imagemagick pstoedit && \
-  apt-get install -y cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev \
-  dvipng texlive libxml2-dev liblua5.3-dev libzip-dev librsvg2-dev gettext lua-lgi
+  apt-get install -y tmux git gdb vim x11-apps #&& \
+#  apt-get install -y build-essential pkg-config autoconf intltool autopoint libtool libglib2.0-dev build-essential libmagickcore-dev libpstoedit-dev imagemagick pstoedit && \
+#  apt-get install -y cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev \
+#  dvipng texlive libxml2-dev liblua5.3-dev libzip-dev librsvg2-dev gettext lua-lgi
 
 # Disabled for testing
 #RUN cd && git clone https://github.com/yy502/autotrace && \
