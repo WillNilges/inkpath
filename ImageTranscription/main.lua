@@ -1,3 +1,4 @@
+inspect = require 'inspect'
 -- Register all Toolbar actions and intialize all UI stuff
 function initUi()
   ref = app.registerUi({["menu"] = "Transcribe Image", ["callback"] = "drawStroke", ["accelerator"] = "<Control><Alt>t"});
@@ -8,12 +9,14 @@ end
 function drawStroke()
     inkpath = require 'inkpath'
     -- path = app.getFilePath({'*.ppm', '*.png', '*.pbm', '*.pnm', '*.bmp', '*.tga', '*.yuv', '*.pgm', '*.gf'}) -- Autotrace 0.40.0 supports ppm, png, pbm, pnm, bmp, tga, yuv, pgm, gf
-    path = app.getFilePath({'*.png'}) -- The current version of Autotrace I'm using only supports PNGs.
+    path = app.getFilePath({'*.png', '*.bmp'}) -- The current version of Autotrace I'm using only supports PNGs.
     image_scale = app.msgbox("Select tracing scale", {[1] = "Small", [2] = "Medium", [3] = "Large"})
     output = inkpath.transcribe_image(path, image_scale)
     print("Strokes retrieved.")
     strokes = {}
     single_stroke = {}
+    print(inspect(output))
+    print("Output Inspected!")
     for key, value in pairs(output) do
         if value[1] == -1.0 and value[2] == -1.0 then -- If we get a delimiting pair, add our current stroke to the stroke table.
             table.insert(strokes, {
@@ -28,7 +31,7 @@ function drawStroke()
     -- When we've assembled our table of strokes, call the addSplines function
     -- Not going to pass any options since I want to use the current tool options.
     app.addSplines({
-        ["strokes"] = strokes,
+        ["splines"] = strokes,
         ["allowUndoRedoAction"] = "grouped",
     })
     app.refreshPage()
