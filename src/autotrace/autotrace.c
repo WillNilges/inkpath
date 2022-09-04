@@ -18,9 +18,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#define AUTOTRACE_VERSION "willard"
-#define AUTOTRACE_WEB "chom"
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* Def: HAVE_CONFIG_H */
@@ -50,6 +47,9 @@
 #include <string.h>
 
 #define AT_DEFAULT_DPI 72
+
+#define AUTOTRACE_VERSION "willard"
+#define AUTOTRACE_WEB "chom"
 
 at_fitting_opts_type *at_fitting_opts_new(void)
 {

@@ -19,7 +19,9 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#define HAVE_LIBPNG
+#define HAVE_LIBPNG true
+//#define HAVE_MAGICK_READERS true
+//#define HAVE_CONFIG_H true
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,19 +31,15 @@
 #include "private.h"
 
 #include "input.h"
+#if !HAVE_MAGICK_READERS
 #include "input-bmp.h"
+#endif /* HAVE_MAGICK_READERS */
+#if !HAVE_MAGICK_READERS || HAVE_GRAPHICSMAGICK
+#endif /* !HAVE_MAGICK_READERS || HAVE_GRAPHICSMAGICK */
 
 #ifdef HAVE_LIBPNG
 #include "input-png.h"
 #endif /* HAVE_LIBPNG */
-#if HAVE_MAGICK
-#include "input-magick.h"
-#else
-int install_input_magick_readers(void)
-{
-  return 0;
-}
-#endif /* HAVE_MAGICK */
 
 static int install_input_readers(void);
 static int install_output_writers(void);
@@ -59,13 +57,17 @@ int at_module_init(void)
 static int install_input_readers(void)
 {
 #ifdef HAVE_LIBPNG
-  at_input_add_handler("PNG", "Portable network graphics", input_png_reader);
+  at_input_add_handler("PNG", "Portable network graphics (native)", input_png_reader);
 #endif
-  at_input_add_handler("BMP", "Microsoft Windows bitmap image", input_bmp_reader);
-  return 0; // :)
+
+#if !HAVE_MAGICK_READERS
+  at_input_add_handler("BMP", "Microsoft Windows bitmap image (native)", input_bmp_reader);
+#endif /* HAVE_MAGICK_READERS */
+
+  return 0; // ((0 << 1) || install_input_magick_readers()); // fuck you :)
 }
 
 static int install_output_writers(void)
 {
-  return 0; // get fucked
+  return 1; // fuck you :)
 }
