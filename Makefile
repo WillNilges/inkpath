@@ -5,7 +5,7 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 	-Wmissing-include-dirs -Wformat-nonliteral -Wnested-externs \
 	-Wno-unused-parameter -Wold-style-definition -Wredundant-decls -Wshadow \
 	-Wstrict-prototypes -Wwrite-strings
-LIGHT_WARNINGS = -Wall
+#LIGHT_WARNINGS = -Wall
 PLUGIN_NAME=ImageTranscription
 SO_INSTALL_PATH=/usr/local/lib/lua/5.3# Just one of many possible destinations :)
 
@@ -15,13 +15,14 @@ SO_INSTALL_PATH=/usr/local/lib/lua/5.3# Just one of many possible destinations :
 
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
-build/inkpath: src/main.c src/util.c src/util.h
+at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
+build/inkpath: src/main.c src/util.c src/util.h $(at_source)
 	mkdir -p build
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/main.c src/util.c -g `pkg-config --libs autotrace glib-2.0` `pkg-config --cflags autotrace glib-2.0` -o build/inkpath
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) $(at_source) src/main.c src/util.c -g `pkg-config --libs glib-2.0` `pkg-config --cflags glib-2.0` -o build/inkpath
 
-lua-plugin: 
+lua-plugin: src/lua_util.c $(at_source)
 	mkdir -p build
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c -g `pkg-config --libs lua5.3 autotrace glib-2.0` `pkg-config --cflags lua5.3 autotrace glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c $(at_source) -g `pkg-config --libs lua5.3 glib-2.0` `pkg-config --cflags lua5.3 glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
 
 install: lua-plugin
 	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/

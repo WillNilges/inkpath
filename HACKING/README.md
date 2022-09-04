@@ -21,3 +21,9 @@ podman run --name=xopp-dev -dit -e DISPLAY=$DISPLAY --network=host --cap-add=SYS
 ```
 
 Or use the provided script.
+
+## Debugging the Lua
+
+You might find the following to be useful
+- https://github.com/kikito/inspect.lua
+- https://gist.github.com/lunixbochs/5b0bb27861a396ab7a86

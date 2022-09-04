@@ -1,6 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
-#include <autotrace/autotrace.h>
+#include "autotrace/autotrace.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <regex.h>
