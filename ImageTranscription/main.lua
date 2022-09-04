@@ -15,8 +15,6 @@ function drawStroke()
     print("Strokes retrieved.")
     strokes = {}
     single_stroke = {}
-    print(inspect(output))
-    print("Output Inspected!")
     for key, value in pairs(output) do
         if value[1] == -1.0 and value[2] == -1.0 then -- If we get a delimiting pair, add our current stroke to the stroke table.
             table.insert(strokes, {
