@@ -18,6 +18,10 @@ SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destina
 
 at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
 
+otsu: src/cv/otsu.cpp
+	mkdir -p build
+	g++ src/cv/otsu.cpp -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -o build/otsu
+
 lua-plugin: src/lua_util.c $(at_source)
 	mkdir -p build
 	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c $(at_source) -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
