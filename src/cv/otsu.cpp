@@ -44,10 +44,18 @@ void otsu(Mat img, bool upsampling)
 
     Mat downsampled;
     pyrDown(img, downsampled, Size( img.cols/2, img.rows/2 ));
-    
+
+    //otsu's thresholding after gaussian filtering
+    Mat gauss_thresh;
+    Mat blur;
+    GaussianBlur(downsampled, blur, Size(5, 5), 0, 0); 
+    threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU);
+    imshow("gaussian.png", gauss_thresh);
+    /*
     Mat adaptive_thresh;
     adaptiveThreshold(downsampled, adaptive_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 51, 2);
     imshow("adaptive_thresh.png", adaptive_thresh);
+    */
 
     while (true) {
         k = waitKey(0); // Wait for a keystroke in the window
