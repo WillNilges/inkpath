@@ -17,10 +17,15 @@ SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destina
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
 at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
+cv_source := $(wildcard src/cv/*.cpp src/cv/*.h)
 
-otsu: src/cv/otsu.cpp
+otsu: $(cv_source) 
 	mkdir -p build
-	g++ src/cv/otsu.cpp -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -o build/otsu
+	g++ $(cv_source) -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -o build/otsu
+
+otsu-static: $(cv_source) 
+	mkdir -p build
+	g++ $(cv_source) -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -static -o build/otsu.lib
 
 lua-plugin: src/lua_util.c $(at_source)
 	mkdir -p build

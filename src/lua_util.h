@@ -12,6 +12,8 @@
 
 #include "spline.h"
 
+#include "cv/otsu.h"
+
 typedef struct {
     double x;
     double y;

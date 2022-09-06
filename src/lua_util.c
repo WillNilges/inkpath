@@ -30,10 +30,14 @@ int transcribe_image(lua_State *L)
         );
     }
 
+    otsu(image_path);
+
+    char* tmp_image = "/tmp/inkpath_cv.bmp";
+
     // Prepare AutoTrace
     autotrace_init();
     static at_bitmap_reader *rfunc = NULL;
-    rfunc = at_input_get_handler(image_path);
+    rfunc = at_input_get_handler(tmp_image);
     at_bitmap* bitmap;
     at_splines_type* splines;
     bitmap = at_bitmap_read(rfunc, image_path, NULL, NULL, NULL);
