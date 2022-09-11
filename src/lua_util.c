@@ -30,7 +30,7 @@ int transcribe_image(lua_State *L)
         );
     }
 
-    otsu(image_path);
+    c_prep_otsu(image_path);
 
     char* tmp_image = "/tmp/inkpath_cv.bmp";
 

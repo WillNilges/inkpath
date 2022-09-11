@@ -36,7 +36,8 @@ podman run --name=xopp-dev --rm -it                   \
     --cap-add=SYS_PTRACE                              \
     --group-add keep-groups                           \
     --annotation io.crun.keep_original_groups=1       \
-    -v "$xauth_path"/.Xauthority:/root/.Xauthority:Z \
+    -v "$xauth_path"/.Xauthority:/root/.Xauthority:Z  \
     -v "$CODE_PATH":/xopp-dev:Z                       \
+    -v /scratch/wilnil:/scratch:Z                     \
     -v /tmp/.X11-unix:/tmp/.X11-unix xopp-dev
 rm -rf "$xauth_path"

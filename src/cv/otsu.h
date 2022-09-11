@@ -6,5 +6,5 @@
 using namespace cv;
 
 void aggressiveXylophones(Mat img_inv);
-void otsu(Mat img);
+Mat otsu(Mat img);
 void prep_otsu(char* image_path);

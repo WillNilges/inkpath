@@ -12,7 +12,7 @@
 
 #include "spline.h"
 
-#include "cv/otsu.h"
+#include "cv/OtsuWrapper.h"
 
 typedef struct {
     double x;

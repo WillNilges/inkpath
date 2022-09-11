@@ -16,20 +16,26 @@ SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destina
 
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
+ip_source := $(wildcard src/*.c src/*.h)
 at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
 cv_source := $(wildcard src/cv/*.cpp src/cv/*.h)
+cv_deps=-I/usr/local/include/opencv4/opencv -I/usr/local/include/opencv4 -L/usr/local/lib/opencv4
+
+#-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio
 
 otsu: $(cv_source) 
 	mkdir -p build
-	g++ $(cv_source) -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -o build/otsu
+	g++ $(cv_source) `pkg-config --cflags --libs --static opencv4` -static -o build/otsu
 
 otsu-static: $(cv_source) 
 	mkdir -p build
-	g++ $(cv_source) -I/usr/include/opencv4/opencv -I/usr/include/opencv4 -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio -static -o build/otsu.lib
+	g++ $(cv_source) $(cv_deps) -static -o build/otsu.lib
 
-lua-plugin: src/lua_util.c $(at_source)
+lua-plugin: $(ip_source) $(at_source) $(cv_source)
 	mkdir -p build
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) src/lua_util.c $(at_source) -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
+	g++ -c $(cv_source)
+	ar -crs build/libotsu.a build/libotsu.o `pkg-config --cflags --libs --static opencv4` 
+	#$(CC) $(LIGHT_WARNINGS) $(CFLAGS) $(ip_source) $(at_source) -Lbuild/otsu.so -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
 
 install: lua-plugin
 	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
@@ -45,6 +51,7 @@ dev-install:
 	cp -r $(PLUGIN_NAME) ../xournalpp/plugins
 	cp -r HACKING/StrokeTest ../xournalpp/plugins
 	cp $(PLUGIN_NAME)/inkpath.so ../xournalpp/build/
+	cp build/otsu.so ../xournalpp/build/
 
 dev-uninstall:
 	rm -rf ../xournalpp/plugins/$(PLUGIN_NAME)

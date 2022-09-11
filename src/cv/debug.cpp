@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
         std::cout << "Could not read the image: " << image_path << std::endl;
         return 1;
     }
-    otsu(img);
+    Mat otsu_img = otsu(img);
+    aggressiveXylophones(otsu_img);
     /*imshow("Display window", img);
     int k = waitKey(0); // Wait for a keystroke in the window
     if(k == 's')

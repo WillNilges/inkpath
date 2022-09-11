@@ -4,7 +4,7 @@
 // more down the road.
 void aggressiveXylophones(Mat img_inv) {
     Mat img;
-    bitwise_not(img, img_inv);
+    bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
     cv::Mat temp;
     cv::Mat eroded;
@@ -28,10 +28,10 @@ void aggressiveXylophones(Mat img_inv) {
 
     Mat downsampled;
     pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    imshow("spook", downsampled);
+    imwrite("/tmp/spook.png", downsampled);
 }
 
-void otsu(Mat img)
+Mat otsu(Mat img)
 {
     int k;
     // Upsample our image
@@ -46,6 +46,7 @@ void otsu(Mat img)
 
     imwrite("/tmp/inkpath_cv.bmp", gauss_thresh);
     printf("image has been written to /tmp\n");
+    return gauss_thresh;
 }
 
 void prep_otsu(char* image_path)
