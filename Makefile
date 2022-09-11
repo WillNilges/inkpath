@@ -32,10 +32,11 @@ otsu-static: $(cv_source)
 	g++ $(cv_source) $(cv_deps) -static -o build/otsu.lib
 
 lua-plugin: $(ip_source) $(at_source) $(cv_source)
-	mkdir -p build
-	g++ -c $(cv_source)
-	ar -crs build/libotsu.a build/libotsu.o `pkg-config --cflags --libs --static opencv4` 
-	#$(CC) $(LIGHT_WARNINGS) $(CFLAGS) $(ip_source) $(at_source) -Lbuild/otsu.so -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
+	@mkdir -p build
+	g++ -c $(cv_source) `pkg-config --cflags --libs --static opencv4` -static  -fPIC # This works, but I need it to not go into the base dir of the project...
+	@mv *.o build # God I'm such a fucking asshole
+	ar -crs build/libotsu.a build/*.o  
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) $(ip_source) $(at_source) -static /xopp-dev/inkpath/build/libotsu.a -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
 
 install: lua-plugin
 	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
@@ -51,7 +52,7 @@ dev-install:
 	cp -r $(PLUGIN_NAME) ../xournalpp/plugins
 	cp -r HACKING/StrokeTest ../xournalpp/plugins
 	cp $(PLUGIN_NAME)/inkpath.so ../xournalpp/build/
-	cp build/otsu.so ../xournalpp/build/
+#	cp build/otsu.so ../xournalpp/build/
 
 dev-uninstall:
 	rm -rf ../xournalpp/plugins/$(PLUGIN_NAME)

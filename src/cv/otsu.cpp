@@ -28,7 +28,9 @@ void aggressiveXylophones(Mat img_inv) {
 
     Mat downsampled;
     pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    imwrite("/tmp/spook.png", downsampled);
+    std::string path = "/tmp/spook.png";
+    imwrite(path, downsampled);
+    printf("Image has been written to %s\n", path);
 }
 
 Mat otsu(Mat img)
