@@ -5,6 +5,6 @@
 #include <iostream>
 using namespace cv;
 
-void aggressiveXylophones(Mat img_inv);
-Mat otsu(Mat img);
+Mat skeletonize(Mat img_inv, std::string output_path);
+Mat otsu(Mat img, std::string output_path);
 void prep_otsu(char* image_path);

@@ -2,7 +2,8 @@
 
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
-void aggressiveXylophones(Mat img_inv) {
+// TODO: Where the hell did I find this?
+Mat skeletonize(Mat img_inv, std::string output_path) {
     Mat img;
     bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
@@ -28,12 +29,16 @@ void aggressiveXylophones(Mat img_inv) {
 
     Mat downsampled;
     pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    std::string path = "/tmp/spook.png";
-    imwrite(path, downsampled);
-    printf("Image has been written to %s\n", path);
+    if (output_path != "") {
+        imwrite(output_path, downsampled);
+        printf("Image has been written to %s\n", output_path);
+    }
+    return downsampled;
 }
 
-Mat otsu(Mat img)
+// Apply an Otsu's thresholding to the object. I found that this was
+// the best function of the ones I tried
+Mat otsu(Mat img, std::string output_path)
 {
     int k;
     // Upsample our image
@@ -46,11 +51,16 @@ Mat otsu(Mat img)
     GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
     threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU);
 
-    imwrite("/tmp/inkpath_cv.bmp", gauss_thresh);
-    printf("image has been written to /tmp\n");
+    if (output_path != "") {
+        imwrite(output_path, gauss_thresh);
+        printf("Image has been written to %s\n", output_path);
+    }
     return gauss_thresh;
 }
 
+// Mat find_shapes(Mat img, std::string output_path) {}
+
+// FIXME: This shouldn't be necessary when I'm done >:)
 void prep_otsu(char* image_path)
 {
     Mat img = imread(image_path, 0);
@@ -59,5 +69,5 @@ void prep_otsu(char* image_path)
         std::cout << "Could not read the image: " << image_path << std::endl;
         return;
     }
-    otsu(img);
+    otsu(img, image_path);
 }
