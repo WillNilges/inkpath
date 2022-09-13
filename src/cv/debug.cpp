@@ -18,7 +18,7 @@ std::vector<std::string> adv_tokenizer(std::string s, char del)
 
 void print_help()
 {
-    printf("-f : file : input file\n-o : output : output file\n-h : help : print help");
+    printf("-f : file : input file\n-o : output : output file\n-h : help : print help\n");
 }
 
 // Test function
@@ -48,7 +48,12 @@ int main(int argc, char *argv[])
     };
     
     opterr = 1;           /* Enable automatic error reporting */
-    while ((rc = getopt_long_only(argc, argv, getoptOptions, long_options, &option_index)) != -1) {
+    while ((rc = getopt_long_only(
+                    argc,
+                    argv,
+                    getoptOptions,
+                    long_options,
+                    &option_index)) != -1) {
        /* Detect the end of the options. */
        switch (rc)
          {
@@ -67,7 +72,7 @@ int main(int argc, char *argv[])
         } // End switch 
     } /* end while */
 
-    if ((optind < argc) /* add lots of stuff here */  ){
+    if ((optind < argc) || image_path.empty() || output_path.empty()){
         print_help();
         exit(1);
     }
@@ -79,9 +84,23 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Separate the file title from the rest of the path
+    // FIXME: This feels awful, but I don't know enough about C++ to be sure.
     std::vector<std::string> path_vec = adv_tokenizer(output_path, '/');
-    Mat otsu_img = otsu(img, "otsu_" + output_path);
-    Mat skel_img = skeletonize(otsu_img, "skel_" + output_path);
+    std::string file_title = path_vec.back();
+    path_vec.pop_back();
+    std::string path_string;
+    if (output_path[0] == '/')
+        path_string += '/';
+    for (auto &dir : path_vec)
+    {
+        if (!dir.empty()) {
+            path_string += dir + '/';
+        }
+    }
+    std::cout << "Using: " << path_string << file_title << "\n";
+    Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
+    Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
 
     return 0;
 }

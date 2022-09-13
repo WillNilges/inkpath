@@ -31,7 +31,7 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
     pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
     if (output_path != "") {
         imwrite(output_path, downsampled);
-        printf("Image has been written to %s\n", output_path);
+        std::cout << "Image has been written to " << output_path << "\n";
     }
     return downsampled;
 }
@@ -53,7 +53,7 @@ Mat otsu(Mat img, std::string output_path)
 
     if (output_path != "") {
         imwrite(output_path, gauss_thresh);
-        printf("Image has been written to %s\n", output_path);
+        std::cout << "Image has been written to " << output_path << "\n";
     }
     return gauss_thresh;
 }
