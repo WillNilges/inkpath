@@ -21,6 +21,20 @@ void print_help()
     printf("-f : file : input file\n-o : output : output file\n-h : help : print help\n");
 }
 
+void print_points(Shapes shapes)
+{
+    int i = 0;
+    for (vector<Point> contour : shapes.contours)
+    {
+        cout << "CONTOUR #" << i << "\n";
+        for (Point point : contour)
+        {
+            cout << "Point: " << point.x << ", " << point.y << "\n";
+        }
+        i++;
+    }
+}
+
 // Test function
 int main(int argc, char *argv[])
 {
