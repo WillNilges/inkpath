@@ -1,6 +1,6 @@
 #include "ip_lua_util.h"
 
-Shapes cv_perform_processing(char* image_path) {
+Shapes cv_perform_processing(const char* image_path) {
     Mat img = imread(image_path, 0);
     if(img.empty())
     {
@@ -13,7 +13,7 @@ Shapes cv_perform_processing(char* image_path) {
     return shapes;
 }
 
-int cv_transcribe_image(lua_State* L)
+static int cv_transcribe_image(lua_State* L)
 {
     const char* image_path = luaL_checkstring(L, 1);
     const char* background = "FFFFFF";
@@ -48,11 +48,11 @@ int cv_transcribe_image(lua_State* L)
 
 //library to be registered
 static const struct luaL_Reg inkpath [] = {
-      {"transcribe_image", cv_transcribe_image},
+      {"cv_transcribe_image", cv_transcribe_image},
       {NULL, NULL}  /* sentinel */
 };
 
-int luaopen_inkpath (lua_State *L){
+int luaopen_inkpath (lua_State* L){
     luaL_newlib(L, inkpath);
     return 1;
 }

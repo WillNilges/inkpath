@@ -8,8 +8,8 @@ extern "C" {
 
 #include "cv/ipcv.h"
 
-Shapes cv_perform_processing(string image_path);
-int cv_transcribe_image(lua_State* L);
-int luaopen_inkpath (lua_State* L);
+Shapes cv_perform_processing(const char* image_path);
+static int cv_transcribe_image(lua_State* L);
+int luaopen_inkpath(lua_State* L);
 
 #endif

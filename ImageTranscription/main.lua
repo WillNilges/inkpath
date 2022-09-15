@@ -7,7 +7,7 @@ end
 
 -- Callback if the menu item is executed
 function drawStroke()
-    inkpath = require 'inkpath'
+    inkpath = require "inkpath"
     -- path = app.getFilePath({'*.ppm', '*.png', '*.pbm', '*.pnm', '*.bmp', '*.tga', '*.yuv', '*.pgm', '*.gf'}) -- Autotrace 0.40.0 supports ppm, png, pbm, pnm, bmp, tga, yuv, pgm, gf
     path = app.getFilePath({'*.png', '*.bmp'}) -- The current version of Autotrace I'm using only supports PNGs.
     image_scale = app.msgbox("Select tracing scale", {[1] = "Small", [2] = "Medium", [3] = "Large"})

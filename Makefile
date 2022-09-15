@@ -27,13 +27,9 @@ ipcv: $(cv_source)
 	mkdir -p build
 	g++ $(cv_source) `pkg-config --cflags --libs --static opencv4` -static -o build/ipcv
 
-ipcv-static: $(cv_source) 
-	mkdir -p build
-	g++ $(cv_source) $(cv_deps) -static -o build/ipcv.lib
-
 ipcv-lua: $(ip_source) $(cv_source)
 	@mkdir -p build
-	g++ $(cv_source) $(ip_source) `pkg-config --cflags --libs --static opencv4` -g `pkg-config --cflags --libs lua glib-2.0` -shared -fPIC -o $(PLUGIN_NAME)/inkpath.so
+	g++ $(cv_source) $(ip_source) `pkg-config --cflags --libs --static opencv4` `pkg-config --cflags --libs lua` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.lib
 
 lua-plugin: $(ip_source) $(at_source) $(cv_source)
 	@mkdir -p build
@@ -55,7 +51,8 @@ uninstall:
 dev-install:
 	cp -r $(PLUGIN_NAME) ../xournalpp/plugins
 	cp -r HACKING/StrokeTest ../xournalpp/plugins
-	cp $(PLUGIN_NAME)/inkpath.so ../xournalpp/build/
+	#cp $(PLUGIN_NAME)/inkpath.so ../xournalpp/build/
+	cp $(PLUGIN_NAME)/inkpath.lib ../xournalpp/build/
 #	cp build/ipcv.so ../xournalpp/build/
 
 dev-uninstall:
