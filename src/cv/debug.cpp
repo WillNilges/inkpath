@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     std::cout << "Using: " << path_string << file_title << "\n";
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
-    find_shapes(skel_img, path_string + "shape_" + file_title);
+    Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
 
     return 0;
 }

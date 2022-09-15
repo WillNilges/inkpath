@@ -59,8 +59,7 @@ Mat otsu(Mat img, std::string output_path)
 }
 
 // Prereqs: Must be binary color image, target must be black
-std::vector<std::vector<Point>> find_shapes(Mat img, std::string output_path) {
-
+Shapes find_shapes(Mat img, std::string output_path) {
     Mat src;
     bitwise_not(img, src);
 
@@ -80,19 +79,13 @@ std::vector<std::vector<Point>> find_shapes(Mat img, std::string output_path) {
         Scalar color( rand()&255, rand()&255, rand()&255 );
         drawContours( dst, contours, idx, color, FILLED, 8, hierarchy );
     }
-    /*
-    Scalar color( rand()&255, rand()&255, rand()&255 );
-    for(vector<Point> contour : contours)
-        drawContours( dst, contours, 0, color, 2);
-    */
+
     if (output_path != "") {
         imwrite(output_path, dst);
         std::cout << "Image has been written to " << output_path << "\n";
     }
 
-    return contours;
-
-    
+    return Shapes{contours, hierarchy};
 }
 
 // FIXME: This shouldn't be necessary when I'm done >:)

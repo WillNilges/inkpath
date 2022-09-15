@@ -19,6 +19,7 @@ typedef struct {
     double y;
 } inkpath_stroke_point;
 
+int cv_transcribe_image(lua_State *L);
 int transcribe_image(lua_State *L);
 
 #endif
