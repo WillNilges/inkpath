@@ -27,13 +27,13 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
     Mat skel_invert;
     bitwise_not(skel, skel_invert);
 
-    Mat downsampled;
-    pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
+    //Mat downsampled;
+    //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
     if (output_path != "") {
-        imwrite(output_path, downsampled);
+        imwrite(output_path, skel_invert);
         std::cout << "Image has been written to " << output_path << "\n";
     }
-    return downsampled;
+    return skel_invert;
 }
 
 // Apply an Otsu's thresholding to the object. I found that this was
@@ -58,7 +58,42 @@ Mat otsu(Mat img, std::string output_path)
     return gauss_thresh;
 }
 
-// Mat find_shapes(Mat img, std::string output_path) {}
+// Prereqs: Must be binary color image, target must be black
+std::vector<std::vector<Point>> find_shapes(Mat img, std::string output_path) {
+
+    Mat src;
+    bitwise_not(img, src);
+
+    Mat dst = Mat::zeros(src.rows, src.cols, CV_8UC3);
+    src = src > 1;
+    //namedWindow( "Source", 1 );
+    //imshow( "Source", src );
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours( src, contours, hierarchy,
+        RETR_TREE, CHAIN_APPROX_SIMPLE );
+    // iterate through all the top-level contours,
+    // draw each connected component with its own random color
+    int idx = 0;
+    for( ; idx >= 0; idx = hierarchy[idx][0] )
+    {
+        Scalar color( rand()&255, rand()&255, rand()&255 );
+        drawContours( dst, contours, idx, color, FILLED, 8, hierarchy );
+    }
+    /*
+    Scalar color( rand()&255, rand()&255, rand()&255 );
+    for(vector<Point> contour : contours)
+        drawContours( dst, contours, 0, color, 2);
+    */
+    if (output_path != "") {
+        imwrite(output_path, dst);
+        std::cout << "Image has been written to " << output_path << "\n";
+    }
+
+    return contours;
+
+    
+}
 
 // FIXME: This shouldn't be necessary when I'm done >:)
 void prep_otsu(char* image_path)
