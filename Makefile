@@ -16,7 +16,7 @@ SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destina
 
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
-ip_source := $(wildcard src/*.c src/*.h)
+ip_source := $(wildcard src/*.cpp src/*.h)
 at_source := $(wildcard src/autotrace/*.c src/autotrace/*.h)
 cv_source := $(wildcard src/cv/*.cpp src/cv/*.h)
 cv_deps=-I/usr/local/include/opencv4/opencv -I/usr/local/include/opencv4 -L/usr/local/lib/opencv4
@@ -30,6 +30,10 @@ ipcv: $(cv_source)
 ipcv-static: $(cv_source) 
 	mkdir -p build
 	g++ $(cv_source) $(cv_deps) -static -o build/ipcv.lib
+
+ipcv-lua: $(ip_source) $(cv_source)
+	@mkdir -p build
+	g++ $(cv_source) $(ip_source) `pkg-config --cflags --libs --static opencv4` -g `pkg-config --cflags --libs lua glib-2.0` -shared -fPIC -o $(PLUGIN_NAME)/inkpath.so
 
 lua-plugin: $(ip_source) $(at_source) $(cv_source)
 	@mkdir -p build
