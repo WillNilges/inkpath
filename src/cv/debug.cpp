@@ -1,5 +1,5 @@
 #include <getopt.h>
-#include "otsu.h"
+#include "ipcv.h"
 
 // A quick way to split strings separated via any character
 // delimiter.

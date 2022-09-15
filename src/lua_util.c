@@ -1,5 +1,10 @@
 #include "lua_util.h"
 
+int cv_transcribe_image(lua_State* L)
+{
+
+}
+
 int transcribe_image(lua_State *L)
 {
     int color_count = 2;

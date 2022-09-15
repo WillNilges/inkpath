@@ -1,4 +1,4 @@
-#include "otsu.h"
+#include "ipcv.h"
 
 // Skeletonization algorithm. I might mess around with this
 // more down the road.

@@ -23,20 +23,20 @@ cv_deps=-I/usr/local/include/opencv4/opencv -I/usr/local/include/opencv4 -L/usr/
 
 #-lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_videoio
 
-otsu: $(cv_source) 
+ipcv: $(cv_source) 
 	mkdir -p build
-	g++ $(cv_source) `pkg-config --cflags --libs --static opencv4` -static -o build/otsu
+	g++ $(cv_source) `pkg-config --cflags --libs --static opencv4` -static -o build/ipcv
 
-otsu-static: $(cv_source) 
+ipcv-static: $(cv_source) 
 	mkdir -p build
-	g++ $(cv_source) $(cv_deps) -static -o build/otsu.lib
+	g++ $(cv_source) $(cv_deps) -static -o build/ipcv.lib
 
 lua-plugin: $(ip_source) $(at_source) $(cv_source)
 	@mkdir -p build
 	g++ -c $(cv_source) `pkg-config --cflags --libs --static opencv4` -static  -fPIC # This works, but I need it to not go into the base dir of the project...
 	@mv *.o build # God I'm such a fucking asshole
-	ar -crs build/libotsu.a build/*.o  
-	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) $(ip_source) $(at_source) -static /xopp-dev/inkpath/build/libotsu.a -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
+	ar -crs build/libipcv.a build/*.o  
+	$(CC) $(LIGHT_WARNINGS) $(CFLAGS) $(ip_source) $(at_source) -static /xopp-dev/inkpath/build/libipcv.a -g `pkg-config --cflags --libs lua glib-2.0` -fPIC -shared -o $(PLUGIN_NAME)/inkpath.so
 
 install: lua-plugin
 	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
@@ -52,7 +52,7 @@ dev-install:
 	cp -r $(PLUGIN_NAME) ../xournalpp/plugins
 	cp -r HACKING/StrokeTest ../xournalpp/plugins
 	cp $(PLUGIN_NAME)/inkpath.so ../xournalpp/build/
-#	cp build/otsu.so ../xournalpp/build/
+#	cp build/ipcv.so ../xournalpp/build/
 
 dev-uninstall:
 	rm -rf ../xournalpp/plugins/$(PLUGIN_NAME)
