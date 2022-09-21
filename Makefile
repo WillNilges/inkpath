@@ -14,8 +14,8 @@ SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destina
 
 # TODO: `-g` is for debugging. Make a target that supports debugging separately from primary compilation
 
-ip_source := $(wildcard src/ipcv_obj/*.cpp src/ipcv_obj/*.h)
-cv_source := $(wildcard src/cv/*.cpp src/cv/*.h)
+ip_source := $(wildcard src/ipcv_obj/*.cpp)
+cv_source := $(wildcard src/cv/*.cpp)
 
 luashit=`pkg-config --cflags --libs lua`
 cvshit=`pkg-config --cflags --libs --static opencv4`
