@@ -9,7 +9,6 @@
 #include <lua.hpp>
 // C++ input/output streams
 #include <iostream>
-//#include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 
 #include "../cv/ipcv.h"
@@ -30,7 +29,7 @@ class IPCVObj
 		ContourList get() const{return this->contours;}
 };
  
-static int cv_perform_processing(const char* image_path, IPCVObj* data);
+int cv_perform_processing(const char* image_path, IPCVObj* data);
 
 // IPCVObj identifier for the Lua metatable
 #define LUA_IPCVOBJ "IPCVObj"
@@ -40,20 +39,11 @@ static int ipcvobj_new(lua_State* L);
 // Free IPCVObj instance by Lua garbage collection
 static int ipcvobj_delete(lua_State* L);
  
-// IPCVObj member functions in Lua
-static int ipcvobj_set(lua_State* L);
-
-static int ipcvobj_get(lua_State* L);
-
 // Length stuff
 static int ipcvobj_getLength(lua_State* L);
 static int ipcvobj_getContourLength(lua_State* L);
 
 // Receiving data
-static int ipcvobj_getPointXInContour(lua_State* L);
-static int ipcvobj_getPointYInContour(lua_State* L);
 static int ipcvobj_getContour(lua_State* L);
-
-//static int ipcvobj_processImage(lua_State *L);
 
 #endif
