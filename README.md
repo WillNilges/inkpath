@@ -57,3 +57,14 @@ make install
 ```
 
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
+
+
+## new build instructions
+
+this is a godawful rough draft of what you need to do to build this thing
+- Get opencv 4.5.1
+- statically compile it
+- install it
+- go to inkpath base dir
+- make dev-install
+-profit
