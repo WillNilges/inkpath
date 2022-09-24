@@ -8,8 +8,6 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 LIGHT_WARNINGS = -Wall
 PLUGIN_NAME=ImageTranscription
 SO_NAME=ipcvobj.so
-LUA_VERSION=5.4
-SO_INSTALL_PATH=/usr/lib64/lua/$(LUA_VERSION)# Just one of many possible destinations :)
 XOPP_DEV_INSTALL_PATH=/xournalpp
 
 .PHONY: clean install uninstall dev-install dev-uninstall
@@ -36,27 +34,23 @@ lua-plugin: $(ip_source) ipcv
 	g++ $(LIGHT_WARNINGS) $(ip_source) -L/xopp-dev/inkpath/build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
 
 # Installs the plugin into your Xournalpp installation
+# FIXME: Not smart enough to avoid re-building the app every time :(
 install: lua-plugin
 	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
-	mkdir -p $(SO_INSTALL_PATH)
-	cp -r $(PLUGIN_NAME)/$(SO_NAME) $(SO_INSTALL_PATH)/$(SO_NAME)
 
 # Remove the plugin files from the xournalpp install dir
 uninstall:
 	rm -rf /usr/share/xournalpp/plugins/$(PLUGIN_NAME)
-	rm $(SO_INSTALL_PATH)/$(SO_NAME)
 
 # Used to install the plugin into a source code repository of xournalpp
 dev-install: lua-plugin
 	cp -r $(PLUGIN_NAME) $(XOPP_DEV_INSTALL_PATH)/plugins
 	cp -r HACKING/StrokeTest $(XOPP_DEV_INSTALL_PATH)/plugins
-	cp $(PLUGIN_NAME)/$(SO_NAME) $(XOPP_DEV_INSTALL_PATH)/build/
 
 # Remove the plugin from the development environment
 dev-uninstall:
 	rm -rf $(XOPP_DEV_INSTALL_PATH)/plugins/$(PLUGIN_NAME)
 	rm -rf HACKING/StrokeTest $(XOPP_DEV_INSTALL_PATH)/plugins
-	rm $(XOPP_DEV_INSTALL_PATH)/$(SO_NAME)
 
 # For generating a CV debugging binary
 ipcv-debug: $(cv_source) 
