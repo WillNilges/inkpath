@@ -1,5 +1,13 @@
 # Thanks for contributing :)
 
+You'll need to statically compile and install OpenCV (see `HACKING/build-opencv.sh`),
+then install Xournalpp using your package manager of choice (or compile from source).
+
+When you run `make lua-plugin`, it will compile inkpath and place `inkpath.so`
+in the ImageTranscription directory.`make install` will copy that directory to
+your Xournalpp plugins folder, and Inkpath will be installed. You can then use
+it from the 'Plugins' menu from within Xournalpp.
+
 ## Setting up the development environment
 
 This guide will walk you through everything you need to work on this project, including building OpenCV and Xournalpp.
@@ -21,6 +29,18 @@ This guide will walk you through everything you need to work on this project, in
 cd /xopp-dev/inkpath/
 make dev-install
 ```
+
+## Using Arch
+There's also an arch-based container, if you're into that sort of thing.
+It is more geared towards testing the installation process, but can be
+used for development as well.
+
+- `cd HACKING/arch-test/`
+- `./build-environment.sh`
+
+To run the container:
+
+- `./launch-environment.sh`
 
 ## Debugging Lua
 
