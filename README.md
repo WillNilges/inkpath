@@ -31,39 +31,13 @@ Xournal++ API. Unlike the previous implementation, this operates purely on raste
 
 ## Installation and Usage
 
-### Prerequisites
+Inkpath is packaged as a statically-linked `.so` file coupled with a Lua script,
+so you should be able to download the release from the [releases page](https://github.com/WillNilges/inkpath/releases)
+and have it Just Work™.
 
-You'll need to statically compile and install OpenCV (see `HACKING/build-opencv.sh`), then install Xournalpp using your package manager of choice (or compile from source).
-
-_I'm not 100% sure that all the API changes I've made have been released. They are merged, but might not be in your package manager._
-
-### Installation
-
-1. Download dependencies
-
-**Debian:**
-```
-apt-get install make liblua5.4-dev build-essential pkg-config libglib2.0-dev libpng-dev
-```
-
-**Fedora:**
-```
-dnf install make lua-devel gcc pkg-config glib2-devel libpng-devel
-```
-
-**Arch:**
-```
-pacman -S base-devel pkg-config lua libpng
-```
-
-2. Compile and install Inkpath
-```
-git clone https://github.com/willnilges/inkpath.git
-cd inkpath
-make install
-```
-
-When you run `make lua-plugin`, it will compile inkpath and place `inkpath.so` in the ImageTranscription directory.`make install` will copy that directory to your Xournalpp plugins folder, and Inkpath will be installed. You can then use it from the 'Plugins' menu from within Xournalpp.
+_As of 2022-09-24, the API changes in Xournalpp are merged, but have not made
+it into the package managers. You will probably need to [build xournalpp from source](https://github.com/xournalpp/xournalpp/blob/master/readme/LinuxBuild.md)
+in order to get them._
 
 _Inkpath is coming to a package manager near you soon™!_
 
