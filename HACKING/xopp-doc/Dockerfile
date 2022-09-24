@@ -5,5 +5,5 @@ RUN git clone https://github.com/xournalpp/xournalpp.git
 WORKDIR xournalpp
 RUN doxygen
 WORKDIR doc/html
-ENTRYPOINT ["/usr/bin/python3", "-m", "http.server", "8000"]
+ENTRYPOINT ["/usr/bin/python3", "-m", "http.server", "8080"]
 
