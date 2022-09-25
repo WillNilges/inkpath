@@ -17,9 +17,10 @@ if [ -n "$1" ]; then
     cores=$1
 fi
 
-cd ../xournalpp
+cd xournalpp
 mkdir build
 cd build
-cmake ..
-cmake --build . -j$cores
-# For a faster build, set the flag -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+cmake --build . -j$cores --target install
+./cmake/postinst configure
