@@ -17,8 +17,9 @@ your other notes.
   <img src="https://user-images.githubusercontent.com/42927786/147401085-94773933-e4a3-4039-97e6-91cf2ea1ee6c.png" alt="Makerfaire 2021 Card" width="400px" style="display: block; margin: 0 auto"/>
 
 </p>
+
 Inkpath is a project designed to crunch those whiteboard photos into easily
-editable [Xournalpp](https://github.com/xournalpp) note files so that you can
+editable [Xournal++](https://github.com/xournalpp/xournalpp) note files so that you can
 drop your whiteboard scrawlings directly into your lecture notes. Convenient!
 
 The project consists of a lua script and a shared object library written in C++
