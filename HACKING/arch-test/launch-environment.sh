@@ -32,5 +32,7 @@ podman run --name=xopp-dev-arch --rm -it              \
     -v "$xauth_path"/.Xauthority:/root/.Xauthority:Z  \
     -v "$CODE_PATH":/xopp-dev:Z                       \
     -v /scratch/wilnil:/scratch:Z                     \
-    -v /tmp/.X11-unix:/tmp/.X11-unix xopp-dev-arch
+    -v /tmp/.X11-unix:/tmp/.X11-unix                  \
+    --env 'PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'  \
+    xopp-dev-arch
 rm -rf "$xauth_path"

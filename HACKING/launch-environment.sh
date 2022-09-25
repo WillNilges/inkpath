@@ -22,13 +22,6 @@ rm -rf "$xauth_path"
 mkdir -p "$xauth_path"
 cp "$HOME"/.Xauthority "$xauth_path"
 chmod g+rwx "$xauth_path"/.Xauthority
-#chmod g+rwx "$CODE_PATH"
-#podman unshare chown 1000:"$uname" "$xauth_path"/.Xauthority # Chom
-#podman unshare chown 1000:$uname "$CODE_PATH"
-#podman unshare chown 1000:$uname -R "$CODE_PATH"
-#sudo chmod -R +070 "$CODE_PATH"
-#sudo chown -R :$uname "$CODE_PATH"
-#sudo chown -R :$uname "$xauth_path"/.Xauthority
 
 podman run --name=xopp-dev --rm -it                   \
     -e DISPLAY="$DISPLAY"                             \
