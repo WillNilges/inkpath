@@ -15,3 +15,4 @@ RUN bash /build-opencv.sh 48
 # Build and install Xournal++
 COPY ./build-xopp.sh .
 RUN bash /build-xopp.sh 48
+

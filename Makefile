@@ -15,7 +15,7 @@ XOPP_DEV_INSTALL_PATH=/xournalpp
 ip_source := $(wildcard src/ipcv_obj/*.cpp)
 cv_source := $(wildcard src/cv/*.cpp)
 
-lua_deps=`pkg-config --cflags --libs --static lua5.3`
+lua_deps=`pkg-config --cflags --libs --static lua`
 cv_deps=`pkg-config --cflags --libs --static opencv4`
 
 .PHONY: build_dir
