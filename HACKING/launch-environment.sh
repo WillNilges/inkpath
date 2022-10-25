@@ -36,16 +36,16 @@ mkdir -p "$xauth_path"
 cp "$HOME"/.Xauthority "$xauth_path"
 chmod g+rwx "$xauth_path"/.Xauthority
 
-podman run --name="$container" --rm -it              \
-    -e DISPLAY="$DISPLAY"                             \
-    --network=host                                    \
-    --cap-add=SYS_PTRACE                              \
-    --group-add keep-groups                           \
-    --annotation io.crun.keep_original_groups=1       \
-    -v "$xauth_path"/.Xauthority:/root/.Xauthority:Z  \
-    -v "$CODE_PATH":/xopp-dev:Z                       \
-    -v /scratch/wilnil:/scratch:Z                     \
-    -v /tmp/.X11-unix:/tmp/.X11-unix                  \
-    --env 'PKG_CONFIG_PATH=/usr/local/lib/pkgconfig'  \
+podman run --name="$container" --rm -it                                \
+    -e DISPLAY="$DISPLAY"                                              \
+    --network=host                                                     \
+    --cap-add=SYS_PTRACE                                               \
+    --group-add keep-groups                                            \
+    --annotation io.crun.keep_original_groups=1                        \
+    -v "$xauth_path"/.Xauthority:/root/.Xauthority:Z                   \
+    -v "$CODE_PATH":/xopp-dev:Z                                        \
+    -v /scratch/wilnil:/scratch:Z                                      \
+    -v /tmp/.X11-unix:/tmp/.X11-unix                                   \
+    --env 'PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH'  \
     "$container"
 rm -rf "$xauth_path"
