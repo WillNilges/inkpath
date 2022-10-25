@@ -42,4 +42,19 @@ in order to get them._
 
 _Inkpath is coming to a package manager near you soon™!_
 
+## Manual Installation
+
+### Arch
+
+```BASH
+# Install dependencies
+pacman -S \
+cmake gtk3 base-devel libxml2 portaudio libsndfile \
+poppler-glib texlive-bin texlive-pictures gettext libzip lua53 lua53-lgi \
+gtksourceview4 wget unzip git tmux
+
+# Build openCV
+./HACKING/build-opencv.sh
+```
+
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
