@@ -13,6 +13,8 @@
 #include <opencv2/cudawarping.hpp>
 #include <opencv2/cudafilters.hpp>
 
+#include "diagnostics.h"
+
 using namespace cv;
 using namespace std;
 

@@ -7,6 +7,8 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/mat.hpp>
 
+#include "diagnostics.h"
+
 using namespace cv;
 using namespace std;
 

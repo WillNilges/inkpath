@@ -2,6 +2,8 @@
 #include "ipcv.h"
 #include "ipcv_gpu.h"
 
+#define ITERS 100
+
 // A quick way to split strings separated via any character
 // delimiter.
 std::vector<std::string> adv_tokenizer(std::string s, char del)
@@ -36,7 +38,42 @@ void print_points(Shapes shapes)
     }
 }
 
-// Test function
+void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbose)
+{
+    // Run on CPU
+    std::string otsu_out, skel_out, shape_out;
+    if (!path_string.empty() || !file_title.empty())
+    {
+        otsu_out = path_string + "otsu_" + file_title;
+        skel_out = path_string + "skel_" + file_title;
+        shape_out = path_string + "shape_" + file_title;
+    }
+    Mat otsu_img = otsu(img, otsu_out);
+    Mat skel_img = skeletonize(otsu_img, skel_out);
+    Shapes shapes = find_shapes(skel_img, shape_out);
+
+    if (verbose)
+        print_points(shapes);
+}
+
+void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose)
+{
+    // Run on GPU
+    std::string otsu_out, skel_out, shape_out;
+    if (!path_string.empty() || !file_title.empty())
+    {
+        otsu_out = path_string + "gpu_otsu_" + file_title;
+        skel_out = path_string + "gpu_skel_" + file_title;
+        shape_out = path_string + "gpu_shape_" + file_title;
+    }
+    Mat gpu_otsu_img = gpu_otsu(img, otsu_out);
+    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out);
+    Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
+
+    if (verbose)
+        print_points(gpu_shapes);
+}
+
 int main(int argc, char *argv[])
 {
     // CLI arguments and such
@@ -91,7 +128,7 @@ int main(int argc, char *argv[])
         } // End switch 
     } /* end while */
 
-    if ((optind < argc) || image_path.empty() || output_path.empty()){
+    if ((optind < argc) || image_path.empty()){
         print_help();
         exit(1);
     }
@@ -119,22 +156,31 @@ int main(int argc, char *argv[])
     }
     std::cout << "Using: " << path_string << file_title << "\n";
 
-    // Run on CPU
-    Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
-    Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
-    Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
+    // Timing data
+    float tcpu, tgpu;
+    clock_t start, end;
 
-    if (verbose)
-        print_points(shapes);
+    start = clock();
+    for (int i = 0; i < ITERS; i++)
+        do_cpu(img, path_string, file_title, verbose);
+    end = clock();
+    tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / ITERS;
+    
+    std::cout << "CPU took " << tcpu << " ms" << std::endl;
 
-    // Run on GPU
-    Mat gpu_otsu_img = gpu_otsu(img, path_string + "gpu_otsu_" + file_title);
-    Mat gpu_skel_img = gpu_skeletonize(otsu_img, path_string + "gpu_skel_" + file_title);
-    Shapes gpu_shapes = gpu_find_shapes(skel_img, path_string + "gpu_shape_" + file_title);
+    // Warm-Up run
+    do_gpu(img, path_string, file_title, verbose);
 
-    if (verbose)
-        print_points(gpu_shapes);
+    start = clock();
+    for (int i = 0; i < ITERS; i++)
+        do_gpu(img, path_string, file_title, verbose);
+    end = clock();
+    tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / ITERS;
 
+    std::cout << "GPU took " << tgpu << " ms" << std::endl;
+
+    // Compare times
+    std::cout << "Speedup: " << tcpu/tgpu << "\n";
 
     return 0;
 }

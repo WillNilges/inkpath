@@ -32,9 +32,11 @@ Mat gpu_skeletonize(Mat img_inv, std::string output_path) {
 
     //Mat downsampled;
     //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    if (output_path != "") {
+    if (!output_path.empty()) {
         imwrite(output_path, skel_invert);
+#ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
+#endif
     }
     return skel_invert;
 }
@@ -67,9 +69,11 @@ Mat gpu_otsu(Mat img, std::string output_path)
     threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU); 
     //adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2); 
 
-    if (output_path != "") {
+    if (!output_path.empty()) {
         imwrite(output_path, gauss_thresh);
+#ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
+#endif
     }
     return gauss_thresh;
 }
@@ -105,7 +109,7 @@ Shapes gpu_find_shapes(Mat img, std::string output_path) {
         //    hierarchy.erase(hierarchy.begin() + i);
     }*/
 
-    if (output_path != "") {
+    if (!output_path.empty()) {
         // iterate through all the top-level contours,
         // draw each connected component with its own random color
         int idx = 0;
@@ -116,7 +120,9 @@ Shapes gpu_find_shapes(Mat img, std::string output_path) {
         }
 
         imwrite(output_path, dst);
+#ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
+#endif
     }
 
     return Shapes{contours, hierarchy};
