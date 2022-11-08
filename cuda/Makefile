@@ -1,4 +1,4 @@
-CC=gcc
+CC=g++
 
 # Warnings
 WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
@@ -13,14 +13,16 @@ CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 build: ipcv-cuda-debug
 
 *.o: *.cpp
-		$(CC) $(CFLAGS) $(CV_PKG_CONFIG) -g -c $?
+	$(CC) $(CFLAGS) $(CV_PKG_CONFIG) -g -c $?
 
 # For generating a CV debugging binary
 ipcv-cuda-debug: *.o 
-	g++ $< $(CV_PKG_CONFIG) -g -o $@
+	$(CC) $< $(CV_PKG_CONFIG) -g -o $@
 
-test:
-	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/lots_of_math_cropped.jpg -o ./outputs/output.jpg
+TEST_IMAGE=msd_board.jpg
+
+test: ipcv-cuda-debug
+	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -o ./outputs/output.jpg
 
 clean:
 	rm -rf *.o
