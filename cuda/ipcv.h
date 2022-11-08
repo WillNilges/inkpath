@@ -9,6 +9,7 @@
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudawarping.hpp>
+#include <opencv2/cudafilters.hpp>
 
 using namespace cv;
 using namespace std;

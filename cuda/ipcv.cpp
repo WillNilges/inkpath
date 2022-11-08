@@ -57,7 +57,12 @@ Mat otsu(Mat img, std::string output_path)
     //otsu's thresholding after gaussian filtering
     Mat gauss_thresh;
     Mat blur;
-    GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
+    cv::cuda::GpuMat gpu_blur_in, gpu_blur;
+    //GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
+    cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(upsampled.type(), -1, Size(5, 5), 0, 0);
+    gpu_blur_in.upload(upsampled); // Pass to GPU
+    gauss_filter->apply(gpu_blur_in, gpu_blur, stream1);
+    gpu_blur.download(blur); // Back to CPU
     // TODO: Implement my own thresholding
     threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU); 
     //adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2); 
