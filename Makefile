@@ -57,9 +57,23 @@ ipcv-debug: $(cv_source)
 	mkdir -p build
 	g++ src/cv/debug/debug.cpp $(cv_source) `pkg-config --cflags --libs --static opencv4` -static -o build/ipcv
 
+# For generating a CV debugging binary
+ipcv-cuda-debug: $(cv_source) 
+	mkdir -p build
+	g++ src/cv/debug/debug.cpp $(cv_source) -L/usr/local/cuda-11.8/lib64 -lnppc_static -lnppicc_static `pkg-config --cflags --libs --static opencv4` -static -o build/ipcv
+
+# For generating a CV debugging binary, with CUDA
+# FUCK FUCK FUCK FUCK FUCK FUCK
+ipcv-cuda-dynamic-debug: $(cv_source) 
+	mkdir -p build
+	g++ src/cv/debug/debug.cpp $(cv_source) -L/usr/local/cuda-11.8/lib64 `pkg-config --cflags --libs opencv4` -o build/ipcv
+
+
+
+
 help:
 	@echo ipcv lua-plugin install uninstall dev-install dev-uninstall ipcv-debug
 
 clean:
 	rm -rf build
-	rm $(PLUGIN_NAME)/$(SO_NAME)
+	rm -rf $(PLUGIN_NAME)/$(SO_NAME)
