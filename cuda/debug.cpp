@@ -1,5 +1,6 @@
 #include <getopt.h>
 #include "ipcv.h"
+#include "ipcv_gpu.h"
 
 // A quick way to split strings separated via any character
 // delimiter.
@@ -117,11 +118,22 @@ int main(int argc, char *argv[])
         }
     }
     std::cout << "Using: " << path_string << file_title << "\n";
+
+    // Run on CPU
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
+
     if (verbose)
         print_points(shapes);
+
+    // Run on GPU
+    Mat gpu_otsu_img = gpu_otsu(img, path_string + "gpu_otsu_" + file_title);
+    Mat gpu_skel_img = gpu_skeletonize(otsu_img, path_string + "gpu_skel_" + file_title);
+    Shapes gpu_shapes = gpu_find_shapes(skel_img, path_string + "gpu_shape_" + file_title);
+
+    if (verbose)
+        print_points(gpu_shapes);
 
 
     return 0;

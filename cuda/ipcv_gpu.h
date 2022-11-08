@@ -1,11 +1,17 @@
-#ifndef IPCV
-#define IPCV
+#ifndef IPCV_GPU
+#define IPCV_GPU
 #include <iostream>
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/mat.hpp>
+
+// OpenCV CUDA API
+#include <opencv2/core/cuda.hpp>
+#include <opencv2/cudaarithm.hpp>
+#include <opencv2/cudawarping.hpp>
+#include <opencv2/cudafilters.hpp>
 
 using namespace cv;
 using namespace std;
@@ -18,8 +24,7 @@ typedef struct Shapes {
 } Shapes;
 #endif //#ifndef IPCV_SHAPES
 
-Mat skeletonize(Mat img_inv, std::string output_path);
-Mat otsu(Mat img, std::string output_path);
-Shapes find_shapes(Mat img, std::string output_path);
-void prep_otsu(char* image_path);
+Mat gpu_skeletonize(Mat img_inv, std::string output_path);
+Mat gpu_otsu(Mat img, std::string output_path);
+Shapes gpu_find_shapes(Mat img, std::string output_path);
 #endif
