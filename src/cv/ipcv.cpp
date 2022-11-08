@@ -41,9 +41,13 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
 Mat otsu(Mat img, std::string output_path)
 {
     int k;
-    // Upsample our image
+    // Upsample our image, if needed.
     Mat upsampled;
-    pyrUp(img, upsampled,  Size( img.cols*2, img.rows*2 ));
+    if (img.rows < 1000 || img.cols < 1000) {
+        pyrUp(img, upsampled,  Size(img.cols*2, img.rows*2));
+    } else {
+        upsampled = img;
+    }
 
     //otsu's thresholding after gaussian filtering
     Mat gauss_thresh;
@@ -73,20 +77,20 @@ Shapes find_shapes(Mat img, std::string output_path) {
         RETR_TREE, CHAIN_APPROX_SIMPLE );
 
     // Remove contours that are too small.
-//    double min_area=10; // area threshold
-    int min_points=10; // area threshold
+    /*int min_points=2; // area threshold
     for(int i = 0; i< contours.size(); i++) // iterate through each contour.
     {
-        /*double area=contourArea(contours[i],false); // Find the area of contour
-        if(area < min_area)
-            contours.erase(contours.begin() + i);*/
-        
-        /*int points = contours[i].size();
-        if (points < min_points)
-            cout << "Found short contour. Removing...\n";
-            contours.erase(contours.begin() + i);
-            hierarchy.erase(hierarchy.begin() + i);*/
-    }
+        // double area=contourArea(contours[i],false); // Find the area of contour
+        // if(area < min_area)
+        //     contours.erase(contours.begin() + i);
+
+        // This shit doesn't work
+        //int points = contours[i].size();
+        //if (points < min_points)
+        //    cout << "Found short contour. Removing...\n";
+        //    contours.erase(contours.begin() + i);
+        //    hierarchy.erase(hierarchy.begin() + i);
+    }*/
 
     if (output_path != "") {
         // iterate through all the top-level contours,
