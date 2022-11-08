@@ -45,7 +45,8 @@ Mat otsu(Mat img, std::string output_path)
     int k;
     // Upsample our image, if needed.
     Mat upsampled;
-    if (img.rows < 1000 || img.cols < 1000) {
+    //if (img.rows < 1000 || img.cols < 1000) {
+    if (true) {
         pyrUp(img, upsampled,  Size(img.cols*2, img.rows*2));
     } else {
         upsampled = img;

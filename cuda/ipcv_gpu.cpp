@@ -50,8 +50,12 @@ Mat gpu_otsu(Mat img, std::string output_path)
     int k;
     // Upsample our image, if needed.
     Mat upsampled;
-    if (img.rows < 1000 || img.cols < 1000) {
-        cv::cuda::pyrUp(img, upsampled, stream1);
+    cv::cuda::GpuMat gpu_pre, gpu_upsampled;
+//    if (img.rows < 1000 || img.cols < 1000) {
+    if (true) {
+        gpu_pre.upload(img);
+        cv::cuda::pyrUp(gpu_pre, gpu_upsampled, stream1);
+        gpu_upsampled.download(upsampled);
     } else {
         upsampled = img;
     }

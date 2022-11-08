@@ -154,7 +154,10 @@ int main(int argc, char *argv[])
             path_string += dir + '/';
         }
     }
-    std::cout << "Using: " << path_string << file_title << "\n";
+    if (!path_string.empty())
+        std::cout << "Using: " << path_string << file_title << "\n";
+    else
+        std::cout << "No output file specified.\n";
 
     // Timing data
     float tcpu, tgpu;
