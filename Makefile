@@ -15,7 +15,7 @@ XOPP_DEV_INSTALL_PATH=/xournalpp
 ip_source := $(wildcard src/ipcv_obj/*.cpp)
 cv_source := $(wildcard src/cv/*.cpp)
 
-lua_deps=`pkg-config --cflags --libs --static lua5.3`
+lua_deps=`pkg-config --cflags --libs --static lua53`
 cv_deps=`pkg-config --cflags --libs --static opencv4`
 
 .PHONY: build_dir
@@ -31,7 +31,7 @@ ipcv: $(cv_source)
 
 # Compiles Inkpath's shared object library
 lua-plugin: $(ip_source) ipcv
-	g++ $(LIGHT_WARNINGS) $(ip_source) -L/xopp-dev/inkpath/build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
+	g++ $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
 
 # Installs the plugin into your Xournalpp installation
 # FIXME: Not smart enough to avoid re-building the app every time :(
