@@ -39,7 +39,7 @@ void print_points(Shapes shapes)
 int main(int argc, char *argv[])
 {
     // CLI arguments and such
-    int verbose = 0;
+    bool verbose = false;
     int order = 0;
     std::string image_path;
     std::string output_path;
@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
              We distinguish them by their indices. */
          {"file",   required_argument, 0, 'f'},
          {"output", required_argument, 0, 'o'},
+         {"verbose", 0, 0, 'v'},
          {"help", 0, 0, 'h'},
          {0, 0, 0, 0}
     };
@@ -76,6 +77,9 @@ int main(int argc, char *argv[])
              break;
          case 'o':
              output_path = optarg;
+             break;
+         case 'v':
+             verbose = true;
              break;
          case 'h':
              print_help();
@@ -116,7 +120,8 @@ int main(int argc, char *argv[])
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
-    print_points(shapes);
+    if (verbose)
+        print_points(shapes);
 
 
     return 0;
