@@ -42,4 +42,33 @@ in order to get them._
 
 _Inkpath is coming to a package manager near you soon™!_
 
+## Manual Installation
+
+### Arch
+
+```BASH
+# Install dependencies
+pacman -S \
+cmake gtk3 base-devel libxml2 portaudio libsndfile \
+poppler-glib texlive-bin texlive-pictures gettext libzip lua53 lua53-lgi \
+gtksourceview4 wget unzip git tmux
+
+# Build openCV
+./HACKING/build-opencv.sh
+```
+
+### Debian
+
+```BASH
+# Install dependencies
+apt -y install \
+make liblua5.3-dev build-essential pkg-config libglib2.0-dev libpng-dev \
+cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev \
+dvipng texlive libxml2-dev libzip-dev librsvg2-dev gettext lua-lgi \
+libgtksourceview-4-dev git gdb x11-apps wget unzip
+./HACKING/build-opencv.sh $NUMBER_OF_CORES_YOU_HAVE # You'll need sudo to install this
+./HACKING/build-xopp.sh $NUMBER_OF_CORES_YOU_HAVE # You'll probably need sudo to install this too
+make install
+```
+
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
