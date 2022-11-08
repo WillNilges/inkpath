@@ -8,7 +8,7 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 LIGHT_WARNINGS = -Wall
 CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 
-.PHONY: clean install uninstall dev-install dev-uninstall
+.PHONY: test clean
 
 build: ipcv-cuda-debug
 
@@ -18,6 +18,9 @@ build: ipcv-cuda-debug
 # For generating a CV debugging binary
 ipcv-cuda-debug: *.o 
 	g++ $< $(CV_PKG_CONFIG) -g -o $@
+
+test:
+	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/lots_of_math_cropped.jpg -o ./outputs/output.jpg
 
 clean:
 	rm -rf *.o

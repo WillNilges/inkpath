@@ -1,2 +1,4 @@
 opencv/*
 outputs/*
+*.o
+ipcv-cuda-debug

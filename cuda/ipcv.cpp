@@ -4,6 +4,9 @@
 // more down the road.
 // TODO: Where the hell did I find this?
 Mat skeletonize(Mat img_inv, std::string output_path) {
+
+    cv::cuda::Stream stream1;
+
     Mat img;
     bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
@@ -18,7 +21,7 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
       cv::erode(img, eroded, element);
       cv::dilate(eroded, temp, element); // temp = open(img)
       cv::subtract(img, temp, temp);
-      cv::bitwise_or(skel, temp, skel);
+      cv::cuda::bitwise_or(skel, temp, skel, cv::noArray(), stream1);
       eroded.copyTo(img);
      
       done = (cv::countNonZero(img) == 0);
