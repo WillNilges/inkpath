@@ -33,55 +33,47 @@ Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream strea
       eroded.copyTo(gpu_img);
       gpu_img.download(test);
      
-//      done = (cv::cudev::countNonZero(gpu_img) == 0);
+//      done = (cv::cudev::countNonZero(gpu_img) == 0); //FIXME: Build errors
       done = (cv::countNonZero(test) == 0);
     } while (!done);
 
     Mat skel_invert;
     cv::cuda::bitwise_not(skel, skel_invert, cv::noArray(), stream1);
 
-    //Mat downsampled;
-    //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
     if (!output_path.empty()) {
         imwrite(output_path, skel_invert);
 #ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
 #endif
-    //
     }
     return skel_invert;
 }
 
-// Apply an Otsu's thresholding to the object. I found that this was
+// Apply Otsu's thresholding to the object. I found that this was
 // the best function of the ones I tried
-Mat gpu_otsu(Mat img, std::string output_path)
+Mat gpu_otsu(Mat img, std::string output_path, cv::cuda::Stream stream1)
 {
-    cv::cuda::Stream stream1;
-
     int k;
     // Upsample our image, if needed.
-    Mat upsampled;
     cv::cuda::GpuMat gpu_pre, gpu_upsampled;
     if (img.rows < 1000 || img.cols < 1000) {
         gpu_pre.upload(img);
         cv::cuda::pyrUp(gpu_pre, gpu_upsampled, stream1);
-        gpu_upsampled.download(upsampled);
     } else {
-        upsampled = img;
+        gpu_upsampled.upload(img);
     }
 
-    //otsu's thresholding after gaussian filtering
-    Mat gauss_thresh;
-    Mat blur;
+    // Gaussian filtering
     cv::cuda::GpuMat gpu_blur_in, gpu_blur;
-    //GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
-    cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(upsampled.type(), -1, Size(5, 5), 0, 0);
-    gpu_blur_in.upload(upsampled); // Pass to GPU
-    gauss_filter->apply(gpu_blur_in, gpu_blur, stream1);
-    gpu_blur.download(blur); // Back to CPU
+    cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(gpu_upsampled.type(), -1, Size(5, 5), 0, 0);
+    gauss_filter->apply(gpu_upsampled, gpu_blur, stream1);
+
+    // Apply Otsu's thresholding
     // TODO: Implement my own thresholding
-    threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU); 
-    //adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2); 
+    Mat gauss_thresh;
+    gpu_blur.download(gauss_thresh);
+    threshold(gauss_thresh, gauss_thresh, 0, 255, THRESH_OTSU); 
+    //adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2); // TODO: Play with this some more.
 
     if (!output_path.empty()) {
         imwrite(output_path, gauss_thresh);

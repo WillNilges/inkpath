@@ -54,10 +54,9 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
         print_points(shapes);
 }
 
-void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose)
+void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1)
 {
     // Run on GPU
-    cv::cuda::Stream stream1;
     std::string otsu_out, skel_out, shape_out;
     if (!path_string.empty() || !file_title.empty())
     {
@@ -65,7 +64,7 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
         skel_out = path_string + "gpu_skel_" + file_title;
         shape_out = path_string + "gpu_shape_" + file_title;
     }
-    Mat gpu_otsu_img = gpu_otsu(img, otsu_out);
+    Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
     Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
     Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
 
@@ -189,14 +188,17 @@ int main(int argc, char *argv[])
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
 
-    std::cout << "Starting GPU...\n";
+
+    cv::cuda::Stream stream1;
 
     // Warm-Up run
-    do_gpu(img, path_string, file_title, verbose);
+    std::cout << "Warming up GPU...\n";
+    do_gpu(img, path_string, file_title, verbose, stream1);
 
+    std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_gpu(img, path_string, file_title, verbose);
+        do_gpu(img, path_string, file_title, verbose, stream1);
     end = clock();
     tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
 
