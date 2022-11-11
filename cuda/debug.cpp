@@ -2,8 +2,6 @@
 #include "ipcv.h"
 #include "ipcv_gpu.h"
 
-#define ITERS 100
-
 // A quick way to split strings separated via any character
 // delimiter.
 std::vector<std::string> adv_tokenizer(std::string s, char del)
@@ -21,7 +19,7 @@ std::vector<std::string> adv_tokenizer(std::string s, char del)
 
 void print_help()
 {
-    printf("-f : file : input file\n-o : output : output file\n-h : help : print help\n");
+    printf("-f : file : input file\n-o : output : output file\n-i : number of iterations to run (CANNOT BE MORE THAN 1 WHILE USING OUTPUT FILE)\n-h : help : print help\n");
 }
 
 void print_points(Shapes shapes)
@@ -79,6 +77,7 @@ int main(int argc, char *argv[])
     // CLI arguments and such
     bool verbose = false;
     int order = 0;
+    int iters = 1;
     std::string image_path;
     std::string output_path;
     int rc;
@@ -95,6 +94,7 @@ int main(int argc, char *argv[])
              We distinguish them by their indices. */
          {"file",   required_argument, 0, 'f'},
          {"output", required_argument, 0, 'o'},
+         {"iterations", required_argument, 0, 'i'},
          {"verbose", 0, 0, 'v'},
          {"help", 0, 0, 'h'},
          {0, 0, 0, 0}
@@ -116,6 +116,9 @@ int main(int argc, char *argv[])
          case 'o':
              output_path = optarg;
              break;
+         case 'i':
+             iters = atoi(optarg);
+             break;
          case 'v':
              verbose = true;
              break;
@@ -128,7 +131,7 @@ int main(int argc, char *argv[])
         } // End switch 
     } /* end while */
 
-    if ((optind < argc) || image_path.empty()){
+    if ((optind < argc) || image_path.empty() || (iters > 1 && !output_path.empty())){
         print_help();
         exit(1);
     }
@@ -164,10 +167,10 @@ int main(int argc, char *argv[])
     clock_t start, end;
 
     start = clock();
-    for (int i = 0; i < ITERS; i++)
+    for (int i = 0; i < iters; i++)
         do_cpu(img, path_string, file_title, verbose);
     end = clock();
-    tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / ITERS;
+    tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
 
@@ -175,10 +178,10 @@ int main(int argc, char *argv[])
     do_gpu(img, path_string, file_title, verbose);
 
     start = clock();
-    for (int i = 0; i < ITERS; i++)
+    for (int i = 0; i < iters; i++)
         do_gpu(img, path_string, file_title, verbose);
     end = clock();
-    tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / ITERS;
+    tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
 
     std::cout << "GPU took " << tgpu << " ms" << std::endl;
 

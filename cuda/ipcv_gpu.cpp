@@ -51,8 +51,7 @@ Mat gpu_otsu(Mat img, std::string output_path)
     // Upsample our image, if needed.
     Mat upsampled;
     cv::cuda::GpuMat gpu_pre, gpu_upsampled;
-//    if (img.rows < 1000 || img.cols < 1000) {
-    if (true) {
+    if (img.rows < 1000 || img.cols < 1000) {
         gpu_pre.upload(img);
         cv::cuda::pyrUp(gpu_pre, gpu_upsampled, stream1);
         gpu_upsampled.download(upsampled);
@@ -96,22 +95,6 @@ Shapes gpu_find_shapes(Mat img, std::string output_path) {
     vector<Vec4i> hierarchy;
     findContours( src, contours, hierarchy,
         RETR_TREE, CHAIN_APPROX_SIMPLE );
-
-    // Remove contours that are too small.
-    /*int min_points=2; // area threshold
-    for(int i = 0; i< contours.size(); i++) // iterate through each contour.
-    {
-        // double area=contourArea(contours[i],false); // Find the area of contour
-        // if(area < min_area)
-        //     contours.erase(contours.begin() + i);
-
-        // This shit doesn't work
-        //int points = contours[i].size();
-        //if (points < min_points)
-        //    cout << "Found short contour. Removing...\n";
-        //    contours.erase(contours.begin() + i);
-        //    hierarchy.erase(hierarchy.begin() + i);
-    }*/
 
     if (!output_path.empty()) {
         // iterate through all the top-level contours,
