@@ -57,6 +57,7 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
 void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose)
 {
     // Run on GPU
+    cv::cuda::Stream stream1;
     std::string otsu_out, skel_out, shape_out;
     if (!path_string.empty() || !file_title.empty())
     {
@@ -65,7 +66,7 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
         shape_out = path_string + "gpu_shape_" + file_title;
     }
     Mat gpu_otsu_img = gpu_otsu(img, otsu_out);
-    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out);
+    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
     Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
 
     if (verbose)
@@ -143,6 +144,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    bool artificial_upscale = false;
+    if (artificial_upscale)
+    {
+        std::cout << "Upscaling image pre-test.\n";
+        cv::cuda::GpuMat gpu_img;
+        cv::cuda::Stream stream1;
+        gpu_img.upload(img);
+        cv::cuda::pyrUp(gpu_img, gpu_img, stream1);
+        cv::cuda::pyrUp(gpu_img, gpu_img, stream1);
+        gpu_img.download(img);
+    }
+
     // Separate the file title from the rest of the path
     // FIXME: This feels awful, but I don't know enough about C++ to be sure.
     std::vector<std::string> path_vec = adv_tokenizer(output_path, '/');
@@ -166,6 +179,8 @@ int main(int argc, char *argv[])
     float tcpu, tgpu;
     clock_t start, end;
 
+    std::cout << "Starting CPU...\n";
+
     start = clock();
     for (int i = 0; i < iters; i++)
         do_cpu(img, path_string, file_title, verbose);
@@ -173,6 +188,8 @@ int main(int argc, char *argv[])
     tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
+
+    std::cout << "Starting GPU...\n";
 
     // Warm-Up run
     do_gpu(img, path_string, file_title, verbose);

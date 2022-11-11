@@ -3,28 +3,38 @@
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where the hell did I find this?
-Mat gpu_skeletonize(Mat img_inv, std::string output_path) {
+Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream stream1) {
 
-    cv::cuda::Stream stream1;
-
-    Mat img;
-    bitwise_not(img_inv, img);
-    cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
-    cv::Mat temp;
-    cv::Mat eroded;
+    cv::Mat test;
+    cv::cuda::GpuMat gpu_img;
+    cv::cuda::GpuMat skel(img_inv.size(), CV_8UC1, cv::Scalar(0));
+    cv::cuda::GpuMat temp;
+    cv::cuda::GpuMat eroded;
+    cv::cuda::GpuMat dialated;
+    
+    cv::cuda::bitwise_not(img_inv, gpu_img, cv::noArray(), stream1);
      
     cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
      
     bool done;		
     do
     {
-      cv::erode(img, eroded, element);
-      cv::dilate(eroded, temp, element); // temp = open(img)
-      cv::cuda::subtract(img, temp, temp, cv::noArray(), -1, stream1);
+      //cv::erode(gpu_img, eroded, element);
+      //cv::dilate(eroded, temp, element); // temp = open(img)
+      
+      Ptr<cuda::Filter> erodeFilter = cuda::createMorphologyFilter(MORPH_ERODE, gpu_img.type(), element);
+      erodeFilter->apply(gpu_img, eroded);
+
+      Ptr<cuda::Filter> dilateFilter = cuda::createMorphologyFilter(MORPH_DILATE, eroded.type(), element);
+      dilateFilter->apply(eroded, dialated);
+
+      cv::cuda::subtract(gpu_img, dialated, temp, cv::noArray(), -1, stream1);
       cv::cuda::bitwise_or(skel, temp, skel, cv::noArray(), stream1);
-      eroded.copyTo(img);
+      eroded.copyTo(gpu_img);
+      gpu_img.download(test);
      
-      done = (cv::countNonZero(img) == 0);
+//      done = (cv::cudev::countNonZero(gpu_img) == 0);
+      done = (cv::countNonZero(test) == 0);
     } while (!done);
 
     Mat skel_invert;
@@ -37,6 +47,7 @@ Mat gpu_skeletonize(Mat img_inv, std::string output_path) {
 #ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
 #endif
+    //
     }
     return skel_invert;
 }
