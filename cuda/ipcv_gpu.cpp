@@ -44,31 +44,39 @@ Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream strea
     cv::cuda::GpuMat gpu_img;
     cv::cuda::GpuMat skel(img_inv.size(), CV_8UC1, cv::Scalar(0));
     cv::cuda::GpuMat temp;
+
+    // For the erosion/dilation
     cv::cuda::GpuMat eroded;
     cv::cuda::GpuMat dialated;
-    
-    cv::cuda::bitwise_not(img_inv, gpu_img, cv::noArray(), stream1);
+
+    // Upload image to GPU
+    gpu_img.upload(img_inv);
+
+    // Invert image
+    cv::cuda::bitwise_not(gpu_img, gpu_img, cv::noArray(), stream1);
      
+    // Create structuring element
     cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
      
-    bool done;		
+    bool done;
     do
     {
-      //cv::erode(gpu_img, eroded, element);
-      //cv::dilate(eroded, temp, element); // temp = open(img)
-      
       Ptr<cuda::Filter> erodeFilter = cuda::createMorphologyFilter(MORPH_ERODE, gpu_img.type(), element);
       erodeFilter->apply(gpu_img, eroded);
 
       Ptr<cuda::Filter> dilateFilter = cuda::createMorphologyFilter(MORPH_DILATE, eroded.type(), element);
       dilateFilter->apply(eroded, dialated);
 
+      // Subtract dilated image from the original image
       cv::cuda::subtract(gpu_img, dialated, temp, cv::noArray(), -1, stream1);
+
+      // OR the skeletonized image
       cv::cuda::bitwise_or(skel, temp, skel, cv::noArray(), stream1);
+
+      // Copy the eroded image to gpu_img to do the erosion again
       eroded.copyTo(gpu_img);
-//      gpu_img.download(test);
-     
-//      done = (cv::cudev::countNonZero(gpu_img) == 0); //FIXME: Build errors
+      
+      // Check if the skeletonization is complete
       done = (cv::cuda::countNonZero(gpu_img) == 0);
     } while (!done);
 
