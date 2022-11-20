@@ -40,7 +40,7 @@ Mat gpu_otsu(Mat img, std::string output_path, cv::cuda::Stream stream1)
 // TODO: Where the hell did I find this?
 Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream stream1) {
 
-    cv::Mat test;
+//    cv::Mat test;
     cv::cuda::GpuMat gpu_img;
     cv::cuda::GpuMat skel(img_inv.size(), CV_8UC1, cv::Scalar(0));
     cv::cuda::GpuMat temp;
@@ -66,14 +66,16 @@ Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream strea
       cv::cuda::subtract(gpu_img, dialated, temp, cv::noArray(), -1, stream1);
       cv::cuda::bitwise_or(skel, temp, skel, cv::noArray(), stream1);
       eroded.copyTo(gpu_img);
-      gpu_img.download(test);
+//      gpu_img.download(test);
      
 //      done = (cv::cudev::countNonZero(gpu_img) == 0); //FIXME: Build errors
-      done = (cv::countNonZero(test) == 0);
+      done = (cv::cuda::countNonZero(gpu_img) == 0);
     } while (!done);
 
     Mat skel_invert;
-    cv::cuda::bitwise_not(skel, skel_invert, cv::noArray(), stream1);
+    cv::cuda::GpuMat gpu_skel_invert;
+    cv::cuda::bitwise_not(skel, gpu_skel_invert, cv::noArray(), stream1);
+    gpu_skel_invert.download(skel_invert);
 
     if (!output_path.empty()) {
         imwrite(output_path, skel_invert);
