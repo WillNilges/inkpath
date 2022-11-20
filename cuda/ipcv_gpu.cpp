@@ -1,5 +1,40 @@
 #include "ipcv_gpu.h"
 
+// Apply Otsu's thresholding to the object. I found that this was
+// the best function of the ones I tried
+Mat gpu_otsu(Mat img, std::string output_path, cv::cuda::Stream stream1)
+{
+    int k;
+    // Upsample our image, if needed.
+    cv::cuda::GpuMat gpu_pre, gpu_upsampled;
+    if (img.rows < 1000 || img.cols < 1000) {
+        gpu_pre.upload(img);
+        cv::cuda::pyrUp(gpu_pre, gpu_upsampled, stream1);
+    } else {
+        gpu_upsampled.upload(img);
+    }
+
+    // Gaussian filtering
+    cv::cuda::GpuMat gpu_blur_in, gpu_blur;
+    cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(gpu_upsampled.type(), -1, Size(5, 5), 0, 0);
+    gauss_filter->apply(gpu_upsampled, gpu_blur, stream1);
+
+    // Apply Otsu's thresholding
+    // TODO: Implement my own thresholding
+    Mat gauss_thresh;
+    gpu_blur.download(gauss_thresh);
+    threshold(gauss_thresh, gauss_thresh, 0, 255, THRESH_OTSU); 
+    //adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2); // TODO: Play with this some more.
+
+    if (!output_path.empty()) {
+        imwrite(output_path, gauss_thresh);
+#ifdef DIAG
+        std::cout << "Image has been written to " << output_path << "\n";
+#endif
+    }
+    return gauss_thresh;
+}
+
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where the hell did I find this?
@@ -49,42 +84,9 @@ Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream strea
     return skel_invert;
 }
 
-// Apply Otsu's thresholding to the object. I found that this was
-// the best function of the ones I tried
-Mat gpu_otsu(Mat img, std::string output_path, cv::cuda::Stream stream1)
-{
-    int k;
-    // Upsample our image, if needed.
-    cv::cuda::GpuMat gpu_pre, gpu_upsampled;
-    if (img.rows < 1000 || img.cols < 1000) {
-        gpu_pre.upload(img);
-        cv::cuda::pyrUp(gpu_pre, gpu_upsampled, stream1);
-    } else {
-        gpu_upsampled.upload(img);
-    }
-
-    // Gaussian filtering
-    cv::cuda::GpuMat gpu_blur_in, gpu_blur;
-    cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(gpu_upsampled.type(), -1, Size(5, 5), 0, 0);
-    gauss_filter->apply(gpu_upsampled, gpu_blur, stream1);
-
-    // Apply Otsu's thresholding
-    // TODO: Implement my own thresholding
-    Mat gauss_thresh;
-    gpu_blur.download(gauss_thresh);
-    threshold(gauss_thresh, gauss_thresh, 0, 255, THRESH_OTSU); 
-    //adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2); // TODO: Play with this some more.
-
-    if (!output_path.empty()) {
-        imwrite(output_path, gauss_thresh);
-#ifdef DIAG
-        std::cout << "Image has been written to " << output_path << "\n";
-#endif
-    }
-    return gauss_thresh;
-}
-
-// Prereqs: Must be binary color image, target must be black
+// Prereqs: Must be binary color image, target must be inverted
+// I'm pretty sure this can't be done entirely on the GPU. Apparently there's a couple of
+// steps of contour detection that could be done on the GPU, such as the Gaussian Blurs.
 Shapes gpu_find_shapes(Mat img, std::string output_path) {
     Mat src;
     cv::cuda::Stream stream1;

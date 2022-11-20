@@ -47,11 +47,11 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
         shape_out = path_string + "shape_" + file_title;
     }
     Mat otsu_img = otsu(img, otsu_out);
-    Mat skel_img = skeletonize(otsu_img, skel_out);
-    Shapes shapes = find_shapes(skel_img, shape_out);
+    //Mat skel_img = skeletonize(otsu_img, skel_out);
+    //Shapes shapes = find_shapes(skel_img, shape_out);
 
-    if (verbose)
-        print_points(shapes);
+    //if (verbose)
+    //    print_points(shapes);
 }
 
 void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1)
@@ -65,11 +65,11 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
         shape_out = path_string + "gpu_shape_" + file_title;
     }
     Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
-    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
-    Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
+    //Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
+    //Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
 
-    if (verbose)
-        print_points(gpu_shapes);
+    //if (verbose)
+    //    print_points(gpu_shapes);
 }
 
 int main(int argc, char *argv[])
@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
     bool verbose = false;
     int order = 0;
     int iters = 1;
+    int artificial_upscale = 0;
     std::string image_path;
     std::string output_path;
     int rc;
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
          {"file",   required_argument, 0, 'f'},
          {"output", required_argument, 0, 'o'},
          {"iterations", required_argument, 0, 'i'},
+         {"upscale", required_argument, 0, 'u'},
          {"verbose", 0, 0, 'v'},
          {"help", 0, 0, 'h'},
          {0, 0, 0, 0}
@@ -118,6 +120,9 @@ int main(int argc, char *argv[])
              break;
          case 'i':
              iters = atoi(optarg);
+             break;
+         case 'u':
+             artificial_upscale = atoi(optarg);
              break;
          case 'v':
              verbose = true;
@@ -143,14 +148,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    bool artificial_upscale = false;
-    if (artificial_upscale)
+    for (int i = 0; i < artificial_upscale; i++)
     {
-        std::cout << "Upscaling image pre-test.\n";
+        std::cout << "Upscaling image pre-test x" << i+1 << "\n";
         cv::cuda::GpuMat gpu_img;
         cv::cuda::Stream stream1;
         gpu_img.upload(img);
-        cv::cuda::pyrUp(gpu_img, gpu_img, stream1);
         cv::cuda::pyrUp(gpu_img, gpu_img, stream1);
         gpu_img.download(img);
     }
