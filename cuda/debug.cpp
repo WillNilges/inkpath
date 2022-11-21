@@ -2,8 +2,6 @@
 #include "ipcv.h"
 #include "ipcv_gpu.h"
 
-Mat pre_thresh;
-
 // A quick way to split strings separated via any character
 // delimiter.
 std::vector<std::string> adv_tokenizer(std::string s, char del)
@@ -48,10 +46,9 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
         skel_out = path_string + "skel_" + file_title;
         shape_out = path_string + "shape_" + file_title;
     }
-    //Mat otsu_img = otsu(img, otsu_out);
-    Mat otsu_img = pre_thresh;
-    Mat skel_img = skeletonize(otsu_img, skel_out);
-    //Shapes shapes = find_shapes(skel_img, shape_out);
+    Mat otsu_img = otsuCuda(img, otsu_out);
+//    Mat skel_img = skeletonize(otsu_img, skel_out);
+//    Shapes shapes = find_shapes(skel_img, shape_out);
 
     //if (verbose)
     //    print_points(shapes);
@@ -67,10 +64,9 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
         skel_out = path_string + "gpu_skel_" + file_title;
         shape_out = path_string + "gpu_shape_" + file_title;
     }
-    //Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
-    Mat gpu_otsu_img = pre_thresh;
-    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
-    //Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
+//    Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
+//    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
+//    Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
 
     //if (verbose)
     //    print_points(gpu_shapes);
@@ -181,10 +177,6 @@ int main(int argc, char *argv[])
     else
         std::cout << "No output file specified.\n";
 
-    // Pre-run Otsu to test skeletonization
-    cv::cuda::Stream stream1;
-    pre_thresh = gpu_otsu(img, "", stream1);
-
     // Timing data
     float tcpu, tgpu;
     clock_t start, end;
@@ -198,6 +190,8 @@ int main(int argc, char *argv[])
     tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
+
+    cv::cuda::Stream stream1;
 
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
