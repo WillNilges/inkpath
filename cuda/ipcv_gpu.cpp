@@ -1,7 +1,6 @@
 #include "ipcv_gpu.h"
 
-// Apply Otsu's thresholding to the object. I found that this was
-// the best function of the ones I tried
+// Hamfisted Otsu's method.
 Mat gpu_otsu(Mat img, std::string output_path, cv::cuda::Stream stream1)
 {
     int k;

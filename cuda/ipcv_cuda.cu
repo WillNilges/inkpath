@@ -20,7 +20,7 @@ __global__ void kernelCalculateHistogram(const cv::cuda::PtrStepSz<unsigned char
     }
 }
 
-// TODO: Port this
+// Disgustingly parallel
 __global__ void kernelComputeClassVariances(double* histogram, double allProbabilitySum, long int totalPixels, double* betweenClassVariance)
 {
 	int id = blockDim.x * blockIdx.x + threadIdx.x;
@@ -42,27 +42,25 @@ __global__ void kernelComputeClassVariances(double* histogram, double allProbabi
 	betweenClassVariance[id] = firstClassProbability * secondClassProbability * pow((firstClassMean - secondClassMean), 2);
 }
 
-
 // Called from debug.cpp
 cv::Mat otsuCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream) {
+
+    // Gaussian filtering
+    // TODO: Play around with this
+    /*
+    cv::cuda::GpuMat gpu_blur;
+    cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(img.type(), -1, Size(5, 5), 0, 0);
+    gauss_filter->apply(gpu_upsampled, gpu_blur, stream1);
+     */
+
 	long totalImagePixels = (long)img.total();
 
 	double* histogram = cudaCalculateHistogram(img, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
 
-    /*
-    for (int i = 0; i < MAXPIXVAL; i++)
-    {
-        printf("%f ", histogram[i]);
-    }
-    printf("\n");*/
-
 	unsigned char threshold;
 	threshold = cudaFindThreshold(histogram, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
-
-    // TODO: Compare OpenCV CPU otsu threshold value with mine
-    //printf("Threshold is: %d\n", threshold);
 
     cv::Mat hostBinarized;
     cv::cuda::GpuMat deviceBinarized;
@@ -78,7 +76,6 @@ cv::Mat otsuCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream)
     }
 
     return hostBinarized;
-
 }
 
 double* cudaCalculateHistogram(
@@ -109,21 +106,19 @@ double* cudaCalculateHistogram(
         cv::cuda::StreamAccessor::getStream(_stream);
     kernelCalculateHistogram<<<dimGrid, dimBlock, 0, stream>>>(input, deviceHistogram);
 
-    // TODO: Error handling: cudaSafeCall(cudaGetLastError());
+    // Check for device error
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("Device error: %s\n", cudaGetErrorString(err));
+        cudaFree(deviceHistogram);
+        return nullptr;
+    }
     
     // Copy the histogram back to the host
 	cudaMemcpy(hostHistogram, deviceHistogram, sizeof(unsigned int) * MAXPIXVAL, cudaMemcpyDeviceToHost);
 
     // Free the device Histogram
     cudaFree(deviceHistogram);
-
-    /*
-    for (int i = 0; i < 256; i++)
-    {
-        printf("%d ", hostHistogram[i]);
-    }
-
-    printf("\n----Chom---- \n");*/
 
     // Normalize the Histogram
 	double* normalizedHistogram = new double[MAXPIXVAL];
@@ -170,6 +165,14 @@ unsigned char cudaFindThreshold(double* histogram, long int totalPixels, cv::cud
     cudaStream_t stream =
         cv::cuda::StreamAccessor::getStream(_stream);
 	kernelComputeClassVariances<<<numBlocks, threadsPerBlock>>>(deviceHistogram, allProbabilitySum, totalPixels, deviceBetweenClassVariances);
+
+    // Check for device error
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("Device error: %s\n", cudaGetErrorString(err));
+        cudaFree(deviceHistogram);
+        return 0;
+    }
 
     // Copy interclass variances back to host
 	cudaMemcpy(hostBetweenClassVariances, deviceBetweenClassVariances, sizeof(double) * MAXPIXVAL, cudaMemcpyDeviceToHost);
