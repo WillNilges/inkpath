@@ -1,4 +1,4 @@
-CC=g++
+CC=nvcc
 
 # Warnings
 WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
@@ -13,7 +13,7 @@ CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 
 build: ipcv-cuda-debug
 
-*.o: *.cpp
+*.o: *.cpp *.cu
 	$(CC) $(CFLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $?
 
 # For generating a CV debugging binary
