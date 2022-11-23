@@ -1,3 +1,39 @@
+/*
+MIT License
+
+Copyright (c) 2020 Dawid Paluchowski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+===============================================================================
+
+Above is a copy of the license included in https://github.com/palucdev/CudaOtsu/
+Portions of this code were copypasta'd from that repo, but all adaptations
+made to accomodate OpenCV are my own. Those modifications fall under the
+GPL2 license included in ../LICENSE
+
+Cheers,
+- Willard
+
+ */
+
+
 #include "ipcv_cuda.cuh"
 
 #include <stdio.h>
@@ -46,22 +82,26 @@ __global__ void kernelComputeClassVariances(double* histogram, double allProbabi
 cv::Mat otsuCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream) {
 
     // Gaussian filtering
-    // TODO: Play around with this
+    // TODO: Play around with this some more (Didn't seem to make much of a difference tbh)
     /*
     cv::cuda::GpuMat gpu_blur;
     cv::Ptr<cv::cuda::Filter> gauss_filter = cv::cuda::createGaussianFilter(img.type(), -1, Size(5, 5), 0, 0);
     gauss_filter->apply(gpu_upsampled, gpu_blur, stream1);
      */
 
+    // Count all the pixels in the image
 	long totalImagePixels = (long)img.total();
 
+    // Build an intensity histogram
 	double* histogram = cudaCalculateHistogram(img, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
 
+    // Use the histogram to find the optimal threshold (lowest inter-class variance)
 	unsigned char threshold;
 	threshold = cudaFindThreshold(histogram, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
 
+    // Binarize the image using OpenCV
     cv::Mat hostBinarized;
     cv::cuda::GpuMat deviceBinarized;
     deviceBinarized.upload(img);
