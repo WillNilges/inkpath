@@ -15,12 +15,8 @@ __global__ void kernelCalculateHistogram(const cv::cuda::PtrStepSz<unsigned char
     int idY = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (idX < input.cols && idY < input.rows) {
-        printf("Pixel value: %f\n", float(input(idY, idX)));
-//        unsigned char * chom = input(idY, idX); // Y first, X after
-//        printf("Pixel value: %c\n", chom[0]);
-        //int pixelValue = (int)((double*)((unsigned char*)img + idY * imgStep))[idX];
-        //printf("Pixel value: %d\n", pixelValue);
-        //atomicAdd(&histogram[pixelValue], 1);
+        int pixelValue = int(input(idY, idX));
+        atomicAdd(&deviceHistogram[pixelValue], 1);
     }
 }
 
@@ -54,10 +50,6 @@ cv::Mat otsuCuda(cv::Mat img, std::string fullFilePath, cv::cuda::Stream _stream
 	double* histogram = cudaCalculateHistogram(img, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
 
-    for (int i = 0; i < MAXPIXVAL; i++)
-    {
-        printf("%f", histogram[i]);
-    }
     /*	
 	unsigned char threshold;
 	threshold = cudaFindThreshold(histogram, totalImagePixels);
