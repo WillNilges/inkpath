@@ -26,7 +26,7 @@ test: ipcv-cuda-debug
 	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -o ./outputs/output.jpg
 
 benchmark: ipcv-cuda-debug
-	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -i 100
+	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -i 1000
 
 big-benchmark: ipcv-cuda-debug
 	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -i 100 -u 3

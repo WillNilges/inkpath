@@ -50,29 +50,24 @@ cv::Mat otsuCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream)
 	double* histogram = cudaCalculateHistogram(img, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
 
+    /*
     for (int i = 0; i < MAXPIXVAL; i++)
     {
         printf("%f ", histogram[i]);
     }
-    printf("\n");
+    printf("\n");*/
 
 	unsigned char threshold;
 	threshold = cudaFindThreshold(histogram, totalImagePixels, _stream);
 	cudaDeviceSynchronize();
 
-    printf("Threshold is: %d\n", threshold);
+    // TODO: Compare OpenCV CPU otsu threshold value with mine
+    //printf("Threshold is: %d\n", threshold);
 
-    /*	
-	delete histogram;
-
-    cv::Mat binarized;
-
-	unsigned char* binarizedRawPixels = cudaBinarize(imageToBinarize->getRawPixelData().data(), totalImagePixels, threshold);
-	cudaDeviceSynchronize();*/
     cv::Mat hostBinarized;
     cv::cuda::GpuMat deviceBinarized;
     deviceBinarized.upload(img);
-    cv::cuda::threshold(deviceBinarized, deviceBinarized, (double) threshold, MAXPIXVAL, cv::THRESH_BINARY, _stream);
+    cv::cuda::threshold(deviceBinarized, deviceBinarized, (double) threshold, MAXPIXVAL-1, cv::THRESH_BINARY, _stream);
     deviceBinarized.download(hostBinarized);
 
     if (!output_path.empty()) {
@@ -122,12 +117,13 @@ double* cudaCalculateHistogram(
     // Free the device Histogram
     cudaFree(deviceHistogram);
 
+    /*
     for (int i = 0; i < 256; i++)
     {
         printf("%d ", hostHistogram[i]);
     }
 
-    printf("\n----Chom---- \n");
+    printf("\n----Chom---- \n");*/
 
     // Normalize the Histogram
 	double* normalizedHistogram = new double[MAXPIXVAL];
