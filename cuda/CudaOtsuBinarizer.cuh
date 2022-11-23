@@ -22,26 +22,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-#include "model/PngImage.h"
-#include "model/ExecutionTimestamp.h"
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/cuda.hpp>
 
 #pragma once
+// I'm pretty sure 255 is the highest grayscale value we'll see.
+#define MAXPIXVAL 255;
+
+cv::Mat otsuCuda(std::string fullFilePath, cv::Mat loadedImage, int threadsPerBlock, int numBlocks, bool drawHistograms);
 class CudaOtsuBinarizer
 {
 public:
-	PngImage* binarize(PngImage* imageToBinarize);
-	std::string getBinarizerExecutionInfo(std::string fileName);
+    cv::cuda::GpuMat binarize(cv::cuda::GpuMat imageToBinarize);
 	CudaOtsuBinarizer(int threadsPerBlock, int numBlocks, bool drawHistogram, const char* TAG = "GPU");
 	virtual ~CudaOtsuBinarizer();
 protected:
 	int threadsPerBlock_;
 	int numBlocks_;
-	ExecutionTimestamp* binarizerTimestamp_;
 	bool drawHistogram_;
 	const char* TAG;
 	virtual void showHistogram(double* histogram);
-	virtual double* cudaCalculateHistogram(unsigned char* rawPixels, long totalPixels);
+	virtual double* CudaOtsuBinarizer::cudaCalculateHistogram(cv::cuda::GpuMat rawPixels, long totalPixels);
 	virtual unsigned char cudaFindThreshold(double* histogram, long int totalPixels);
-	virtual unsigned char* cudaBinarize(unsigned char* rawPixels, long totalPixels, unsigned char threshold);
+	virtual unsigned char* cudaBinarize(cv::cuda::GpuMat rawPixels, long totalPixels, unsigned char threshold);
 };
 
