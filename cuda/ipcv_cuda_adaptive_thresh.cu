@@ -46,7 +46,7 @@ __global__ void kernelThreshold(
 cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream) {
     // Binarize the image using OpenCV
     cv::Mat hostBinarized;
-    cudaAdaptiveThreshold(img, hostBinarized, 255, ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 5, 2, _stream);
+    cudaAdaptiveThreshold(img, hostBinarized, 255, ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 3, 2, _stream);
 
     if (!output_path.empty()) {
         imwrite(output_path, hostBinarized);
@@ -124,7 +124,7 @@ void cudaAdaptiveThreshold(
         dev_src.upload(host_src);
         dev_mean.upload(host_mean);
         cv::Ptr<cv::cuda::Filter> gauss_filter =
-            cv::cuda::createGaussianFilter(dev_src.type(), -1, Size(5, 5), 0, 0);
+            cv::cuda::createGaussianFilter(dev_src.type(), -1, Size(blockSize, blockSize), 0, 0); // TODO: border default
         gauss_filter->apply(dev_src, dev_mean, _stream);
         dev_mean.download(host_mean);
     }
@@ -139,12 +139,13 @@ void cudaAdaptiveThreshold(
     // Allocate space for tab
 	unsigned char* deviceTab;
 	cudaMalloc((void **)&deviceTab, sizeof(unsigned char) * magicNumber);
-	//cudaMemcpy(deviceTab, hostTab, sizeof(unsigned char) * magicNumber, cudaMemcpyHostToDevice);
+	cudaMemcpy(deviceTab, hostTab, sizeof(unsigned char) * magicNumber, cudaMemcpyHostToDevice);
 
-    // Run kernel to build the tab
     cudaStream_t stream =
         cv::cuda::StreamAccessor::getStream(_stream);
-	kernelBuildTab<<<1, magicNumber, 0, stream>>>(deviceTab, idelta, imaxval, type);
+
+    // Run kernel to build the tab
+	kernelBuildTab<<<1, magicNumber, 0, stream>>>(deviceTab, imaxval, idelta, type);
     cudaDeviceSynchronize();
 
     // Copy finished tab to host (not necessary)
