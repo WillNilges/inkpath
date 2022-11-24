@@ -98,15 +98,3 @@ Shapes find_shapes(Mat img, std::string output_path) {
 
     return Shapes{contours, hierarchy};
 }
-
-// FIXME: This shouldn't be necessary when I'm done >:)
-void prep_otsu(char* image_path)
-{
-    Mat img = imread(image_path, 0);
-    if(img.empty())
-    {
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return;
-    }
-    otsu(img, image_path);
-}

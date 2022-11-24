@@ -33,6 +33,9 @@ Cheers,
 
  */
 
+#ifndef IPCV_CUDA
+#define IPCV_CUDA
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
@@ -45,3 +48,5 @@ Cheers,
 cv::Mat otsuCuda(cv::Mat img, std::string fullFilePath, cv::cuda::Stream _stream);
 double* cudaCalculateHistogram(cv::InputArray _input, long totalPixels, cv::cuda::Stream _stream);
 unsigned char cudaFindThreshold(double* histogram, long int totalPixels, cv::cuda::Stream _stream);
+
+#endif
