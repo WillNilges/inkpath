@@ -17,6 +17,7 @@
 
 using namespace cv;
 
+cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream);
 void cudaAdaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
                             int method, int type, int blockSize, double delta,
                             cv::cuda::Stream _stream );

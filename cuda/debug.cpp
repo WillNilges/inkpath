@@ -2,6 +2,7 @@
 #include "ipcv.h"
 #include "ipcv_gpu.h"
 #include "ipcv_cuda.cuh"
+#include "ipcv_cuda_adaptive_thresh.cuh"
 
 // A quick way to split strings separated via any character
 // delimiter.
@@ -55,7 +56,7 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
     //    print_points(shapes);
 }
 
-void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1)
+void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1, bool use_adaptive)
 {
     // Run on GPU
     std::string otsu_out, skel_out, shape_out;
@@ -65,7 +66,11 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
         skel_out = path_string + "gpu_skel_" + file_title;
         shape_out = path_string + "gpu_shape_" + file_title;
     }
-    Mat gpu_otsu_img = otsuCuda(img, otsu_out, stream1);
+    Mat gpu_otsu_img;
+    if (use_adaptive)
+        gpu_otsu_img = adaptiveCuda(img, otsu_out, stream1);
+    else
+        gpu_otsu_img = otsuCuda(img, otsu_out, stream1);
 //    Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
     //Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
     //Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
@@ -180,7 +185,7 @@ int main(int argc, char *argv[])
         std::cout << "No output file specified.\n";
 
     // Timing data
-    float tcpu, tgpu;
+    float tcpu, tgpu, tgpu_adaptive;
     clock_t start, end;
 
     std::cout << "Starting CPU...\n";
@@ -197,16 +202,26 @@ int main(int argc, char *argv[])
 
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
-    do_gpu(img, path_string, file_title, verbose, stream1);
+    do_gpu(img, path_string, file_title, verbose, stream1, false);
 
     std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_gpu(img, path_string, file_title, verbose, stream1);
+        do_gpu(img, path_string, file_title, verbose, stream1, false);
     end = clock();
     tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
 
     std::cout << "GPU took " << tgpu << " ms" << std::endl;
+
+
+    std::cout << "Starting GPU (Adaptive)...\n";
+    start = clock();
+    for (int i = 0; i < iters; i++)
+        do_gpu(img, path_string, file_title, verbose, stream1, true);
+    end = clock();
+    tgpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
+
+    std::cout << "GPU (adaptive) took " << tgpu_adaptive << " ms" << std::endl;
 
     // Compare times
     std::cout << "Speedup: " << tcpu/tgpu << "\n";
