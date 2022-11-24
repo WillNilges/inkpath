@@ -1,5 +1,133 @@
 #include "ipcv.h"
 
+// hahah
+void chomThreshold( InputArray _src, OutputArray _dst, double maxValue,
+                            int method, int type, int blockSize, double delta )
+{
+    Mat src = _src.getMat();
+    CV_Assert( src.type() == CV_8UC1 );
+    CV_Assert( blockSize % 2 == 1 && blockSize > 1 );
+    Size size = src.size();
+
+    _dst.create( size, src.type() );
+    Mat dst = _dst.getMat();
+
+    if( maxValue < 0 )
+    {
+        dst = Scalar(0);
+        return;
+    }
+
+    Mat mean;
+
+    if( src.data != dst.data )
+        mean = dst;
+
+    if (method == ADAPTIVE_THRESH_MEAN_C)
+        boxFilter( src, mean, src.type(), Size(blockSize, blockSize),
+                   Point(-1,-1), true, BORDER_REPLICATE|BORDER_ISOLATED );
+    else if (method == ADAPTIVE_THRESH_GAUSSIAN_C)
+    {
+        Mat srcfloat,meanfloat;
+        src.convertTo(srcfloat,CV_32F);
+        meanfloat=srcfloat;
+        GaussianBlur(srcfloat, meanfloat, Size(blockSize, blockSize), 0, 0, BORDER_REPLICATE|BORDER_ISOLATED);
+        meanfloat.convertTo(mean, src.type());
+    }
+    else
+        CV_Error( CV_StsBadFlag, "Unknown/unsupported adaptive threshold method" );
+
+    int i, j;
+    uchar imaxval = saturate_cast<uchar>(maxValue);
+    int idelta = type == THRESH_BINARY ? cvCeil(delta) : cvFloor(delta);
+    uchar tab[768];
+
+    if( type == CV_THRESH_BINARY )
+        for( i = 0; i < 768; i++ )
+            tab[i] = (uchar)(i - 255 > -idelta ? imaxval : 0);
+    else if( type == CV_THRESH_BINARY_INV )
+        for( i = 0; i < 768; i++ )
+            tab[i] = (uchar)(i - 255 <= -idelta ? imaxval : 0);
+    else
+        CV_Error( CV_StsBadFlag, "Unknown/unsupported threshold type" );
+
+    if( src.isContinuous() && mean.isContinuous() && dst.isContinuous() )
+    {
+        size.width *= size.height;
+        size.height = 1;
+    }
+
+    for (int i = 0; i < 768; i++)
+    {
+        printf("%d ", tab[i]);
+    }
+
+    for( i = 0; i < size.height; i++ )
+    {
+        const uchar* sdata = src.ptr(i);
+        const uchar* mdata = mean.ptr(i);
+        uchar* ddata = dst.ptr(i);
+
+        for( j = 0; j < size.width; j++ )
+            ddata[j] = tab[sdata[j] - mdata[j] + 255];
+    }
+}
+
+
+// Apply an Otsu's thresholding to the object. I found that this was
+// the best function of the ones I tried
+Mat adaptive(Mat img, std::string output_path)
+{
+    int k;
+    // Upsample our image, if needed.
+    Mat upsampled;
+    if (img.rows < 1000 || img.cols < 1000) {
+        pyrUp(img, upsampled,  Size(img.cols*2, img.rows*2));
+    } else {
+        upsampled = img;
+    }
+
+    Mat gauss_thresh, blur;
+    GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
+    chomThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2);
+
+    if (!output_path.empty()) {
+        imwrite(output_path, gauss_thresh);
+#ifdef DIAG
+        std::cout << "Image has been written to " << output_path << "\n";
+#endif
+    }
+    return gauss_thresh;
+}
+
+// Apply an Otsu's thresholding to the object. I found that this was
+// the best function of the ones I tried
+Mat otsu(Mat img, std::string output_path)
+{
+    int k;
+    // Upsample our image, if needed.
+    Mat upsampled;
+    if (img.rows < 1000 || img.cols < 1000) {
+        pyrUp(img, upsampled,  Size(img.cols*2, img.rows*2));
+    } else {
+        upsampled = img;
+    }
+
+    //otsu's thresholding after gaussian filtering
+    Mat gauss_thresh;
+    Mat blur;
+    GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
+    threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU);
+
+    if (!output_path.empty()) {
+        imwrite(output_path, gauss_thresh);
+#ifdef DIAG
+        std::cout << "Image has been written to " << output_path << "\n";
+#endif
+    }
+    return gauss_thresh;
+}
+
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where the hell did I find this?
@@ -36,34 +164,6 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
 #endif
     }
     return skel_invert;
-}
-
-// Apply an Otsu's thresholding to the object. I found that this was
-// the best function of the ones I tried
-Mat otsu(Mat img, std::string output_path)
-{
-    int k;
-    // Upsample our image, if needed.
-    Mat upsampled;
-    if (img.rows < 1000 || img.cols < 1000) {
-        pyrUp(img, upsampled,  Size(img.cols*2, img.rows*2));
-    } else {
-        upsampled = img;
-    }
-
-    //otsu's thresholding after gaussian filtering
-    Mat gauss_thresh;
-    Mat blur;
-    GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
-    threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU);
-
-    if (!output_path.empty()) {
-        imwrite(output_path, gauss_thresh);
-#ifdef DIAG
-        std::cout << "Image has been written to " << output_path << "\n";
-#endif
-    }
-    return gauss_thresh;
 }
 
 // Prereqs: Must be binary color image, target must be black

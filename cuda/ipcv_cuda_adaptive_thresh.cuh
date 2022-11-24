@@ -14,6 +14,7 @@
 #include <opencv2/cudawarping.hpp>
 #include <opencv2/cudafilters.hpp>
 //#include <opencv2/cudev/expr/reduction.hpp>
+#include <opencv2/core/cuda_stream_accessor.hpp>
 
 using namespace cv;
 

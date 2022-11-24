@@ -38,7 +38,7 @@ void print_points(Shapes shapes)
     }
 }
 
-void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbose)
+void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbose, bool use_adaptive)
 {
     // Run on CPU
     std::string otsu_out, skel_out, shape_out;
@@ -48,7 +48,14 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
         skel_out = path_string + "skel_" + file_title;
         shape_out = path_string + "shape_" + file_title;
     }
-    Mat otsu_img = otsu(img, otsu_out);
+    Mat otsu_img;
+    if (use_adaptive)
+    {
+        otsu_out = path_string + "adaptive_" + file_title;
+        otsu_img = adaptive(img, otsu_out);
+    }
+    else
+        otsu_img = otsu(img, otsu_out);
     //Mat skel_img = skeletonize(otsu_img, skel_out);
     //Shapes shapes = find_shapes(skel_img, shape_out);
 
@@ -68,7 +75,10 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
     }
     Mat gpu_otsu_img;
     if (use_adaptive)
+    {
+        otsu_out = path_string + "gpu_adaptive_" + file_title;
         gpu_otsu_img = adaptiveCuda(img, otsu_out, stream1);
+    }
     else
         gpu_otsu_img = otsuCuda(img, otsu_out, stream1);
 //    Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
@@ -185,18 +195,30 @@ int main(int argc, char *argv[])
         std::cout << "No output file specified.\n";
 
     // Timing data
-    float tcpu, tgpu, tgpu_adaptive;
+    float tcpu, tcpu_adaptive, tgpu, tgpu_adaptive;
     clock_t start, end;
 
     std::cout << "Starting CPU...\n";
 
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_cpu(img, path_string, file_title, verbose);
+        do_cpu(img, path_string, file_title, verbose, false);
     end = clock();
     tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
+
+    std::cout << "Starting CPU (Adaptive)...\n";
+
+    start = clock();
+    for (int i = 0; i < iters; i++)
+        do_cpu(img, path_string, file_title, verbose, true);
+    end = clock();
+    tcpu_adaptive = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
+    
+    std::cout << "CPU (Adaptive) took " << tcpu_adaptive << " ms" << std::endl;
+
+
 
     cv::cuda::Stream stream1;
 

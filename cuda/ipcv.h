@@ -6,6 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc/types_c.h>
 
 #include "diagnostics.h"
 
@@ -20,7 +21,8 @@ typedef struct Shapes {
 } Shapes;
 #endif //#ifndef IPCV_SHAPES
 
-Mat skeletonize(Mat img_inv, std::string output_path);
+Mat adaptive(Mat img, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
+Mat skeletonize(Mat img_inv, std::string output_path);
 Shapes find_shapes(Mat img, std::string output_path);
 #endif

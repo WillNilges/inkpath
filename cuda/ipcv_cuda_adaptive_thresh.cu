@@ -58,10 +58,11 @@ cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _str
     return hostBinarized;
 }
 
-void cudaAdaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
-                            int method, int type, int blockSize, double delta,
-                            cv::cuda::Stream _stream )
-{
+void cudaAdaptiveThreshold(
+    InputArray _src, OutputArray _dst, double maxValue,
+    int method, int type, int blockSize, double delta,
+    cv::cuda::Stream _stream
+){
     Mat host_src = _src.getMat();
     CV_Assert( host_src.type() == CV_8UC1 );
     CV_Assert( blockSize % 2 == 1 && blockSize > 1 );
@@ -118,7 +119,6 @@ void cudaAdaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
         dev_meanfloat.download(host_meanfloat);
         host_meanfloat.convertTo(host_mean, host_src.type());*/
 
-
         // Gaussian filtering
         cv::cuda::GpuMat dev_src, dev_mean;
         dev_src.upload(host_src);
@@ -134,7 +134,7 @@ void cudaAdaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
     uchar imaxval = saturate_cast<uchar>(maxValue);
     int idelta = type == THRESH_BINARY ? cvCeil(delta) : cvFloor(delta);
     int magicNumber = 768; // I have literally no idea why this is 768.
-    //uchar tab[768];
+    uchar hostTab[768];
 
     // Allocate space for tab
 	unsigned char* deviceTab;
@@ -142,11 +142,18 @@ void cudaAdaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
 	//cudaMemcpy(deviceTab, hostTab, sizeof(unsigned char) * magicNumber, cudaMemcpyHostToDevice);
 
     // Run kernel to build the tab
-	kernelBuildTab<<<1, magicNumber>>>(deviceTab, idelta, imaxval, type);
+    cudaStream_t stream =
+        cv::cuda::StreamAccessor::getStream(_stream);
+	kernelBuildTab<<<1, magicNumber, 0, stream>>>(deviceTab, idelta, imaxval, type);
     cudaDeviceSynchronize();
 
     // Copy finished tab to host (not necessary)
-	//cudaMemcpy(hostTab, deviceTab, sizeof(unsigned char) * magicNumber, cudaMemcpyDeviceToHost);
+    cudaMemcpy(hostTab, deviceTab, sizeof(unsigned char) * magicNumber, cudaMemcpyDeviceToHost);
+
+    for (int i = 0; i < magicNumber; i++)
+    {
+        printf("%d ", hostTab[i]);
+    }
 
     if( host_src.isContinuous() && host_mean.isContinuous() && host_dst.isContinuous() )
     {
@@ -160,15 +167,18 @@ void cudaAdaptiveThreshold( InputArray _src, OutputArray _dst, double maxValue,
     deviceMean.upload(host_mean);
     deviceDst.upload(host_dst);
 
+    imwrite("/tmp/chom.png", host_src);
+
     // Set up and run the kernel.
     const int TILE_SIZE = 32;
     dim3 dimBlock(TILE_SIZE, TILE_SIZE);
     dim3 dimGrid((int)ceil((float)size.width / (float)TILE_SIZE), (int)ceil((float)size.height / (float)TILE_SIZE));
-    kernelThreshold<<<dimGrid, dimBlock>>>(deviceSrc, deviceMean, deviceDst, deviceTab, size);
+    kernelThreshold<<<dimGrid, dimBlock, 0, stream>>>(deviceSrc, deviceMean, deviceDst, deviceTab, size);
     cudaDeviceSynchronize();
 
     // Copy finished product back to host
     deviceDst.download(host_dst);
+
     
     // Free tab
     cudaFree(deviceTab);
