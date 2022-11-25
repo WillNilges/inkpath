@@ -50,7 +50,7 @@ cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _str
         hostBinarized,
         255,
         ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv::THRESH_BINARY,
+        THRESH_BINARY,
         3,
         2,
         _stream
@@ -132,11 +132,11 @@ void cudaAdaptiveThreshold(
 
         // Move data back to host
         dev_mean.download(host_mean);
-        imwrite("/tmp/chom.png", host_mean);
     }
     else
         CV_Error( CV_StsBadFlag, "Unknown/unsupported adaptive threshold method" );
 
+    // Build the spooky magic array
     uchar imaxval = saturate_cast<uchar>(maxValue);
     int idelta = type == THRESH_BINARY ? cvCeil(delta) : cvFloor(delta);
     int magicNumber = 768; // I have literally no idea why this is 768.
@@ -171,9 +171,6 @@ void cudaAdaptiveThreshold(
     deviceMean.upload(host_mean);
     deviceDst.upload(host_dst);
 
-//    imwrite("/tmp/chom.png", host_src);
-    printf("size: %d, %d\n", size.width, size.height);
-
     // Set up and run the kernel.
     const int TILE_SIZE = 32;
     dim3 dimBlock(TILE_SIZE, TILE_SIZE);
@@ -184,7 +181,6 @@ void cudaAdaptiveThreshold(
     // Copy finished product back to host
     deviceDst.download(host_dst);
 
-    
     // Free tab
     cudaFree(deviceTab);
 }
