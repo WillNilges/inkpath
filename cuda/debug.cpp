@@ -202,6 +202,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Starting CPU...\n";
 
+    img = imread(image_path, 0); // Refresh image
     start = clock();
     for (int i = 0; i < iters; i++)
         do_cpu(img, path_string, file_title, verbose, false);
@@ -212,6 +213,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Starting CPU (Adaptive)...\n";
 
+    img = imread(image_path, 0); // Refresh image
     start = clock();
     for (int i = 0; i < iters; i++)
         do_cpu(img, path_string, file_title, verbose, true);
@@ -224,9 +226,13 @@ int main(int argc, char *argv[])
 
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
+
+    img = imread(image_path, 0); // Refresh image
     do_gpu(img, path_string, file_title, verbose, stream1, false);
+    img = imread(image_path, 0); // Refresh image
     do_gpu(img, path_string, file_title, verbose, stream1, true);
 
+    img = imread(image_path, 0); // Refresh image
     std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < iters; i++)
@@ -236,7 +242,7 @@ int main(int argc, char *argv[])
 
     std::cout << "GPU took " << tgpu << " ms" << std::endl;
 
-
+    img = imread(image_path, 0); // Refresh image
     std::cout << "Starting GPU (Adaptive)...\n";
     start = clock();
     for (int i = 0; i < iters; i++)

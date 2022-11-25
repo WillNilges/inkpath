@@ -58,7 +58,6 @@ Cheers,
 // CUDA imports
 #include <cuda_runtime.h>
 
-
 __global__ void kernelBuildTab(unsigned char* tab, uchar imaxval, int idelta, int type)
 {
 	int idX = blockDim.x * blockIdx.x + threadIdx.x;
@@ -127,6 +126,11 @@ void cudaAdaptiveThreshold(
     CV_Assert( host_src.type() == CV_8UC1 );
     CV_Assert( blockSize % 2 == 1 && blockSize > 1 );
     Size size = host_src.size();
+    
+    imwrite("/tmp/opencv_debugging/host_src_first.png", host_src);
+
+    // Pre-apply a blur
+    GaussianBlur(host_src, host_src, Size(blockSize+2, blockSize+2), 0, 0); 
 
     // Move src to the GPU.
     cv::cuda::GpuMat dev_src;
@@ -144,6 +148,7 @@ void cudaAdaptiveThreshold(
     {
         host_dst = Scalar(0);
         return;
+
     }
 
     Mat host_mean;
@@ -170,7 +175,7 @@ void cudaAdaptiveThreshold(
         cv::Ptr<cv::cuda::Filter> gauss_filter =
             cv::cuda::createGaussianFilter(
             dev_srcfloat.type(), 
-            -1, 
+            dev_meanfloat.type(), 
             Size(blockSize, blockSize),
             0,
             0,
@@ -211,12 +216,29 @@ void cudaAdaptiveThreshold(
     }
     */
 
+    dev_src.download(host_src);
+    dev_mean.download(host_mean);
+    dev_dst.download(host_dst);
+    imwrite("/tmp/opencv_debugging/host_src_pre.png", host_src);
+    imwrite("/tmp/opencv_debugging/host_mean_pre.png", host_mean);
+    imwrite("/tmp/opencv_debugging/host_dst_pre.png", host_dst);
+
     // Set up and run the kernel.
     const int TILE_SIZE = 32;
     dim3 dimBlock(TILE_SIZE, TILE_SIZE);
     dim3 dimGrid((int)ceil((float)size.width / (float)TILE_SIZE), (int)ceil((float)size.height / (float)TILE_SIZE));
     kernelThreshold<<<dimGrid, dimBlock, 0, stream>>>(dev_src, dev_mean, dev_dst, deviceTab, size);
     cudaDeviceSynchronize();
+
+
+    dev_src.download(host_src);
+    dev_mean.download(host_mean);
+    dev_dst.download(host_dst);
+    imwrite("/tmp/opencv_debugging/host_src_post.png", host_src);
+    imwrite("/tmp/opencv_debugging/host_mean_post.png", host_mean);
+    imwrite("/tmp/opencv_debugging/host_dst_post.png", host_dst);
+
+
 
     // Copy finished product back to host
     dev_dst.download(host_dst);
