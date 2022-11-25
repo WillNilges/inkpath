@@ -18,8 +18,6 @@ __global__ void kernelBuildTab(unsigned char* tab, uchar imaxval, int idelta, in
     }
 }
 
-    //kernelThreshold<<<dimGrid, dimBlock>>>(deviceSrc, deviceMean, deviceDst, deviceTab, size);
-
 __global__ void kernelThreshold(
     const cv::cuda::PtrStepSz<unsigned char> src,
     const cv::cuda::PtrStepSz<unsigned char> mean,
@@ -31,6 +29,8 @@ __global__ void kernelThreshold(
 	int idX = blockDim.x * blockIdx.x + threadIdx.x;
 	int idY = blockDim.y * blockIdx.y + threadIdx.y;
 
+//    printf("ID %d, %d!!!\n", idX, idY);
+
     if (idX < size.width && idY < size.height)
     {
         const uchar* sdata = src.ptr(idY);
@@ -41,12 +41,20 @@ __global__ void kernelThreshold(
     }
 }
 
-
 // Called from debug.cpp
 cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream) {
     // Binarize the image using OpenCV
     cv::Mat hostBinarized;
-    cudaAdaptiveThreshold(img, hostBinarized, 255, ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 3, 2, _stream);
+    cudaAdaptiveThreshold(
+        img, 
+        hostBinarized,
+        255,
+        ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv::THRESH_BINARY,
+        3,
+        2,
+        _stream
+    );
 
     if (!output_path.empty()) {
         imwrite(output_path, hostBinarized);
@@ -95,38 +103,36 @@ void cudaAdaptiveThreshold(
                    Point(-1,-1), true, BORDER_REPLICATE|BORDER_ISOLATED );*/
     else if (method == ADAPTIVE_THRESH_GAUSSIAN_C)
     {
-        /*
-        Mat host_srcfloat, host_meanfloat;
-        host_src.convertTo(host_srcfloat,CV_32F);
-
-        cv::cuda::GpuMat dev_srcfloat, dev_meanfloat;
-        dev_srcfloat.upload(host_srcfloat);
-        dev_meanfloat=dev_srcfloat;
-
         // Gaussian filtering
-        cv::Ptr<cv::cuda::Filter> gauss_filter =
-            cv::cuda::createGaussianFilter(
-                dev_srcfloat.type(),
-                -1,
-                Size(blockSize, blockSize),
-                0,
-                0,
-                BORDER_REPLICATE,
-                -1
-            );
-        gauss_filter->apply(dev_srcfloat, dev_meanfloat, _stream);
-
-        dev_meanfloat.download(host_meanfloat);
-        host_meanfloat.convertTo(host_mean, host_src.type());*/
-
-        // Gaussian filtering
+        
+        //Upload data to GPU
         cv::cuda::GpuMat dev_src, dev_mean;
         dev_src.upload(host_src);
         dev_mean.upload(host_mean);
+
+        // Convert data to float
+        cv::cuda::GpuMat dev_srcfloat, dev_meanfloat;
+        dev_src.convertTo(dev_srcfloat, CV_32F);
+        dev_meanfloat = dev_srcfloat;
+
         cv::Ptr<cv::cuda::Filter> gauss_filter =
-            cv::cuda::createGaussianFilter(dev_src.type(), -1, Size(blockSize, blockSize), 0, 0); // TODO: border default
-        gauss_filter->apply(dev_src, dev_mean, _stream);
+            cv::cuda::createGaussianFilter(
+            dev_srcfloat.type(), 
+            -1, 
+            Size(blockSize, blockSize),
+            0,
+            0,
+            BORDER_REPLICATE,
+            BORDER_REPLICATE
+        ); // TODO: border default
+        gauss_filter->apply(dev_srcfloat, dev_meanfloat, _stream);
+
+        // Convert back to normal type
+        dev_meanfloat.convertTo(dev_mean, dev_src.type());
+
+        // Move data back to host
         dev_mean.download(host_mean);
+        imwrite("/tmp/chom.png", host_mean);
     }
     else
         CV_Error( CV_StsBadFlag, "Unknown/unsupported adaptive threshold method" );
@@ -134,12 +140,12 @@ void cudaAdaptiveThreshold(
     uchar imaxval = saturate_cast<uchar>(maxValue);
     int idelta = type == THRESH_BINARY ? cvCeil(delta) : cvFloor(delta);
     int magicNumber = 768; // I have literally no idea why this is 768.
-    uchar hostTab[768];
+    uchar hostTab[magicNumber];
 
     // Allocate space for tab
 	unsigned char* deviceTab;
-	cudaMalloc((void **)&deviceTab, sizeof(unsigned char) * magicNumber);
-	cudaMemcpy(deviceTab, hostTab, sizeof(unsigned char) * magicNumber, cudaMemcpyHostToDevice);
+	cudaMalloc((void **)&deviceTab, sizeof(uchar) * magicNumber);
+	cudaMemcpy(deviceTab, hostTab, sizeof(uchar) * magicNumber, cudaMemcpyHostToDevice);
 
     cudaStream_t stream =
         cv::cuda::StreamAccessor::getStream(_stream);
@@ -149,18 +155,15 @@ void cudaAdaptiveThreshold(
     cudaDeviceSynchronize();
 
     // Copy finished tab to host (not necessary)
-    cudaMemcpy(hostTab, deviceTab, sizeof(unsigned char) * magicNumber, cudaMemcpyDeviceToHost);
+    //cudaMemcpy(hostTab, deviceTab, sizeof(unsigned char) * magicNumber, cudaMemcpyDeviceToHost);
 
-    for (int i = 0; i < magicNumber; i++)
-    {
-        printf("%d ", hostTab[i]);
-    }
-
+    /*
     if( host_src.isContinuous() && host_mean.isContinuous() && host_dst.isContinuous() )
     {
         size.width *= size.height;
         size.height = 1;
     }
+    */
 
     // Copy the matricies to the device
     cv::cuda::GpuMat deviceSrc, deviceMean, deviceDst;
@@ -168,7 +171,8 @@ void cudaAdaptiveThreshold(
     deviceMean.upload(host_mean);
     deviceDst.upload(host_dst);
 
-    imwrite("/tmp/chom.png", host_src);
+//    imwrite("/tmp/chom.png", host_src);
+    printf("size: %d, %d\n", size.width, size.height);
 
     // Set up and run the kernel.
     const int TILE_SIZE = 32;

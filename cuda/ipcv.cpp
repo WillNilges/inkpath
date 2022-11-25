@@ -57,11 +57,6 @@ void chomThreshold( InputArray _src, OutputArray _dst, double maxValue,
         size.height = 1;
     }
 
-    for (int i = 0; i < 768; i++)
-    {
-        printf("%d ", tab[i]);
-    }
-
     for( i = 0; i < size.height; i++ )
     {
         const uchar* sdata = src.ptr(i);
