@@ -1,6 +1,7 @@
 #include "ipcv.h"
 
-// hahah
+// I ripped the adaptiveThreshold function out of OpenCV so I could
+// mess around with it during debugging
 void chomThreshold( InputArray _src, OutputArray _dst, double maxValue,
                             int method, int type, int blockSize, double delta )
 {
@@ -68,9 +69,7 @@ void chomThreshold( InputArray _src, OutputArray _dst, double maxValue,
     }
 }
 
-
-// Apply an Otsu's thresholding to the object. I found that this was
-// the best function of the ones I tried
+// Apply opencv Adaptive Thresholding to image
 Mat adaptive(Mat img, std::string output_path)
 {
     int k;
@@ -84,7 +83,7 @@ Mat adaptive(Mat img, std::string output_path)
 
     Mat gauss_thresh, blur;
     GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
-    chomThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2);
+    adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 3, 2);
 
     if (!output_path.empty()) {
         imwrite(output_path, gauss_thresh);
@@ -95,8 +94,7 @@ Mat adaptive(Mat img, std::string output_path)
     return gauss_thresh;
 }
 
-// Apply an Otsu's thresholding to the object. I found that this was
-// the best function of the ones I tried
+// Apply otsu's method to image
 Mat otsu(Mat img, std::string output_path)
 {
     int k;

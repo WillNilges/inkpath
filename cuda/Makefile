@@ -18,7 +18,7 @@ build: ipcv-cuda-debug
 
 # For generating a CV debugging binary
 ipcv-cuda-debug: *.o 
-	$(CC) $< $(CUDA_INCL) $(CV_PKG_CONFIG) -g -o $@
+	$(CC) *.o $(CUDA_INCL) $(CV_PKG_CONFIG) -g -o $@
 
 OTSU_IMAGE=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/msd_board.jpg
 ADAPTIVE_IMAGE=/xopp-dev/inkpath_samples/inkpath_sample_images/physics.jpg
