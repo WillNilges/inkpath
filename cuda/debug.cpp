@@ -220,13 +220,12 @@ int main(int argc, char *argv[])
     
     std::cout << "CPU (Adaptive) took " << tcpu_adaptive << " ms" << std::endl;
 
-
-
     cv::cuda::Stream stream1;
 
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
     do_gpu(img, path_string, file_title, verbose, stream1, false);
+    do_gpu(img, path_string, file_title, verbose, stream1, true);
 
     std::cout << "Starting GPU...\n";
     start = clock();
