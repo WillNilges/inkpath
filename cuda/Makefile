@@ -20,19 +20,21 @@ build: ipcv-cuda-debug
 ipcv-cuda-debug: *.o 
 	$(CC) $< $(CUDA_INCL) $(CV_PKG_CONFIG) -g -o $@
 
-TEST_IMAGE=msd_board.jpg
+OTSU_IMAGE=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/msd_board.jpg
+ADAPTIVE_IMAGE=/xopp-dev/inkpath_samples/inkpath_sample_images/physics.jpg
+TEST_IMAGE=$(OTSU_IMAGE)
 
 test: ipcv-cuda-debug
-	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -o ./outputs/output.jpg
+	./ipcv-cuda-debug -f $(OTSU_IMAGE) -o ./outputs/output.jpg
 
 adaptive-test: ipcv-cuda-debug
-	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/waves.jpg -o ./outputs/output.jpg
+	./ipcv-cuda-debug -f $(ADAPTIVE_IMAGE) -o ./outputs/output.jpg
 
 benchmark: ipcv-cuda-debug
-	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -i 1000
+	./ipcv-cuda-debug -f $(TEST_IMAGE) -i 1000
 
 big-benchmark: ipcv-cuda-debug
-	./ipcv-cuda-debug -f ~/Pictures/inkpath_sample_images_vol_2/good/$(TEST_IMAGE) -i 100 -u 3
+	./ipcv-cuda-debug -f $(TEST_IMAGE) -i 100 -u 3
 
 clean:
 	rm -rf *.o
