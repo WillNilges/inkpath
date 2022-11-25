@@ -29,8 +29,6 @@ __global__ void kernelThreshold(
 	int idX = blockDim.x * blockIdx.x + threadIdx.x;
 	int idY = blockDim.y * blockIdx.y + threadIdx.y;
 
-//    printf("ID %d, %d!!!\n", idX, idY);
-
     if (idX < size.width && idY < size.height)
     {
         const uchar* sdata = src.ptr(idY);
@@ -44,10 +42,9 @@ __global__ void kernelThreshold(
 // Called from debug.cpp
 cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream) {
     // Binarize the image using OpenCV
-    cv::Mat hostBinarized;
     cudaAdaptiveThreshold(
         img, 
-        hostBinarized,
+        img,
         255,
         ADAPTIVE_THRESH_GAUSSIAN_C,
         THRESH_BINARY,
@@ -57,13 +54,13 @@ cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _str
     );
 
     if (!output_path.empty()) {
-        imwrite(output_path, hostBinarized);
+        imwrite(output_path, img);
 #ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
 #endif
     }
 
-    return hostBinarized;
+    return img;
 }
 
 void cudaAdaptiveThreshold(
@@ -80,8 +77,11 @@ void cudaAdaptiveThreshold(
     cv::cuda::GpuMat dev_src;
     dev_src.upload(host_src);
 
+    // Create dest matrix.
     _dst.create( size, host_src.type() );
     Mat host_dst = _dst.getMat();
+
+    // Move dst to the GPU.
     cv::cuda::GpuMat dev_dst;
     dev_dst.upload(host_dst);
 
@@ -92,7 +92,9 @@ void cudaAdaptiveThreshold(
     }
 
     Mat host_mean;
+    cv::cuda::GpuMat dev_mean;
 
+    // Compare src and destination
     if( host_src.data != host_dst.data )
         host_mean = host_dst;
 
@@ -105,11 +107,6 @@ void cudaAdaptiveThreshold(
     {
         // Gaussian filtering
         
-        //Upload data to GPU
-        cv::cuda::GpuMat dev_src, dev_mean;
-        dev_src.upload(host_src);
-        dev_mean.upload(host_mean);
-
         // Convert data to float
         cv::cuda::GpuMat dev_srcfloat, dev_meanfloat;
         dev_src.convertTo(dev_srcfloat, CV_32F);
@@ -129,9 +126,6 @@ void cudaAdaptiveThreshold(
 
         // Convert back to normal type
         dev_meanfloat.convertTo(dev_mean, dev_src.type());
-
-        // Move data back to host
-        dev_mean.download(host_mean);
     }
     else
         CV_Error( CV_StsBadFlag, "Unknown/unsupported adaptive threshold method" );
@@ -154,9 +148,6 @@ void cudaAdaptiveThreshold(
 	kernelBuildTab<<<1, magicNumber, 0, stream>>>(deviceTab, imaxval, idelta, type);
     cudaDeviceSynchronize();
 
-    // Copy finished tab to host (not necessary)
-    //cudaMemcpy(hostTab, deviceTab, sizeof(unsigned char) * magicNumber, cudaMemcpyDeviceToHost);
-
     /*
     if( host_src.isContinuous() && host_mean.isContinuous() && host_dst.isContinuous() )
     {
@@ -165,21 +156,15 @@ void cudaAdaptiveThreshold(
     }
     */
 
-    // Copy the matricies to the device
-    cv::cuda::GpuMat deviceSrc, deviceMean, deviceDst;
-    deviceSrc.upload(host_src);
-    deviceMean.upload(host_mean);
-    deviceDst.upload(host_dst);
-
     // Set up and run the kernel.
     const int TILE_SIZE = 32;
     dim3 dimBlock(TILE_SIZE, TILE_SIZE);
     dim3 dimGrid((int)ceil((float)size.width / (float)TILE_SIZE), (int)ceil((float)size.height / (float)TILE_SIZE));
-    kernelThreshold<<<dimGrid, dimBlock, 0, stream>>>(deviceSrc, deviceMean, deviceDst, deviceTab, size);
+    kernelThreshold<<<dimGrid, dimBlock, 0, stream>>>(dev_src, dev_mean, dev_dst, deviceTab, size);
     cudaDeviceSynchronize();
 
     // Copy finished product back to host
-    deviceDst.download(host_dst);
+    dev_dst.download(host_dst);
 
     // Free tab
     cudaFree(deviceTab);

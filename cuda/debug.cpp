@@ -51,7 +51,8 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
     Mat otsu_img;
     if (use_adaptive)
     {
-        otsu_out = path_string + "adaptive_" + file_title;
+        if (!path_string.empty() || !file_title.empty())
+            otsu_out = path_string + "adaptive_" + file_title;
         otsu_img = adaptive(img, otsu_out);
     }
     else
@@ -76,7 +77,8 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
     Mat gpu_otsu_img;
     if (use_adaptive)
     {
-        otsu_out = path_string + "gpu_adaptive_" + file_title;
+        if (!path_string.empty() || !file_title.empty())
+            otsu_out = path_string + "gpu_adaptive_" + file_title;
         gpu_otsu_img = adaptiveCuda(img, otsu_out, stream1);
     }
     else
@@ -247,6 +249,7 @@ int main(int argc, char *argv[])
 
     // Compare times
     std::cout << "Speedup: " << tcpu/tgpu << "\n";
+    std::cout << "Speedup (Adaptive): " << tcpu_adaptive/tgpu_adaptive << "\n";
 
     return 0;
 }
