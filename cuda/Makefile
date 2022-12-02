@@ -9,16 +9,29 @@ LIGHT_WARNINGS = -Wall
 CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 #CUDA_INCL=-I/usr/local/cuda/include
 
+SRC = $(wildcard *.cpp)
+CPP_OBJ = $(patsubst %.cpp,%.o,$(SRC))
+CU_SRC = $(wildcard *.cu)
+CU_OBJ = $(patsubst %.cu,%.o,$(CU_SRC))
+
+$(info found $(SRC)...)
+$(info compiling CPP_OBJ as $(CPP_OBJ)...)
+$(info found $(CU_SRC)...)
+$(info compiling CU_OBJ as $(CU_OBJ)...)
+
 .PHONY: test clean
 
 build: ipcv-cuda-debug
 
-*.o: *.cpp *.cu
-	$(CC) $(CFLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $?
+%.o: %.cpp #$(SRC) $(CU_SRC)
+	$(CC) $(CFLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $< -o $@
+
+%.o: %.cu #$(SRC) $(CU_SRC)
+	$(CC) $(CFLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $< -o $@
 
 # For generating a CV debugging binary
-ipcv-cuda-debug: *.o 
-	$(CC) *.o $(CUDA_INCL) $(CV_PKG_CONFIG) -g -o $@
+ipcv-cuda-debug: $(CPP_OBJ) $(CU_OBJ)
+	$(CC) $(CPP_OBJ) $(CU_OBJ) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -o $@
 
 OTSU_IMAGE=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/msd_board.jpg
 ADAPTIVE_IMAGE=/xopp-dev/inkpath_samples/inkpath_sample_images/physics.jpg
