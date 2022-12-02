@@ -1,4 +1,6 @@
 #include <getopt.h>
+#include <fstream>
+
 #include "ipcv.h"
 #include "ipcv_gpu.h"
 #include "ipcv_cuda.cuh"
@@ -114,7 +116,7 @@ int main(int argc, char* argv[])
         data.open(args.timing, std::ios_base::app);
         if (data_empty)
         {
-            data << "filename,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive\n";
+            data << "filename,upscale_amt,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive\n";
             std::cout << "File empty. File has been initialized.\n";
         }
     }
@@ -211,9 +213,10 @@ int main(int argc, char* argv[])
     if (!args.timing.empty())
     {
 //"filename,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive";
-        data << file_title << "," << tcpu << "," << tcpu_adaptive  << "," 
+        data << file_title << "," << args.artificial_upscale << "," << tcpu << "," << tcpu_adaptive  << "," 
             << tgpu << "," << tgpu_adaptive << "," << tcpu/tgpu 
             << "," << tcpu_adaptive/tgpu_adaptive << ","  << std::endl;
+        std::cout << "Results have been saved." << std::endl;
     }
 
     return 0;
