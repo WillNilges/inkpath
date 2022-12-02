@@ -98,6 +98,28 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // Optionally, write the results to a file.
+    std::ifstream data_check;
+    std::ofstream data;
+    if (!args.timing.empty())
+    {
+        std::cout << "Writing results to " << args.timing << ".\n";
+        // Set up .csv file
+        bool data_empty = false;
+        data_check.open(args.timing);
+        if(data_check.peek() == std::ifstream::traits_type::eof())
+            data_empty = true;
+        data_check.close();
+
+        data.open(args.timing, std::ios_base::app);
+        if (data_empty)
+        {
+            data << "filename,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive\n";
+            std::cout << "File empty. File has been initialized.\n";
+        }
+    }
+
+    // Upscale the image if needed
     for (int i = 0; i < args.artificial_upscale; i++)
     {
         std::cout << "Upscaling image pre-test x" << i+1 << "\n";
@@ -185,6 +207,14 @@ int main(int argc, char* argv[])
     // Compare times
     std::cout << "Speedup: " << tcpu/tgpu << "\n";
     std::cout << "Speedup (Adaptive): " << tcpu_adaptive/tgpu_adaptive << "\n";
+
+    if (!args.timing.empty())
+    {
+//"filename,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive";
+        data << file_title << "," << tcpu << "," << tcpu_adaptive  << "," 
+            << tgpu << "," << tgpu_adaptive << "," << tcpu/tgpu 
+            << "," << tcpu_adaptive/tgpu_adaptive << ","  << std::endl;
+    }
 
     return 0;
 }

@@ -18,6 +18,7 @@ Options::Options(int argc, char* argv[])
          {"output", required_argument, 0, 'o'},
          {"iterations", required_argument, 0, 'i'},
          {"upscale", required_argument, 0, 'u'},
+         {"timing", required_argument, 0, 't'},
          {"verbose", 0, 0, 'v'},
          {"help", 0, 0, 'h'},
          {0, 0, 0, 0}
@@ -45,6 +46,9 @@ Options::Options(int argc, char* argv[])
          case 'u':
              this->artificial_upscale = atoi(optarg);
              break;
+         case 't':
+            this->timing = optarg;
+            break;
          case 'v':
              this->verbose = true;
              break;
@@ -68,5 +72,7 @@ void Options::print_help()
     printf("-f : file : input file\n");
     printf("-o : output : output file\n");
     printf("-i : number of iterations to run (CANNOT BE MORE THAN 1 WHILE USING OUTPUT FILE)\n");
+    printf("-u : number of times to upscale input data\n");
+    printf("-t : write timing data to file\n");
     printf("-h : help : print help\n");
 }

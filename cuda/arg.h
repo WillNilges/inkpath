@@ -8,6 +8,7 @@ public:
     bool verbose = false;
     int iters = 1;
     int artificial_upscale = 0;
+    std::string timing = "";
     std::string image_path;
     std::string output_path;
 
