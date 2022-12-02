@@ -3,6 +3,7 @@
 #include "ipcv_gpu.h"
 #include "ipcv_cuda.cuh"
 #include "ipcv_cuda_adaptive_thresh.cuh"
+#include "arg.h"
 
 // A quick way to split strings separated via any character
 // delimiter.
@@ -17,11 +18,6 @@ std::vector<std::string> adv_tokenizer(std::string s, char del)
         tokens.push_back(word);
     }
     return tokens;
-}
-
-void print_help()
-{
-    printf("-f : file : input file\n-o : output : output file\n-i : number of iterations to run (CANNOT BE MORE THAN 1 WHILE USING OUTPUT FILE)\n-h : help : print help\n");
 }
 
 void print_points(Shapes shapes)
@@ -91,83 +87,18 @@ void gpu_complete(Mat img, std::string path_string, std::string file_title, bool
     //    print_points(gpu_shapes);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    // CLI arguments and such
-    bool verbose = false;
-    int order = 0;
-    int iters = 1;
-    int artificial_upscale = 0;
-    std::string image_path;
-    std::string output_path;
-    int rc;
-    /* getopt_long stores the option index here. */
-    int option_index = 0;
-    
-    /* This contains the short command line parameters list */
-    const char* getoptOptions = "f:o:h";    /* add lots of stuff here */
-    
-    /* This contains the long command line parameter list, it should mostly 
-      match the short list                                                  */
-    struct option long_options[] = {
-         /* These options don’t set a flag.
-             We distinguish them by their indices. */
-         {"file",   required_argument, 0, 'f'},
-         {"output", required_argument, 0, 'o'},
-         {"iterations", required_argument, 0, 'i'},
-         {"upscale", required_argument, 0, 'u'},
-         {"verbose", 0, 0, 'v'},
-         {"help", 0, 0, 'h'},
-         {0, 0, 0, 0}
-    };
-    
-    opterr = 1;           /* Enable automatic error reporting */
-    while ((rc = getopt_long_only(
-                    argc,
-                    argv,
-                    getoptOptions,
-                    long_options,
-                    &option_index)) != -1) {
-       /* Detect the end of the options. */
-       switch (rc)
-         {
-         case 'f':
-             image_path = optarg;
-             break;
-         case 'o':
-             output_path = optarg;
-             break;
-         case 'i':
-             iters = atoi(optarg);
-             break;
-         case 'u':
-             artificial_upscale = atoi(optarg);
-             break;
-         case 'v':
-             verbose = true;
-             break;
-         case 'h':
-             print_help();
-             break;
-        default:
-           fprintf (stderr, "Internal error: undefined option %0xX\n", rc);
-           exit(1);
-        } // End switch 
-    } /* end while */
+    Options args(argc, argv);
 
-    if ((optind < argc) || image_path.empty() || (iters > 1 && !output_path.empty())){
-        print_help();
-        exit(1);
-    }
-
-    Mat img = imread(image_path, 0);
+    Mat img = imread(args.image_path, 0);
     if(img.empty())
     {
-        std::cout << "Could not read the image: " << image_path << std::endl;
+        std::cout << "Could not read the image: " << args.image_path << std::endl;
         return 1;
     }
 
-    for (int i = 0; i < artificial_upscale; i++)
+    for (int i = 0; i < args.artificial_upscale; i++)
     {
         std::cout << "Upscaling image pre-test x" << i+1 << "\n";
         cv::cuda::GpuMat gpu_img;
@@ -178,11 +109,11 @@ int main(int argc, char *argv[])
     }
 
     // Separate the file title from the rest of the path
-    std::vector<std::string> path_vec = adv_tokenizer(output_path, '/');
+    std::vector<std::string> path_vec = adv_tokenizer(args.output_path, '/');
     std::string file_title = path_vec.back();
     path_vec.pop_back();
     std::string path_string;
-    if (output_path[0] == '/')
+    if (args.output_path[0] == '/')
         path_string += '/';
     for (auto &dir : path_vec)
     {
@@ -201,23 +132,23 @@ int main(int argc, char *argv[])
 
     std::cout << "Starting CPU...\n";
 
-    img = imread(image_path, 0); // Refresh image
+    img = imread(args.image_path, 0); // Refresh image
     start = clock();
-    for (int i = 0; i < iters; i++)
-        cpu_complete(img, path_string, file_title, verbose, false);
+    for (int i = 0; i < args.iters; i++)
+        cpu_complete(img, path_string, file_title, args.verbose, false);
     end = clock();
-    tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
+    tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / args.iters;
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
 
     std::cout << "Starting CPU (Adaptive)...\n";
 
-    img = imread(image_path, 0); // Refresh image
+    img = imread(args.image_path, 0); // Refresh image
     start = clock();
-    for (int i = 0; i < iters; i++)
-        cpu_complete(img, path_string, file_title, verbose, true);
+    for (int i = 0; i < args.iters; i++)
+        cpu_complete(img, path_string, file_title, args.verbose, true);
     end = clock();
-    tcpu_adaptive = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
+    tcpu_adaptive = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / args.iters;
     
     std::cout << "CPU (Adaptive) took " << tcpu_adaptive << " ms" << std::endl;
 
@@ -226,28 +157,28 @@ int main(int argc, char *argv[])
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
 
-    img = imread(image_path, 0); // Refresh image
-    gpu_complete(img, path_string, file_title, verbose, stream1, false);
-    img = imread(image_path, 0); // Refresh image
-    gpu_complete(img, path_string, file_title, verbose, stream1, true);
+    img = imread(args.image_path, 0); // Refresh image
+    gpu_complete(img, path_string, file_title, args.verbose, stream1, false);
+    img = imread(args.image_path, 0); // Refresh image
+    gpu_complete(img, path_string, file_title, args.verbose, stream1, true);
 
-    img = imread(image_path, 0); // Refresh image
+    img = imread(args.image_path, 0); // Refresh image
     std::cout << "Starting GPU...\n";
     start = clock();
-    for (int i = 0; i < iters; i++)
-        gpu_complete(img, path_string, file_title, verbose, stream1, false);
+    for (int i = 0; i < args.iters; i++)
+        gpu_complete(img, path_string, file_title, args.verbose, stream1, false);
     end = clock();
-    tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
+    tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
 
     std::cout << "GPU took " << tgpu << " ms" << std::endl;
 
-    img = imread(image_path, 0); // Refresh image
+    img = imread(args.image_path, 0); // Refresh image
     std::cout << "Starting GPU (Adaptive)...\n";
     start = clock();
-    for (int i = 0; i < iters; i++)
-        gpu_complete(img, path_string, file_title, verbose, stream1, true);
+    for (int i = 0; i < args.iters; i++)
+        gpu_complete(img, path_string, file_title, args.verbose, stream1, true);
     end = clock();
-    tgpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
+    tgpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
 
     std::cout << "GPU (adaptive) took " << tgpu_adaptive << " ms" << std::endl;
 
