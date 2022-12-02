@@ -94,17 +94,17 @@ __global__ void kernelThreshold(
 }
 
 // Called from debug.cpp
-cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, cv::cuda::Stream _stream) {
+cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, double maxValue, int blockSize, double delta, cv::cuda::Stream _stream) {
     Mat output;
     // Binarize the image using OpenCV
     cudaAdaptiveThreshold(
         img, 
         output,
-        255,
+        maxValue, /*255*/
         ADAPTIVE_THRESH_GAUSSIAN_C,
         THRESH_BINARY,
-        3,
-        2,
+        blockSize, /*3*/
+        delta, /*2*/
         _stream
     );
 

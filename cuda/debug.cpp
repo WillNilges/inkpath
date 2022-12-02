@@ -38,9 +38,8 @@ void print_points(Shapes shapes)
     }
 }
 
-void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbose, bool use_adaptive)
+void cpu_complete(Mat img, std::string path_string, std::string file_title, bool verbose, bool use_adaptive)
 {
-    // Run on CPU
     std::string otsu_out, skel_out, shape_out;
     if (!path_string.empty() || !file_title.empty())
     {
@@ -49,6 +48,7 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
         shape_out = path_string + "shape_" + file_title;
     }
     Mat otsu_img;
+
     if (use_adaptive)
     {
         if (!path_string.empty() || !file_title.empty())
@@ -57,16 +57,16 @@ void do_cpu(Mat img, std::string path_string, std::string file_title, bool verbo
     }
     else
         otsu_img = otsu(img, otsu_out);
-    //Mat skel_img = skeletonize(otsu_img, skel_out);
-    //Shapes shapes = find_shapes(skel_img, shape_out);
+
+    Mat skel_img = skeletonize(otsu_img, skel_out);
+    Shapes shapes = find_shapes(skel_img, shape_out);
 
     //if (verbose)
     //    print_points(shapes);
 }
 
-void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1, bool use_adaptive)
+void gpu_complete(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1, bool use_adaptive)
 {
-    // Run on GPU
     std::string otsu_out, skel_out, shape_out;
     if (!path_string.empty() || !file_title.empty())
     {
@@ -79,13 +79,13 @@ void do_gpu(Mat img, std::string path_string, std::string file_title, bool verbo
     {
         if (!path_string.empty() || !file_title.empty())
             otsu_out = path_string + "gpu_adaptive_" + file_title;
-        gpu_otsu_img = adaptiveCuda(img, otsu_out, stream1);
+        gpu_otsu_img = adaptiveCuda(img, otsu_out, 255, 3, 2, stream1);
     }
     else
         gpu_otsu_img = otsuCuda(img, otsu_out, stream1);
-//    Mat gpu_otsu_img = gpu_otsu(img, otsu_out, stream1);
-    //Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
-    //Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
+
+    Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
+    Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
 
     //if (verbose)
     //    print_points(gpu_shapes);
@@ -178,7 +178,6 @@ int main(int argc, char *argv[])
     }
 
     // Separate the file title from the rest of the path
-    // FIXME: This feels awful, but I don't know enough about C++ to be sure.
     std::vector<std::string> path_vec = adv_tokenizer(output_path, '/');
     std::string file_title = path_vec.back();
     path_vec.pop_back();
@@ -205,7 +204,7 @@ int main(int argc, char *argv[])
     img = imread(image_path, 0); // Refresh image
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_cpu(img, path_string, file_title, verbose, false);
+        cpu_complete(img, path_string, file_title, verbose, false);
     end = clock();
     tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
     
@@ -216,7 +215,7 @@ int main(int argc, char *argv[])
     img = imread(image_path, 0); // Refresh image
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_cpu(img, path_string, file_title, verbose, true);
+        cpu_complete(img, path_string, file_title, verbose, true);
     end = clock();
     tcpu_adaptive = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / iters;
     
@@ -228,15 +227,15 @@ int main(int argc, char *argv[])
     std::cout << "Warming up GPU...\n";
 
     img = imread(image_path, 0); // Refresh image
-    do_gpu(img, path_string, file_title, verbose, stream1, false);
+    gpu_complete(img, path_string, file_title, verbose, stream1, false);
     img = imread(image_path, 0); // Refresh image
-    do_gpu(img, path_string, file_title, verbose, stream1, true);
+    gpu_complete(img, path_string, file_title, verbose, stream1, true);
 
     img = imread(image_path, 0); // Refresh image
     std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_gpu(img, path_string, file_title, verbose, stream1, false);
+        gpu_complete(img, path_string, file_title, verbose, stream1, false);
     end = clock();
     tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
 
@@ -246,7 +245,7 @@ int main(int argc, char *argv[])
     std::cout << "Starting GPU (Adaptive)...\n";
     start = clock();
     for (int i = 0; i < iters; i++)
-        do_gpu(img, path_string, file_title, verbose, stream1, true);
+        gpu_complete(img, path_string, file_title, verbose, stream1, true);
     end = clock();
     tgpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / iters;
 

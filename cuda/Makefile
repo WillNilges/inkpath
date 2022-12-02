@@ -14,10 +14,10 @@ CPP_OBJ = $(patsubst %.cpp,%.o,$(SRC))
 CU_SRC = $(wildcard *.cu)
 CU_OBJ = $(patsubst %.cu,%.o,$(CU_SRC))
 
-$(info found $(SRC)...)
-$(info compiling CPP_OBJ as $(CPP_OBJ)...)
-$(info found $(CU_SRC)...)
-$(info compiling CU_OBJ as $(CU_OBJ)...)
+#$(info found $(SRC)...)
+#$(info compiling CPP_OBJ as $(CPP_OBJ)...)
+#$(info found $(CU_SRC)...)
+#$(info compiling CU_OBJ as $(CU_OBJ)...)
 
 .PHONY: test clean
 

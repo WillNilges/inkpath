@@ -29,6 +29,5 @@ typedef struct Shapes {
 #endif //#ifndef IPCV_SHAPES
 
 Mat gpu_skeletonize(Mat img_inv, std::string output_path, cv::cuda::Stream stream1);
-Mat gpu_otsu(Mat img, std::string output_path, cv::cuda::Stream stream1);
 Shapes gpu_find_shapes(Mat img, std::string output_path);
 #endif

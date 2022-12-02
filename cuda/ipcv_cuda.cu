@@ -33,7 +33,6 @@ Cheers,
 
  */
 
-
 #include "ipcv_cuda.cuh"
 
 #include <stdio.h>
