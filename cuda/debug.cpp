@@ -156,7 +156,6 @@ int main(int argc, char* argv[])
 
     std::cout << "Starting CPU...\n";
 
-    img = imread(args.image_path, 0); // Refresh image
     start = clock();
     for (int i = 0; i < args.iters; i++)
         cpu_complete(img, path_string, file_title, args.verbose, false);
@@ -167,7 +166,6 @@ int main(int argc, char* argv[])
 
     std::cout << "Starting CPU (Adaptive)...\n";
 
-    img = imread(args.image_path, 0); // Refresh image
     start = clock();
     for (int i = 0; i < args.iters; i++)
         cpu_complete(img, path_string, file_title, args.verbose, true);
@@ -181,12 +179,9 @@ int main(int argc, char* argv[])
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
 
-    img = imread(args.image_path, 0); // Refresh image
     gpu_complete(img, path_string, file_title, args.verbose, stream1, false);
-    img = imread(args.image_path, 0); // Refresh image
     gpu_complete(img, path_string, file_title, args.verbose, stream1, true);
 
-    img = imread(args.image_path, 0); // Refresh image
     std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < args.iters; i++)
@@ -196,7 +191,6 @@ int main(int argc, char* argv[])
 
     std::cout << "GPU took " << tgpu << " ms" << std::endl;
 
-    img = imread(args.image_path, 0); // Refresh image
     std::cout << "Starting GPU (Adaptive)...\n";
     start = clock();
     for (int i = 0; i < args.iters; i++)
@@ -212,7 +206,6 @@ int main(int argc, char* argv[])
 
     if (!args.timing.empty())
     {
-//"filename,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive";
         data << file_title << "," << args.artificial_upscale << "," << tcpu << "," << tcpu_adaptive  << "," 
             << tgpu << "," << tgpu_adaptive << "," << tcpu/tgpu 
             << "," << tcpu_adaptive/tgpu_adaptive << ","  << std::endl;

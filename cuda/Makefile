@@ -51,6 +51,23 @@ benchmark: ipcv-cuda-debug
 big-benchmark: ipcv-cuda-debug
 	./ipcv-cuda-debug -f $(TEST_IMAGE) -i 100 -u 3
 
+# DATA_IMAGE_01=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/msd_board.jpg
+DATA_IMAGE_01=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/circuits_cropped.jpg
+
+HOSTNAME=$(shell hostname)
+ts := $(shell /bin/date "+%Y-%m-%d---%H-%M-%S")
+OUTPUT_PATH=./data/test-$(HOSTNAME)-$(ts).csv
+
+recorded-test: ipcv-cuda-debug
+	./ipcv-cuda-debug -f $(OTSU_IMAGE) -i 10 -o ./outputs/output.jpg -t $(OUTPUT_PATH)
+
+gauntlet: ipcv-cuda-debug
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -i 10 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 1 -i 10 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 2 -i 10 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 3 -i 10 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 4 -i 10 -t $(OUTPUT_PATH)
+
 clean:
 	rm -rf *.o
 	rm -rf ipcv-cuda-debug
