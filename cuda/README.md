@@ -7,6 +7,8 @@ The most reliable way to install this is probably through Podman. Ensure you hav
 
 You'll want to use the best base image for your system. For me, that's docker.io/nvidia/cuda:11.4.1-cudnn8-devel-ubuntu20.04, because I have a Tela K80, but your mileage may vary. On newer GPU's, I've had success with 11.8.0-cudnn8-devel-ubuntu22.04.
 
+You should also make sure that the compute capability version you compile everything (both OpenCV and this project) with matches that of your GPU. You can specify that in the Dockerfile, `build_opencv.sh`, and the Makefile.
+
 ```
 cd HACKING/
 podman build . --tag inkpath-cuda
