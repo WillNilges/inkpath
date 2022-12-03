@@ -29,12 +29,12 @@ cmake  ../opencv-4.5.1 \
     -DENABLE_FAST_MATH=1 \
     -DWITH_CUDNN=ON \
     -DOPENCV_DNN_CUDA=ON \
-    -DCUDA_ARCH_BIN=6.1 \
+    -DCUDA_ARCH_BIN=3.5 \
     -DBUILD_opencv_cudacodec=OFF \
-	-D OPENCV_EXTRA_MODULES_PATH='../opencv_contrib-4.5.1/modules' \
+	-DOPENCV_EXTRA_MODULES_PATH='../opencv_contrib-4.5.1/modules' \
 	-DOPENCV_GENERATE_PKGCONFIG=YES \
     -DWITH_GTK=OFF \
-    -D BUILD_TESTS=OFF
+    -DBUILD_TESTS=OFF
 # Build
 cmake --build . -j$cores
 

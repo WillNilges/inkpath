@@ -8,6 +8,8 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 LIGHT_WARNINGS = -Wall
 CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 #CUDA_INCL=-I/usr/local/cuda/include
+COMPUTE_CAPABILITY=35
+CUDA_FLAGS=-gencode arch=compute_$(COMPUTE_CAPABILITY),code=compute_$(COMPUTE_CAPABILITY)
 
 SRC = $(wildcard *.cpp)
 CPP_OBJ = $(patsubst %.cpp,%.o,$(SRC))
@@ -24,10 +26,10 @@ CU_OBJ = $(patsubst %.cu,%.o,$(CU_SRC))
 build: ipcv-cuda-debug
 
 %.o: %.cpp #$(SRC) $(CU_SRC)
-	$(CC) $(CFLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $< -o $@
+	$(CC) $(CFLAGS) $(CUDA_FLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $< -o $@
 
 %.o: %.cu #$(SRC) $(CU_SRC)
-	$(CC) $(CFLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $< -o $@
+	$(CC) $(CFLAGS) $(CUDA_FLAGS) $(CUDA_INCL) $(CV_PKG_CONFIG) -g -c $< -o $@
 
 # For generating a CV debugging binary
 ipcv-cuda-debug: $(CPP_OBJ) $(CU_OBJ)
