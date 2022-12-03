@@ -206,7 +206,9 @@ int main(int argc, char* argv[])
 
     if (!args.timing.empty())
     {
-        data << file_title << "," << args.artificial_upscale << "," << tcpu << "," << tcpu_adaptive  << "," 
+        std::vector<std::string> input_path_vec = adv_tokenizer(args.image_path, '/');
+        std::string input_title = input_path_vec.back();
+        data << input_title << "," << args.artificial_upscale << "," << tcpu << "," << tcpu_adaptive  << "," 
             << tgpu << "," << tgpu_adaptive << "," << tcpu/tgpu 
             << "," << tcpu_adaptive/tgpu_adaptive << ","  << std::endl;
         std::cout << "Results have been saved." << std::endl;
