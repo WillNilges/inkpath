@@ -36,7 +36,9 @@ void print_points(Shapes shapes)
     }
 }
 
-void cpu_complete(Mat img, std::string path_string, std::string file_title, bool verbose, bool use_adaptive)
+// Run the whole algorithm
+
+void cpu_complete(Mat img, std::string path_string, std::string file_title, bool verbose, bool use_adaptive, bool threshold_only)
 {
     std::string otsu_out, skel_out, shape_out;
     if (!path_string.empty() || !file_title.empty())
@@ -55,6 +57,9 @@ void cpu_complete(Mat img, std::string path_string, std::string file_title, bool
     }
     else
         otsu_img = otsu(img, otsu_out);
+
+    if (threshold_only)
+        return;
 
     Mat skel_img = skeletonize(otsu_img, skel_out);
     Shapes shapes = find_shapes(skel_img, shape_out);
@@ -81,6 +86,9 @@ void gpu_complete(Mat img, std::string path_string, std::string file_title, bool
     }
     else
         gpu_otsu_img = otsuCuda(img, otsu_out, stream1);
+
+    if (threshold_only)
+        return;
 
     Mat gpu_skel_img = gpu_skeletonize(gpu_otsu_img, skel_out, stream1);
     Shapes gpu_shapes = gpu_find_shapes(gpu_skel_img, shape_out);
@@ -116,10 +124,20 @@ int main(int argc, char* argv[])
         data.open(args.timing, std::ios_base::app);
         if (data_empty)
         {
-            data << "filename,upscale_amt,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive\n";
+            data << "device,filename,upscale_amt,time_cpu_otsu,time_cpu_adaptive,time_gpu_otsu,time_gpu_adaptive,speedup_otsu,speedup_adaptive\n";
             std::cout << "File empty. File has been initialized.\n";
         }
     }
+    
+    // Select device to use
+    cudaError_t status;
+    status = cudaSetDevice(args.device);
+    if (status != cudaSuccess)
+    {
+        std::cout << "CUDA error: " << cudaGetErrorString(status) <<
+        std::endl;
+    }
+    std::cout << "Using device " << args.device << ".\n";
 
     // Upscale the image if needed
     for (int i = 0; i < args.artificial_upscale; i++)
@@ -158,7 +176,7 @@ int main(int argc, char* argv[])
 
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        cpu_complete(img, path_string, file_title, args.verbose, false);
+        cpu_complete(img, path_string, file_title, args.verbose, false, arg.threshold_only);
     end = clock();
     tcpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
     
@@ -168,7 +186,7 @@ int main(int argc, char* argv[])
 
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        cpu_complete(img, path_string, file_title, args.verbose, true);
+        cpu_complete(img, path_string, file_title, args.verbose, true, arg.threshold_only);
     end = clock();
     tcpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
     
@@ -179,13 +197,13 @@ int main(int argc, char* argv[])
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
 
-    gpu_complete(img, path_string, file_title, args.verbose, stream1, false);
-    gpu_complete(img, path_string, file_title, args.verbose, stream1, true);
+    gpu_complete(img, path_string, file_title, args.verbose, stream1, false, arg.threshold_only);
+    gpu_complete(img, path_string, file_title, args.verbose, stream1, true, arg.threshold_only);
 
     std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        gpu_complete(img, path_string, file_title, args.verbose, stream1, false);
+        gpu_complete(img, path_string, file_title, args.verbose, stream1, false, arg.threshold_only);
     end = clock();
     tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
 
@@ -194,7 +212,7 @@ int main(int argc, char* argv[])
     std::cout << "Starting GPU (Adaptive)...\n";
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        gpu_complete(img, path_string, file_title, args.verbose, stream1, true);
+        gpu_complete(img, path_string, file_title, args.verbose, stream1, true, arg.threshold_only);
     end = clock();
     tgpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
 
@@ -208,7 +226,17 @@ int main(int argc, char* argv[])
     {
         std::vector<std::string> input_path_vec = adv_tokenizer(args.image_path, '/');
         std::string input_title = input_path_vec.back();
-        data << input_title << "," << args.artificial_upscale << "," << tcpu << "," << tcpu_adaptive  << "," 
+        struct cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, args.device);
+
+        // Check for device error
+        cudaError_t err = cudaGetLastError();
+        if (err != cudaSuccess) {
+            printf("Device error: %s\n", cudaGetErrorString(err));
+            return 1;
+        }
+
+        data <<  deviceProp.name << "," << input_title << "," << args.artificial_upscale << "," << tcpu << "," << tcpu_adaptive  << "," 
             << tgpu << "," << tgpu_adaptive << "," << tcpu/tgpu 
             << "," << tcpu_adaptive/tgpu_adaptive << ","  << std::endl;
         std::cout << "Results have been saved." << std::endl;

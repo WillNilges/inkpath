@@ -52,7 +52,10 @@ big-benchmark: ipcv-cuda-debug
 	./ipcv-cuda-debug -f $(TEST_IMAGE) -i 100 -u 3
 
 DATA_IMAGE_01=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/msd_board.jpg
-DATA_IMAGE_02=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/circuits_cropped.jpg
+DATA_IMAGE_02=/home/wilnil/Code/xopp_dev/inkpath_samples/inkpath_sample_images_vol_2/waves.jpg
+DATA_IMAGE_03=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/circuits_cropped.jpg
+DATA_IMAGE_04=/xopp_dev/inkpath_samples/inkpath_sample_images_vol_2/mask.jpg
+DATA_IMAGE_05=/xopp_dev/inkpath_samples/Inkpath_samples_3/roland_sip.jpg
 
 HOSTNAME=$(shell hostname)
 ts := $(shell /bin/date "+%Y-%m-%d---%H-%M-%S")
@@ -62,11 +65,69 @@ recorded-test: ipcv-cuda-debug
 	./ipcv-cuda-debug -f $(OTSU_IMAGE) -i 10 -t $(OUTPUT_PATH)
 
 gauntlet: ipcv-cuda-debug
+	echo $(DATA_IMAGE_01)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 0 -i 100 -t $(OUTPUT_PATH)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 1 -i 100 -t $(OUTPUT_PATH)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 2 -i 100 -t $(OUTPUT_PATH)
-	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 3 -i 100 -t $(OUTPUT_PATH)
-	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 4 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 3 -i 50 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 4 -i 50 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_02)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 0 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 1 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 2 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 3 -i 50 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 4 -i 50 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_03)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 0 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 1 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 2 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 3 -i 50 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 4 -i 50 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_04)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 0 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 1 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 2 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 3 -i 50 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 4 -i 50 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_05)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 0 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 1 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 2 -i 100 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 3 -i 50 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 4 -i 50 -t $(OUTPUT_PATH)
+
+gauntlet-thresh-only: ipcv_cuda_debug
+	OUTPUT_PATH=./data/test-$(HOSTNAME)-$(ts)-short.csv
+	echo $(DATA_IMAGE_01)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 0 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 1 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 2 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 3 -s -i 5 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -u 4 -s -i 5 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_02)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 0 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 1 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 2 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 3 -s -i 5 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -u 4 -s -i 5 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_03)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 0 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 1 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 2 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 3 -s -i 5 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -u 4 -s -i 5 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_04)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 0 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 1 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 2 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 3 -s -i 5 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -u 4 -s -i 5 -t $(OUTPUT_PATH)
+	echo $(DATA_IMAGE_05)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 0 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 1 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 2 -s -i 1 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 3 -s -i 5 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -u 4 -s -i 5 -t $(OUTPUT_PATH)
 
 clean:
 	rm -rf *.o

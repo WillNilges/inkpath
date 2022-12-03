@@ -7,18 +7,20 @@ Options::Options(int argc, char* argv[])
     int option_index = 0;
     
     /* This contains the short command line parameters list */
-    const char* getoptOptions = "f:o:h";    /* add lots of stuff here */
+    const char* getoptOptions = "d:f:o:i:u:t:vs:h";    /* add lots of stuff here */
     
     /* This contains the long command line parameter list, it should mostly 
       match the short list                                                  */
     struct option long_options[] = {
          /* These options don’t set a flag.
              We distinguish them by their indices. */
+         {"device",   required_argument, 0, 'd'},
          {"file",   required_argument, 0, 'f'},
          {"output", required_argument, 0, 'o'},
          {"iterations", required_argument, 0, 'i'},
          {"upscale", required_argument, 0, 'u'},
          {"timing", required_argument, 0, 't'},
+         {"short", required_argument, 0, 's'},
          {"verbose", 0, 0, 'v'},
          {"help", 0, 0, 'h'},
          {0, 0, 0, 0}
@@ -34,6 +36,9 @@ Options::Options(int argc, char* argv[])
        /* Detect the end of the options. */
        switch (rc)
          {
+         case 'd':
+             this->device = atoi(optarg);
+             break;
          case 'f':
              this->image_path = optarg;
              break;
@@ -48,6 +53,9 @@ Options::Options(int argc, char* argv[])
              break;
          case 't':
             this->timing = optarg;
+            break;
+         case 's':
+            this->threshold_only = true;
             break;
          case 'v':
              this->verbose = true;
@@ -69,10 +77,12 @@ Options::Options(int argc, char* argv[])
 
 void Options::print_help()
 {
+    printf("-d : device : device to use\n");
     printf("-f : file : input file\n");
-    printf("-o : output : output file\n");
     printf("-i : number of iterations to run (CANNOT BE MORE THAN 1 WHILE USING OUTPUT FILE)\n");
-    printf("-u : number of times to upscale input data\n");
-    printf("-t : write timing data to file\n");
+    printf("-o : output : output file\n");
+    printf("-s : short : only run thresholding (useful for testing)");
+    printf("-t : timing : write timing data to file\n");
+    printf("-u : upscale :  number of times to upscale input data\n");
     printf("-h : help : print help\n");
 }

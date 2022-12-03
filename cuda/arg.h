@@ -11,6 +11,8 @@ public:
     std::string timing = "";
     std::string image_path;
     std::string output_path;
+    int device = 0;
+    bool threshold_only = false;
 
     enum METHOD method;
 
