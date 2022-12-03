@@ -15,54 +15,45 @@ args = parser.parse_args()
 
 headers = ['filename','upscale_amt','time_cpu_otsu','time_cpu_adaptive','time_gpu_otsu','time_gpu_adaptive','speedup_otsu','speedup_adaptive']
 data = pd.read_csv(args.path, header=1, names=headers, index_col=False)
-matplotlib.use('tkagg')
+#matplotlib.use('tkagg')
 
 def truncate(data, headers, rows):
     for header in headers:
         data[header] = data[header][: len(data[header]) - rows]
     return data
 
-def plot_data_together(data, show = True, save = False, output = ''):
+def plot_threshold(data, show = True, save = False, output = '', thresh_type = 'otsu'):
     fig, ax = plt.subplots()
     # Plot compute time
-    ax.plot(data['upscale_amt'], data[f'time_cpu_otsu'], 'bv', label='cpu otsu threshold time')
-    ax.plot(data['upscale_amt'], data[f'time_gpu_otsu'], 'g^', label='gpu otsu threshold time')
-    ax.set_title(f'Time to process {data["filename"]} (Otsu\'s Method)')
+    ax.plot(data['upscale_amt'], data[f'time_cpu_{thresh_type}'], 'bv', label='cpu otsu threshold time')
+    ax.plot(data['upscale_amt'], data[f'time_gpu_{thresh_type}'], 'g^', label='gpu otsu threshold time')
+    ax.set_title(f'Time to process {data["filename"][0]} ({thresh_type} Method)')
     ax.set_xlabel('Upscaling amount') # TODO: Print resolution of the image here? Going to need some changes in the debug file.
     ax.set_ylabel('Compute time (ms)')
     ax.legend()
 
     if save:
-        plt.savefig(f'./{output}/time_comparison.png')
+        plt.savefig(f'./{output}/{thresh_type}_time_comparison.png')
         print(f'Graph has been saved to ./{output}/time_comparison.png')
 
     # Plot speedup
-    plt.figure()
-    plt.plot(data['upscale_amt'], data[f'speedup_otsu'], 'kx', label='speedup')
-    ax.set_title(f'Time to process {data["filename"]} vs. Speedup')
-    plt.xlabel('Upscaling amount')
-    plt.ylabel('Speedup')
-    plt.legend()
+    fig, ax = plt.subplots()
+    #plt.figure()
+    ax.plot(data['upscale_amt'], data[f'speedup_{thresh_type}'], 'kx', label='speedup')
+    ax.set_title(f'Time to process {data["filename"][0]} vs. Speedup ({thresh_type} Method)')
+    ax.set_xlabel('Upscaling amount')
+    ax.set_ylabel('Speedup')
+    ax.legend()
     if save:
-        plt.savefig(f'./{output}/speedup.png')
+        plt.savefig(f'./{output}/{thresh_type}_speedup.png')
         print(f'Graph has been saved to ./{output}/speedup.png')
 
-'''
-    plt.figure()
-    plt.plot(data['dimension'], data[f'err_direct'], 'rd', label='error')
-    plt.title(f'Matrix Size vs. Error')
-    plt.xlabel('Matrix Size')
-    plt.ylabel('Error (%)')
-    plt.legend()
-    if save:
-        plt.savefig(f'./{output}/error.png')
-        print(f'Graph has been saved to ./{output}/error.png')
-'''
     if show:
         print(f'Showing graphs...')
         plt.show()
 
-data = truncate(data, headers, args.truncate)
+if (args.truncate != 0):
+    data = truncate(data, headers, args.truncate)
 print(data)
 
 display_data = args.show
@@ -70,4 +61,5 @@ save_data = False
 if args.output != None:
     save_data = True
 
-plot_data_together(data, show=display_data, save=save_data, output=args.output)
+plot_threshold(data, show=display_data, save=save_data, output=args.output, thresh_type='otsu')
+plot_threshold(data, show=display_data, save=save_data, output=args.output, thresh_type='adaptive')

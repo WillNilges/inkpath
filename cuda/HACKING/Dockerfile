@@ -9,5 +9,5 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y make liblua5.3-dev build-e
 
 # Build and install OpenCV into the container
 COPY ./build-opencv.sh .
-RUN bash /build-opencv.sh 48
+RUN bash /build-opencv.sh -j 48 -c 6.1
 

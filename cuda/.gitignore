@@ -4,3 +4,4 @@ outputs/*
 *.o
 ipcv-cuda-debug
 data/*
+venv/*

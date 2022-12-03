@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < args.iters; i++)
         cpu_complete(img, path_string, file_title, args.verbose, false);
     end = clock();
-    tcpu = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / args.iters;
+    tcpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
     
     std::cout << "CPU took " << tcpu << " ms" << std::endl;
 
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < args.iters; i++)
         cpu_complete(img, path_string, file_title, args.verbose, true);
     end = clock();
-    tcpu_adaptive = (float)(end - start) * 1001 / (float)CLOCKS_PER_SEC / args.iters;
+    tcpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
     
     std::cout << "CPU (Adaptive) took " << tcpu_adaptive << " ms" << std::endl;
 

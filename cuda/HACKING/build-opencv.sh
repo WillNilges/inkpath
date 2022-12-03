@@ -3,11 +3,19 @@
 set -e
 
 cores=4
+nvidia_capability=3.5
 
-# For compiling faster
-if [ -n "$1" ]; then
-    cores=$1
-fi
+while getopts ":hc:j:" option; do
+    case $option in
+        c) # choose which container to use
+            nvidia_capability=$OPTARG;;
+        j) # choose code path
+            cores=$OPTARG;;
+        h)
+            help
+            exit;;
+    esac
+done
 
 # Create exterior directories
 mkdir -p ./opencv
@@ -29,7 +37,7 @@ cmake  ../opencv-4.5.1 \
     -DENABLE_FAST_MATH=1 \
     -DWITH_CUDNN=ON \
     -DOPENCV_DNN_CUDA=ON \
-    -DCUDA_ARCH_BIN=3.5 \
+    -DCUDA_ARCH_BIN=$nvidia_capability \
     -DBUILD_opencv_cudacodec=OFF \
 	-DOPENCV_EXTRA_MODULES_PATH='../opencv_contrib-4.5.1/modules' \
 	-DOPENCV_GENERATE_PKGCONFIG=YES \
