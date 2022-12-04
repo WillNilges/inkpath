@@ -16,7 +16,11 @@ args = parser.parse_args()
 
 headers = ['device','filename','upscale_amt','time_cpu_otsu','time_cpu_adaptive','time_gpu_otsu','time_gpu_adaptive','speedup_otsu','speedup_adaptive']
 data = pd.read_csv(args.path, header=0, names=headers, index_col=False)
-threshold_data = pd.read_csv(args.threshold_path, header=0, names=headers, index_col=False)
+try:
+    threshold_data = pd.read_csv(args.threshold_path, header=0, names=headers, index_col=False)
+except ValueError:
+    print("no secondary data");
+    threshold_data = None
 #matplotlib.use('tkagg')
 
 def truncate(data, headers, rows):
@@ -27,10 +31,11 @@ def truncate(data, headers, rows):
 def plot_threshold(data, threshold_data, show = True, save = False, output = '', thresh_type = 'otsu'):
     fig, ax = plt.subplots()
     # Plot compute time
-    ax.plot(data['upscale_amt'], data[f'time_cpu_{thresh_type}'], 'bv', label='cpu {thresh_type} time')
-    ax.plot(data['upscale_amt'], data[f'time_gpu_{thresh_type}'], 'g^', label='gpu {thresh_type} time')
-    ax.plot(threshold_data['upscale_amt'], threshold_data[f'time_cpu_{thresh_type}'], 'bv', label='cpu {thresh_type} time (thresholding only)')
-    ax.plot(threshold_data['upscale_amt'], threshold_data[f'time_gpu_{thresh_type}'], 'g^', label='gpu {thresh_type} time (thresholding only)')
+    ax.plot(data['upscale_amt'], data[f'time_cpu_{thresh_type}'], 'bv', label=f'cpu {thresh_type} time')
+    ax.plot(data['upscale_amt'], data[f'time_gpu_{thresh_type}'], 'g^', label=f'gpu {thresh_type} time')
+    if (not threshold_data.empty):
+        ax.plot(threshold_data['upscale_amt'], threshold_data[f'time_cpu_{thresh_type}'], 'cv', label=f'cpu {thresh_type} time (thresholding only)')
+        ax.plot(threshold_data['upscale_amt'], threshold_data[f'time_gpu_{thresh_type}'], 'y^', label=f'gpu {thresh_type} time (thresholding only)')
     ax.set_title(f'Time to process {data["filename"][0]} ({thresh_type} Method) ({data["device"][0]})')
     ax.set_xlabel('Upscaling amount') # TODO: Print resolution of the image here? Going to need some changes in the debug file.
     ax.set_ylabel('Compute time (ms)')
@@ -60,7 +65,7 @@ if (args.truncate != 0):
     data = truncate(data, headers, args.truncate)
     threshold_data = truncate(threshold_data, headers, args.truncate)
 print(data)
-print(threshold_data)
+#print(threshold_data)
 
 display_data = args.show
 save_data = False
