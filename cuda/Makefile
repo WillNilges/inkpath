@@ -8,10 +8,10 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 LIGHT_WARNINGS = -Wall
 CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 #CUDA_INCL=-I/usr/local/cuda/include
-COMPUTE_CAPABILITY=35
+COMPUTE_CAPABILITY=61
 CUDA_FLAGS=-gencode arch=compute_$(COMPUTE_CAPABILITY),code=compute_$(COMPUTE_CAPABILITY) -Wno-deprecated-gpu-targets
 
-USE_DEVICE=1
+USE_DEVICE=0
 
 SRC = $(wildcard *.cpp)
 CPP_OBJ = $(patsubst %.cpp,%.o,$(SRC))
@@ -53,11 +53,12 @@ benchmark: ipcv-cuda-debug
 big-benchmark: ipcv-cuda-debug
 	./ipcv-cuda-debug -f $(TEST_IMAGE) -i 100 -u 3
 
-DATA_IMAGE_01=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/msd_board.jpg
-DATA_IMAGE_02=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/waves.jpg
-DATA_IMAGE_03=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/good/circuits_cropped.jpg
-DATA_IMAGE_04=/xopp-dev/inkpath_samples/inkpath_sample_images_vol_2/mask.jpg
-DATA_IMAGE_05=/xopp-dev/inkpath_samples/Inkpath_samples_3/roland_sip.jpg
+# /xopp-dev/inkpath/cuda
+DATA_IMAGE_01=./samples/msd_board.jpg
+DATA_IMAGE_02=./samples/waves.jpg
+DATA_IMAGE_03=./samples/circuits_cropped.jpg
+DATA_IMAGE_04=./samples/mask.jpg
+DATA_IMAGE_05=./samples/roland_sip.jpg
 
 HOSTNAME=$(shell hostname)
 ts := $(shell /bin/date "+%Y%m%d-%H%M%S")
@@ -67,7 +68,12 @@ data_mkdir:
 	mkdir -p ./data/$(ts)
 
 recorded-test: ipcv-cuda-debug data_mkdir
-	./ipcv-cuda-debug -f $(OTSU_IMAGE) -d $(USE_DEVICE) -i 10 -t $(OUTPUT_PATH)
+	#./ipcv-cuda-debug -f $(OTSU_IMAGE) -d $(USE_DEVICE) -i 10 -t $(OUTPUT_PATH)
+	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 0 -s -i 100 -t $(OUTPUT_PATH)-img01.csv
+	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 0 -s -i 100 -t $(OUTPUT_PATH)-img02.csv
+	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 0 -s -i 100 -t $(OUTPUT_PATH)-img03.csv
+	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 0 -s -i 100 -t $(OUTPUT_PATH)-img04.csv
+	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 0 -s -i 100 -t $(OUTPUT_PATH)-img05.csv
 
 # Can't do 4x upscaling. Not enough memory and/or not enough time to debug.
 gauntlet: ipcv-cuda-debug data_mkdir
