@@ -7,7 +7,7 @@ Options::Options(int argc, char* argv[])
     int option_index = 0;
     
     /* This contains the short command line parameters list */
-    const char* getoptOptions = "d:f:o:i:u:t:vs:h";    /* add lots of stuff here */
+    const char* getoptOptions = "d:f:o:i:u:t:vsh";    /* add lots of stuff here */
     
     /* This contains the long command line parameter list, it should mostly 
       match the short list                                                  */
@@ -20,7 +20,7 @@ Options::Options(int argc, char* argv[])
          {"iterations", required_argument, 0, 'i'},
          {"upscale", required_argument, 0, 'u'},
          {"timing", required_argument, 0, 't'},
-         {"short", required_argument, 0, 's'},
+         {"short", 0, 0, 's'},
          {"verbose", 0, 0, 'v'},
          {"help", 0, 0, 'h'},
          {0, 0, 0, 0}

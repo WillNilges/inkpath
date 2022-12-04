@@ -68,7 +68,7 @@ void cpu_complete(Mat img, std::string path_string, std::string file_title, bool
     //    print_points(shapes);
 }
 
-void gpu_complete(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1, bool use_adaptive)
+void gpu_complete(Mat img, std::string path_string, std::string file_title, bool verbose, cv::cuda::Stream stream1, bool use_adaptive, bool threshold_only)
 {
     std::string otsu_out, skel_out, shape_out;
     if (!path_string.empty() || !file_title.empty())
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
 
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        cpu_complete(img, path_string, file_title, args.verbose, false, arg.threshold_only);
+        cpu_complete(img, path_string, file_title, args.verbose, false, args.threshold_only);
     end = clock();
     tcpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
     
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
 
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        cpu_complete(img, path_string, file_title, args.verbose, true, arg.threshold_only);
+        cpu_complete(img, path_string, file_title, args.verbose, true, args.threshold_only);
     end = clock();
     tcpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
     
@@ -197,13 +197,13 @@ int main(int argc, char* argv[])
     // Warm-Up run
     std::cout << "Warming up GPU...\n";
 
-    gpu_complete(img, path_string, file_title, args.verbose, stream1, false, arg.threshold_only);
-    gpu_complete(img, path_string, file_title, args.verbose, stream1, true, arg.threshold_only);
+    gpu_complete(img, path_string, file_title, args.verbose, stream1, false, args.threshold_only);
+    gpu_complete(img, path_string, file_title, args.verbose, stream1, true, args.threshold_only);
 
     std::cout << "Starting GPU...\n";
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        gpu_complete(img, path_string, file_title, args.verbose, stream1, false, arg.threshold_only);
+        gpu_complete(img, path_string, file_title, args.verbose, stream1, false, args.threshold_only);
     end = clock();
     tgpu = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
 
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
     std::cout << "Starting GPU (Adaptive)...\n";
     start = clock();
     for (int i = 0; i < args.iters; i++)
-        gpu_complete(img, path_string, file_title, args.verbose, stream1, true, arg.threshold_only);
+        gpu_complete(img, path_string, file_title, args.verbose, stream1, true, args.threshold_only);
     end = clock();
     tgpu_adaptive = (float)(end - start) * 1000 / (float)CLOCKS_PER_SEC / args.iters;
 
