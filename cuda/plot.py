@@ -49,6 +49,8 @@ def plot_threshold(data, threshold_data, show = True, save = False, output = '',
     fig, ax = plt.subplots()
     #plt.figure()
     ax.plot(data['upscale_amt'], data[f'speedup_{thresh_type}'], 'kx', label='speedup')
+    if (not threshold_data.empty):
+        ax.plot(threshold_data['upscale_amt'], threshold_data[f'speedup_{thresh_type}'], 'rx', label=f'speedup (thresholding only)')
     ax.set_title(f'Time to process {data["filename"][0]} vs. Speedup ({thresh_type} Method) ({data["device"][0]})')
     ax.set_xlabel('Upscaling amount')
     ax.set_ylabel('Speedup')
