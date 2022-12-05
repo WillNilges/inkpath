@@ -8,7 +8,7 @@ WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
 LIGHT_WARNINGS = -Wall
 CV_PKG_CONFIG=`pkg-config --cflags --libs opencv4`
 #CUDA_INCL=-I/usr/local/cuda/include
-COMPUTE_CAPABILITY=61
+COMPUTE_CAPABILITY=35
 CUDA_FLAGS=-gencode arch=compute_$(COMPUTE_CAPABILITY),code=compute_$(COMPUTE_CAPABILITY) -Wno-deprecated-gpu-targets
 
 USE_DEVICE=0

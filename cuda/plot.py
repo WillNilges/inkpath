@@ -4,6 +4,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import argparse
+import PIL # to get image resolution
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--path', dest='path', required=True, type=str, help='Path to your data')
@@ -28,14 +29,34 @@ def truncate(data, headers, rows):
         data[header] = data[header][: len(data[header]) - rows]
     return data
 
+def plot_pixels(ax, wid, hgt):
+    # Plot number of pixels in image
+    ax2 = ax.twiny()
+    ax2.set_xticks( ax.get_xticks() )
+    ax2.set_xbound(ax.get_xbound())
+    ax2.set_xticklabels(["{0:.{1}e}".format(2**int(x) * (wid * hgt), 2) for x in ax.get_xticks()], rotation=30)
+    ax2.set_xlabel('Number of Pixels')
+
+
 def plot_threshold(data, threshold_data, show = True, save = False, output = '', thresh_type = 'otsu'):
+    img = PIL.Image.open(f"../../samples/{data['filename'][0]}")
+    wid, hgt = img.size
+    resolutions = []
+    for i in range(0,data['upscale_amt'][-1:].values[0]):
+        resolutions.append(wid * hgt)
+    
     fig, ax = plt.subplots()
+    plt.subplots_adjust(top=0.75) # use a lower number to make more vertical space
     # Plot compute time
     ax.plot(data['upscale_amt'], data[f'time_cpu_{thresh_type}'], 'bv', label=f'cpu {thresh_type} time')
     ax.plot(data['upscale_amt'], data[f'time_gpu_{thresh_type}'], 'g^', label=f'gpu {thresh_type} time')
     if (not threshold_data.empty):
         ax.plot(threshold_data['upscale_amt'], threshold_data[f'time_cpu_{thresh_type}'], 'cv', label=f'cpu {thresh_type} time (thresholding only)')
         ax.plot(threshold_data['upscale_amt'], threshold_data[f'time_gpu_{thresh_type}'], 'y^', label=f'gpu {thresh_type} time (thresholding only)')
+
+    # Plot number of pixels in image
+    plot_pixels(ax, wid, hgt)
+
     ax.set_title(f'Time to process {data["filename"][0]} ({thresh_type} Method) ({data["device"][0]})')
     ax.set_xlabel('Upscaling amount') # TODO: Print resolution of the image here? Going to need some changes in the debug file.
     ax.set_ylabel('Compute time (ms)')
@@ -47,11 +68,15 @@ def plot_threshold(data, threshold_data, show = True, save = False, output = '',
 
     # Plot speedup
     fig, ax = plt.subplots()
+    plt.subplots_adjust(top=0.75) # use a lower number to make more vertical space
     #plt.figure()
     ax.plot(data['upscale_amt'], data[f'speedup_{thresh_type}'], 'kx', label='speedup')
     if (not threshold_data.empty):
         ax.plot(threshold_data['upscale_amt'], threshold_data[f'speedup_{thresh_type}'], 'rx', label=f'speedup (thresholding only)')
     ax.set_title(f'Time to process {data["filename"][0]} vs. Speedup ({thresh_type} Method) ({data["device"][0]})')
+
+    plot_pixels(ax, wid, hgt)
+
     ax.set_xlabel('Upscaling amount')
     ax.set_ylabel('Speedup')
     ax.legend()
