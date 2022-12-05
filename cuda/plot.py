@@ -41,9 +41,6 @@ def plot_pixels(ax, wid, hgt):
 def plot_threshold(data, threshold_data, show = True, save = False, output = '', thresh_type = 'otsu'):
     img = PIL.Image.open(f"../../samples/{data['filename'][0]}")
     wid, hgt = img.size
-    resolutions = []
-    for i in range(0,data['upscale_amt'][-1:].values[0]):
-        resolutions.append(wid * hgt)
     
     fig, ax = plt.subplots()
     plt.subplots_adjust(top=0.75) # use a lower number to make more vertical space
