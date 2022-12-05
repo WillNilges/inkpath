@@ -11,6 +11,9 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
     cv::Mat eroded;
      
     cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+
+    cv::Mat skel2;
+    cv::Mat skel3;
      
     bool done;		
     do
@@ -18,6 +21,8 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
       cv::erode(img, eroded, element);
       cv::dilate(eroded, temp, element); // temp = open(img)
       cv::subtract(img, temp, temp);
+      skel2.copyTo(skel3);
+      skel.copyTo(skel2);
       cv::bitwise_or(skel, temp, skel);
       eroded.copyTo(img);
      
@@ -25,7 +30,7 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
     } while (!done);
 
     Mat skel_invert;
-    bitwise_not(skel, skel_invert);
+    bitwise_not(skel3, skel_invert);
 
     //Mat downsampled;
     //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
@@ -36,8 +41,34 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
     return skel_invert;
 }
 
-// Apply an Otsu's thresholding to the object. I found that this was
-// the best function of the ones I tried
+// Apply opencv Adaptive Thresholding to image
+Mat adaptive(Mat img, std::string output_path)
+{
+    int k;
+    // Upsample our image, if needed.
+    Mat upsampled;
+    if (img.rows < 1000 || img.cols < 1000) {
+        pyrUp(img, upsampled,  Size(img.cols*2, img.rows*2));
+    } else {
+        upsampled = img;
+    }
+
+    int blockSize = 3;
+
+    Mat gauss_thresh, blur;
+    GaussianBlur(upsampled, blur, Size(blockSize+2, blockSize+2), 0, 0); 
+    adaptiveThreshold(blur, gauss_thresh, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, blockSize, 2);
+
+    if (!output_path.empty()) {
+        imwrite(output_path, gauss_thresh);
+#ifdef DIAG
+        std::cout << "Image has been written to " << output_path << "\n";
+#endif
+    }
+    return gauss_thresh;
+}
+
+// Apply otsu's method to image
 Mat otsu(Mat img, std::string output_path)
 {
     int k;
@@ -55,12 +86,16 @@ Mat otsu(Mat img, std::string output_path)
     GaussianBlur(upsampled, blur, Size(5, 5), 0, 0); 
     threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU);
 
-    if (output_path != "") {
+    if (!output_path.empty()) {
         imwrite(output_path, gauss_thresh);
+#ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
+#endif
     }
     return gauss_thresh;
 }
+
+
 
 // Prereqs: Must be binary color image, target must be black
 Shapes find_shapes(Mat img, std::string output_path) {

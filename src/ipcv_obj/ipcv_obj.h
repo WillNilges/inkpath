@@ -29,7 +29,7 @@ class IPCVObj
 		ContourList get() const{return this->contours;}
 };
  
-int cv_perform_processing(const char* image_path, IPCVObj* data);
+int cv_perform_processing(const char* image_path, IPCVObj* data, int threshold_type);
 
 // IPCVObj identifier for the Lua metatable
 #define LUA_IPCVOBJ "IPCVObj"
@@ -45,5 +45,6 @@ static int ipcvobj_getContourLength(lua_State* L);
 
 // Receiving data
 static int ipcvobj_getContour(lua_State* L);
+static int ipcvobj_getContourBatch(lua_State* L);
 
 #endif
