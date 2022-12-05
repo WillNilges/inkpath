@@ -17,17 +17,21 @@ args = parser.parse_args()
 
 headers = ['device','filename','upscale_amt','time_cpu_otsu','time_cpu_adaptive','time_gpu_otsu','time_gpu_adaptive','speedup_otsu','speedup_adaptive']
 
-full_files = glob.glob(args.path + "/full*.csv")
-short_files = glob.glob(args.path + "/short*.csv")
+try:
+    full_files = glob.glob(args.path + "/full*.csv")
+    short_files = glob.glob(args.path + "/short*.csv")
 
-full_data_frame = pd.DataFrame()
-full_content = []
+    full_data_frame = pd.DataFrame()
+    full_content = []
 
-for filename in full_files:
-    df = pd.read_csv(filename, header=0, names=headers, index_col=False)
-    full_content.append(df)
+    for filename in full_files:
+        df = pd.read_csv(filename, header=0, names=headers, index_col=False)
+        full_content.append(df)
 
-full_data_frame = pd.concat(full_content)
+    full_data_frame = pd.concat(full_content)
+    full_data_frame = full_data_frame[full_data_frame['upscale_amt'] == 0]
+except:
+    print("no full data.")
 
 short_data_frame = pd.DataFrame()
 short_content = []
@@ -38,19 +42,19 @@ for filename in short_files:
 
 short_data_frame = pd.concat(short_content)
 
-full_data_frame = full_data_frame[full_data_frame['upscale_amt'] == 0]
 short_data_frame = short_data_frame[short_data_frame['upscale_amt'] == 0]
 
 print(full_data_frame)
 print(short_data_frame)
 
 labels = ['chom']
-labels.extend(full_data_frame['filename'])
+labels.extend(short_data_frame['filename'])
 
 width = 0.1
 
 def bars(data, output):
     my_device = data['device'][0].values[0]
+    my_device = my_device.replace(' with Max-Q Design', '')
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.15)
     plt.subplots_adjust(top=0.80)
@@ -61,7 +65,7 @@ def bars(data, output):
     ax.set_xticklabels(labels, rotation=20)
     ax.set_xlabel('File Name')
     ax.set_ylabel('Compute time (ms)')
-    ax.set_title(f'Threshold Computation Time for Various Images ({my_device})')
+    ax.set_title(f'Threshold Computation Time ({my_device})')
     resolutions = []
 
     for file in data['filename']:
@@ -84,6 +88,7 @@ def bars(data, output):
 
 def speedup_bars(data, output):
     my_device = data['device'][0].values[0]
+    my_device = my_device.replace(' with Max-Q Design', '')
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.15)
     plt.subplots_adjust(top=0.80)
@@ -91,7 +96,7 @@ def speedup_bars(data, output):
     ax.bar(np.arange(len(data['time_cpu_adaptive'])) + width, data['speedup_adaptive'], label='speedup_adaptive', color='red', width=width)
     ax.set_xticklabels(labels, rotation=20)
     ax.set_xlabel('File Name')
-    ax.set_ylabel('Compute time (ms)')
+    ax.set_ylabel('Speedup')
     ax.set_title(f'Threshold Computation Speedup ({my_device})')
     resolutions = []
 
@@ -113,7 +118,10 @@ def speedup_bars(data, output):
         plt.savefig(f'./{args.output}/{output}-bars.png')
         print(f'Graph has been saved to ./{args.output}/{output}-bars.png')
 
-bars(full_data_frame, 'full')
+try:
+    bars(full_data_frame, 'full')
+except:
+    print("No full data.")
 bars(short_data_frame, 'short')
 
 speedup_bars(short_data_frame, 'speedup-short')
