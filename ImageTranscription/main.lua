@@ -6,7 +6,6 @@ end
 
 -- Callback if the menu item is executed
 function drawStroke()
-    local inspect = require 'inspect'
     print("Inkpath Activated. Transcribing image....")
     inkpath = assert(package.loadlib("/usr/share/xournalpp/plugins/ImageTranscription/ipcvobj.so", "luaopen_ipcvobj"))
     inkpath()
@@ -19,35 +18,23 @@ function drawStroke()
     print("Strokes retrieved.")
     contourCt = obj:getLength()
     print("Got ", contourCt, " strokes.")
-    contourBatchSize = 100 -- Let's send up this many contours at a time.
-    for i = 0,contourCt-1,contourBatchSize do
-        local contours = obj:getContourBatch(i, scaling_factor, contourBatchSize)
-        inspect(contours)
-        app.addStrokes({
+
+    -- TODO: This could be much, MUCH faster.
+    for i = 0,contourCt-1,1 do
+        local pointCt = obj:getContourLength(i)
+        if (pointCt >= 3)
+        then
+            x_points, y_points = obj:getContour(i, scaling_factor)
+            app.addStrokes({
                 ["strokes"] = {
-                    contours
+                    {
+                        ["x"] = x_points,
+                        ["y"] = y_points,
+                    },
                 },
                 ["allowUndoRedoAction"] = "grouped",
             })
+        end
     end
-
-
-    -- TODO: This could be much, MUCH faster.
-    --for i = 0,contourCt-1,1 do
-    --    local pointCt = obj:getContourLength(i)
-    --    if (pointCt >= 3)
-    --    then
-    --        x_points, y_points = obj:getContour(i, scaling_factor)
-    --        app.addStrokes({
-    --            ["strokes"] = {
-    --                {
-    --                    ["x"] = x_points,
-    --                    ["y"] = y_points,
-    --                },
-    --            },
-    --            ["allowUndoRedoAction"] = "grouped",
-    --        })
-    --    end
-    --end
     print("Image Transcription Complete. Exiting Inkpath.")
 end
