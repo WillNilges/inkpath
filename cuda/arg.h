@@ -13,6 +13,7 @@ public:
     std::string output_path;
     int device = 0;
     bool threshold_only = false;
+    int block_size = 3;
 
     enum METHOD method;
 

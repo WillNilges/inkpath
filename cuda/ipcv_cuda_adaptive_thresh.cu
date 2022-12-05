@@ -109,7 +109,7 @@ cv::Mat adaptiveCuda(cv::Mat img, std::string output_path, double maxValue, int 
     );
 
     if (!output_path.empty()) {
-        imwrite(output_path, img);
+        imwrite(output_path, output);
 #ifdef DIAG
         std::cout << "Image has been written to " << output_path << "\n";
 #endif

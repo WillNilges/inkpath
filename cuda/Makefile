@@ -81,31 +81,31 @@ gauntlet: ipcv-cuda-debug data_mkdir
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 0 -i 100 -t $(OUTPUT_PATH)-img01.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 1 -i 100 -t $(OUTPUT_PATH)-img01.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 2 -i 50 -t $(OUTPUT_PATH)-img01.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img01.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img01.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 4 -i 50 -t $(OUTPUT_PATH)-img01.csv
 	echo $(DATA_IMAGE_02)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 0 -i 100 -t $(OUTPUT_PATH)-img02.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 1 -i 100 -t $(OUTPUT_PATH)-img02.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 2 -i 50 -t $(OUTPUT_PATH)-img02.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img02.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img02.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 4 -i 50 -t $(OUTPUT_PATH)-img02.csv
 	echo $(DATA_IMAGE_03)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 0 -i 100 -t $(OUTPUT_PATH)-img03.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 1 -i 100 -t $(OUTPUT_PATH)-img03.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 2 -i 50 -t $(OUTPUT_PATH)-img03.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img03.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img03.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 4 -i 50 -t $(OUTPUT_PATH)-img03.csv
 	echo $(DATA_IMAGE_04)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 0 -i 100 -t $(OUTPUT_PATH)-img04.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 1 -i 100 -t $(OUTPUT_PATH)-img04.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 2 -i 50 -t $(OUTPUT_PATH)-img04.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img04.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img04.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 4 -i 50 -t $(OUTPUT_PATH)-img03.csv
 	echo $(DATA_IMAGE_05)
 	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 0 -i 100 -t $(OUTPUT_PATH)-img05.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 1 -i 100 -t $(OUTPUT_PATH)-img05.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 2 -i 50 -t $(OUTPUT_PATH)-img05.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img05.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 3 -i 50 -t $(OUTPUT_PATH)-img05.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 4 -i 50 -t $(OUTPUT_PATH)-img03.csv
 
 OUTPUT_PATH_SHORT=./data/$(ts)/short
@@ -114,31 +114,31 @@ gauntlet-thresh-only: ipcv-cuda-debug data_mkdir
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 0 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img01.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 1 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img01.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 2 -s -i 100 -t $(OUTPUT_PATH_SHORT)-img01.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img01.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img01.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_01) -d $(USE_DEVICE) -u 4 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img01.csv
 	echo $(DATA_IMAGE_02)                                                                            
 	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 0 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img02.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 1 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img02.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 2 -s -i 100 -t $(OUTPUT_PATH_SHORT)-img02.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img02.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img02.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_02) -d $(USE_DEVICE) -u 4 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img02.csv
 	echo $(DATA_IMAGE_03)                                                                            
 	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 0 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img03.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 1 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img03.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 2 -s -i 100 -t $(OUTPUT_PATH_SHORT)-img03.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img03.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img03.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_03) -d $(USE_DEVICE) -u 4 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img03.csv
 	echo $(DATA_IMAGE_04)                                                                            
 	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 0 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img04.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 1 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img04.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 2 -s -i 100 -t $(OUTPUT_PATH_SHORT)-img04.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img04.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img04.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_04) -d $(USE_DEVICE) -u 4 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img03.csv
 	echo $(DATA_IMAGE_05)                                                                            
 	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 0 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img05.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 1 -s -i 500 -t $(OUTPUT_PATH_SHORT)-img05.csv
 	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 2 -s -i 100 -t $(OUTPUT_PATH_SHORT)-img05.csv
-	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img05.csv
+	-./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 3 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img05.csv
 #	./ipcv-cuda-debug -f $(DATA_IMAGE_05) -d $(USE_DEVICE) -u 4 -s -i 50 -t $(OUTPUT_PATH_SHORT)-img03.csv
 
 clean:

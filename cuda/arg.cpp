@@ -7,13 +7,14 @@ Options::Options(int argc, char* argv[])
     int option_index = 0;
     
     /* This contains the short command line parameters list */
-    const char* getoptOptions = "d:f:o:i:u:t:vsh";    /* add lots of stuff here */
+    const char* getoptOptions = "b:d:f:o:i:u:t:vsh";    /* add lots of stuff here */
     
     /* This contains the long command line parameter list, it should mostly 
       match the short list                                                  */
     struct option long_options[] = {
          /* These options don’t set a flag.
              We distinguish them by their indices. */
+         {"block-size",   required_argument, 0, 'b'},
          {"device",   required_argument, 0, 'd'},
          {"file",   required_argument, 0, 'f'},
          {"output", required_argument, 0, 'o'},
@@ -36,6 +37,8 @@ Options::Options(int argc, char* argv[])
        /* Detect the end of the options. */
        switch (rc)
          {
+         case 'b':
+             this->block_size = atoi(optarg);
          case 'd':
              this->device = atoi(optarg);
              break;
