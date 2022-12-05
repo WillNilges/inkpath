@@ -16,8 +16,8 @@ LUA_VERSION=lua53
 ip_source := $(wildcard src/ipcv_obj/*.cpp)
 cv_source := $(wildcard src/cv/*.cpp)
 
-lua_deps=`pkg-config --cflags --libs --static $(LUA_VERSION)`
-cv_deps=`pkg-config --cflags --libs --static opencv4`
+lua_deps=`pkg-config --cflags --libs $(LUA_VERSION)`
+cv_deps=`pkg-config --cflags --libs opencv4`
 
 .PHONY: build_dir
 build_dir:
@@ -26,7 +26,7 @@ build_dir:
 # Compiles and statically links Inkpath's OpenCV code to the necessary OpenCV libraries
 ipcv: $(cv_source)
 	@mkdir -p build
-	g++ -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC -static
+	g++ -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC
 	@mv *.o build
 	ar -crsT build/libipcv.a build/*.o
 

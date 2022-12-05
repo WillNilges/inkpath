@@ -6,30 +6,48 @@ end
 
 -- Callback if the menu item is executed
 function drawStroke()
+    local inspect = require 'inspect'
     print("Inkpath Activated. Transcribing image....")
     inkpath = assert(package.loadlib("/usr/share/xournalpp/plugins/ImageTranscription/ipcvobj.so", "luaopen_ipcvobj"))
     inkpath()
     path = app.getFilePath({'*.jpg', '*.png', '*.bmp'}) -- The current version of Autotrace I'm using only supports PNGs.
     --image_scale = app.msgbox("Select tracing scale", {[1] = "Small", [2] = "Medium", [3] = "Large"}) -- TODO: implement this again.
+    threshold_type = app.msgbox("Select threshold type", {[1] = "Otsu", [2] = "Adaptive"}) -- TODO: implement this again.
     image_scale = 1
     scaling_factor = 10.0 -- THIS IS A NEW THING! HOW MUCH DO YOU WANT TO DIVIDE YOUR SHIT BY!? MUST BE FLOAT!
-    local obj = IPCVObj(path, 1)
+    local obj = IPCVObj(path, 1, threshold_type)
     print("Strokes retrieved.")
     contourCt = obj:getLength()
     print("Got ", contourCt, " strokes.")
-    -- TODO: This could be much, MUCH faster.
-    for i = 0,contourCt-1,1 do
-        pointCt = obj:getContourLength(i)
-        x_points, y_points = obj:getContour(i, scaling_factor)
+    contourBatchSize = 100 -- Let's send up this many contours at a time.
+    for i = 0,contourCt-1,contourBatchSize do
+        local contours = obj:getContourBatch(i, scaling_factor, contourBatchSize)
+        inspect(contours)
         app.addStrokes({
-            ["strokes"] = {
-                {
-                    ["x"] = x_points,
-                    ["y"] = y_points,
+                ["strokes"] = {
+                    contours
                 },
-            },
-            ["allowUndoRedoAction"] = "grouped",
-        })
+                ["allowUndoRedoAction"] = "grouped",
+            })
     end
+
+
+    -- TODO: This could be much, MUCH faster.
+    --for i = 0,contourCt-1,1 do
+    --    local pointCt = obj:getContourLength(i)
+    --    if (pointCt >= 3)
+    --    then
+    --        x_points, y_points = obj:getContour(i, scaling_factor)
+    --        app.addStrokes({
+    --            ["strokes"] = {
+    --                {
+    --                    ["x"] = x_points,
+    --                    ["y"] = y_points,
+    --                },
+    --            },
+    --            ["allowUndoRedoAction"] = "grouped",
+    --        })
+    --    end
+    --end
     print("Image Transcription Complete. Exiting Inkpath.")
 end
