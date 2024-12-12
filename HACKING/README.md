@@ -10,12 +10,16 @@ it from the 'Plugins' menu from within Xournalpp.
 
 ## Setting up the development environment
 
-This guide will walk you through everything you need to work on this project, including building OpenCV and Xournalpp.
+This guide will walk you through everything you need to work on this project,
+including building OpenCV and Xournalpp.
 
-(You should have all relevant development files (including this repo) located at `~/Code/xopp-dev`. This can be configured in `launch-environment.sh` by the `$CODE_PATH` variable)
+(You should have all relevant development files (including this repo) located
+at `~/Code/xopp-dev`. This can be configured in `launch-environment.sh` by the
+`$CODE_PATH` variable)
 
-- First, build the Dockerfile. This will download all the packages you need to compile inkpath and friends. OpenCV is the backend that now powers this project, and you might want Xournalpp as source code so you can debug more easily.
-
+- First, build the Dockerfile. This will download all the packages you need to
+compile inkpath and friends. OpenCV is the backend that now powers this project,
+and you might want Xournalpp as source code so you can debug more easily.
 
 ```
 podman build HACKING --tag xopp-dev
@@ -24,7 +28,11 @@ podman build HACKING --tag xopp-dev
 _That will build a Debian container. You can also build an Arch Linux container.
 Check `arch-test/README.md` for more info_
 
-- Next, launch it. This container will do Xforwarding for you so that you can run Xournalpp on your desktop and do development. All subsequent build stuff should happen in here.
+### If you are using Xorg
+
+- Next, launch it. This container will do Xforwarding for you so that you can
+run Xournalpp on your desktop and do development. All subsequent build stuff
+should happen in here.
 ```
 ./HACKING/launch-environment.sh
 ```
@@ -34,6 +42,11 @@ Check `arch-test/README.md` for more info_
 cd /xopp-dev/inkpath/
 make dev-install
 ```
+
+### If you are using Wayland
+
+If you're using Wayland, simply run the `launch-environment-wayland.sh` script
+after building the container.
 
 ## Using Arch
 There's also an arch-based container, if you're into that sort of thing.
