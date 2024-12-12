@@ -71,4 +71,11 @@ libgtksourceview-4-dev git gdb x11-apps wget unzip
 make install
 ```
 
+To compile for Windows with mingw, 
+
+```
+apt install mingw-64
+make lua-plugin CXX=x86_64-w64-mingw32-g++-posix
+```
+
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>

@@ -1,4 +1,5 @@
 CC=gcc
+CXX=g++
 
 # Warnings
 WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
@@ -26,13 +27,13 @@ build_dir:
 # Compiles and statically links Inkpath's OpenCV code to the necessary OpenCV libraries
 ipcv: $(cv_source)
 	@mkdir -p build
-	g++ -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC -static
+	$(CXX) -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC -static
 	@mv *.o build
 	ar -crsT build/libipcv.a build/*.o
 
 # Compiles Inkpath's shared object library
 lua-plugin: $(ip_source) ipcv
-	g++ $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
+	$(CXX) $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
 
 # Installs the plugin into your Xournalpp installation
 # FIXME: Not smart enough to avoid re-building the app every time :(
