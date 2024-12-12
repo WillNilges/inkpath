@@ -14,11 +14,11 @@ RUN apt-get install -y make liblua5.3-dev build-essential pkg-config libglib2.0-
 
 # Build and install OpenCV into the container
 COPY ./build-opencv.sh .
-RUN bash /build-opencv.sh 48
+RUN bash /build-opencv.sh 16
 
 # Build and install Xournal++
 COPY ./build-xopp.sh .
-RUN bash /build-xopp.sh 48
+RUN bash /build-xopp.sh 16
 
 # Install dev tools
 RUN apt-get install -y tmux gdb vim x11-apps tree nautilus eog 
