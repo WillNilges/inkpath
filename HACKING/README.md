@@ -28,25 +28,27 @@ podman build HACKING --tag xopp-dev
 _That will build a Debian container. You can also build an Arch Linux container.
 Check `arch-test/README.md` for more info_
 
+- Next, launch it. 
+
 ### If you are using Xorg
 
-- Next, launch it. This container will do Xforwarding for you so that you can
+This container will do Xforwarding for you so that you can
 run Xournalpp on your desktop and do development. All subsequent build stuff
 should happen in here.
 ```
 ./HACKING/launch-environment.sh
 ```
 
+### If you are using Wayland
+
+Run the `launch-environment-wayland.sh` script. This will expose wayland's display
+socket in the container for you to use.
+
 - If you did it right, you should have an `xopp-dev` directory in your container.
 ```
 cd /xopp-dev/inkpath/
 make dev-install
 ```
-
-### If you are using Wayland
-
-If you're using Wayland, simply run the `launch-environment-wayland.sh` script
-after building the container.
 
 ## Using Arch
 There's also an arch-based container, if you're into that sort of thing.
