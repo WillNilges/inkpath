@@ -78,4 +78,8 @@ apt install mingw-64
 make lua-plugin CXX=x86_64-w64-mingw32-g++-posix
 ```
 
+```
+make install LUA_VERSION=lua5.4 SO_NAME=ipcvobj.dll INSTALL_PATH='/c/Program\ Files/Xournal++/share/xournalpp/plugins'
+```
+
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>

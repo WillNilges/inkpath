@@ -10,14 +10,15 @@ LIGHT_WARNINGS = -Wall
 PLUGIN_NAME=ImageTranscription
 SO_NAME=ipcvobj.so
 XOPP_DEV_INSTALL_PATH=/xournalpp
-LUA_VERSION=lua53
+LUA_VERSION=lua54
+INSTALL_PATH=/usr/share/xournalpp/plugins/
 
 .PHONY: clean install uninstall dev-install dev-uninstall
 
 ip_source := $(wildcard src/ipcv_obj/*.cpp)
 cv_source := $(wildcard src/cv/*.cpp)
 
-lua_deps=`pkg-config --cflags --libs --static $(LUA_VERSION)`
+lua_deps=`pkg-config --cflags --libs $(LUA_VERSION)`
 cv_deps=`pkg-config --cflags --libs --static opencv4`
 
 .PHONY: build_dir
@@ -38,11 +39,11 @@ lua-plugin: $(ip_source) ipcv
 # Installs the plugin into your Xournalpp installation
 # FIXME: Not smart enough to avoid re-building the app every time :(
 install: lua-plugin
-	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
+	cp -r $(PLUGIN_NAME) $(INSTALL_PATH)
 
 # Remove the plugin files from the xournalpp install dir
 uninstall:
-	rm -rf /usr/share/xournalpp/plugins/$(PLUGIN_NAME)
+	rm -rf $(INSTALL_PATH)/$(PLUGIN_NAME)
 
 # Used to install the plugin into a source code repository of xournalpp
 dev-install: lua-plugin

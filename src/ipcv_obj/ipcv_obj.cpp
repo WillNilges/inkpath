@@ -1,5 +1,11 @@
 #include "ipcv_obj.h"
 
+#ifdef _WIN32
+#define WINEXPORT __declspec(dllexport)
+#else
+#define WINEXPORT
+#endif
+
 // Do OpenCV stuff
 int cv_perform_processing(const char* image_path, IPCVObj* data)
 {
@@ -97,8 +103,9 @@ static void register_ipcvobj(lua_State* L){
  
 extern "C" {
     // Program entry
-    int luaopen_ipcvobj(lua_State *L)
+    WINEXPORT int luaopen_ipcvobj(lua_State *L)
     {
+        printf("Hello world");
         luaL_openlibs(L);
         register_ipcvobj(L);
         return 1;
