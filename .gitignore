@@ -7,4 +7,5 @@ build/
 do.sh
 ImageTranscription/inkpath.so
 ImageTranscription/ipcvobj.so
+ImageTranscription/ipcvobj.dll
 *.gch

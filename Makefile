@@ -1,4 +1,5 @@
 CC=gcc
+CXX=g++
 
 # Warnings
 WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 -Winit-self \
@@ -9,14 +10,15 @@ LIGHT_WARNINGS = -Wall
 PLUGIN_NAME=ImageTranscription
 SO_NAME=ipcvobj.so
 XOPP_DEV_INSTALL_PATH=/xournalpp
-LUA_VERSION=lua53
+LUA_VERSION=lua54
+INSTALL_PATH=/usr/share/xournalpp/plugins/
 
 .PHONY: clean install uninstall dev-install dev-uninstall
 
 ip_source := $(wildcard src/ipcv_obj/*.cpp)
 cv_source := $(wildcard src/cv/*.cpp)
 
-lua_deps=`pkg-config --cflags --libs --static $(LUA_VERSION)`
+lua_deps=`pkg-config --cflags --libs $(LUA_VERSION)`
 cv_deps=`pkg-config --cflags --libs --static opencv4`
 
 .PHONY: build_dir
@@ -26,22 +28,22 @@ build_dir:
 # Compiles and statically links Inkpath's OpenCV code to the necessary OpenCV libraries
 ipcv: $(cv_source)
 	@mkdir -p build
-	g++ -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC -static
+	$(CXX) -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC -static
 	@mv *.o build
 	ar -crsT build/libipcv.a build/*.o
 
 # Compiles Inkpath's shared object library
 lua-plugin: $(ip_source) ipcv
-	g++ $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
+	$(CXX) $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
 
 # Installs the plugin into your Xournalpp installation
 # FIXME: Not smart enough to avoid re-building the app every time :(
 install: lua-plugin
-	cp -r $(PLUGIN_NAME) /usr/share/xournalpp/plugins/
+	cp -r $(PLUGIN_NAME) $(INSTALL_PATH)
 
 # Remove the plugin files from the xournalpp install dir
 uninstall:
-	rm -rf /usr/share/xournalpp/plugins/$(PLUGIN_NAME)
+	rm -rf $(INSTALL_PATH)/$(PLUGIN_NAME)
 
 # Used to install the plugin into a source code repository of xournalpp
 dev-install: lua-plugin
