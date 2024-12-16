@@ -32,6 +32,10 @@ Xournal++ API. Unlike the previous implementation, this operates purely on raste
 
 ## Installation and Usage
 
+1. Download compiled version from release page (Windows or Linux)
+
+2. Unzip and copy plugin folder to appropriate path (check Xournalpp documentation)
+
 Inkpath is packaged as a statically-linked `.so` file coupled with a Lua script,
 so you should be able to download the release from the [releases page](https://github.com/WillNilges/inkpath/releases)
 and have it Just Work™.
@@ -70,6 +74,27 @@ libgtksourceview-4-dev git gdb x11-apps wget unzip
 ./HACKING/build-xopp.sh $NUMBER_OF_CORES_YOU_HAVE # You'll probably need sudo to install this too
 make install
 ```
+
+### Windows
+
+1. Install MSYS2
+
+2. Open MSYS2 MINGW64 shell
+
+3. Install dependencies
+
+```
+pacman -S cmake mingw-w64-x86_64-gtk3 base-devel libxml2 mingw-w64-x86_64-portaudio mingw-w64-x86_64-libsndfile mingw-w64-x86_64-poppler mingw-w64-x86_64-libzip mingw-w64-x86_64-lua54 mingw-w64-x86_64-lua54-lgi mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-opencv wget unzip git tmux
+```
+
+4. Run `make install`
+
+```
+make install LUA_VERSION=lua5.4 SO_NAME=ipcvobj.dll  INSTALL_PATH='/c/Program\ Files/Xournal++/share/xournalpp/plugins'
+```
+
+### MinGW Debian not working
+
 
 To compile for Windows with mingw, 
 
