@@ -106,34 +106,6 @@ extern "C" {
     WINEXPORT int luaopen_ipcvobj(lua_State *L)
     {
         printf("Entered Inkpath.");
-        #ifdef _WIN32
-        // This feels janky but it works for now(tm): Add Inkpath's plugin
-        // folder to the path so that Xournal++ can locate the requisite dlls
-
-        //const char* inkpathLibPath = "C:\\Users\\willard\\AppData\\Local\\xournalpp\\plugins\\Inkpath\\lib";
-
-        const char* inkpathLibPath = "C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
-
-        // Get the current PATH
-        char currentPath[MAX_PATH];
-        GetEnvironmentVariable("Path", currentPath, MAX_PATH);
-
-        // Check if Inkpath is already in the PATH
-        if (strstr(currentPath, inkpathLibPath) == nullptr) {
-            // Append to current PATH
-            strcat(currentPath, ";");
-            strcat(currentPath, inkpathLibPath);
-
-            // Set the new PATH environment variable
-            SetEnvironmentVariable("Path", currentPath);
-
-            std::cout << "Path updated successfully!" << std::endl;
-        } else {
-            std::cout << "Inkpath is already in the Path variable." << std::endl;
-        }
-
-        #endif
-
         luaL_openlibs(L);
         register_ipcvobj(L);
 
