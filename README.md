@@ -84,27 +84,34 @@ make install
 3. Install dependencies
 
 ```
-pacman -S cmake mingw-w64-x86_64-gtk3 base-devel libxml2 mingw-w64-x86_64-portaudio mingw-w64-x86_64-libsndfile mingw-w64-x86_64-poppler mingw-w64-x86_64-libzip mingw-w64-x86_64-lua54 mingw-w64-x86_64-lua54-lgi mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-opencv wget unzip git tmux
+pacman -S \
+mingw-w64-x86_64-cmake mingw-w64-x86_64-gtk3 base-devel libxml2 mingw-w64-x86_64-portaudio mingw-w64-x86_64-libsndfile mingw-w64-x86_64-poppler mingw-w64-x86_64-libzip mingw-w64-x86_64-lua54 mingw-w64-x86_64-lua54-lgi mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-opencv wget unzip git tmux
 ```
 
-4. Run `make install`
+4. Use `cmake`
 
 ```
-make install LUA_VERSION=lua5.4 SO_NAME=ipcvobj.dll  INSTALL_PATH='/c/Program\ Files/Xournal++/share/xournalpp/plugins'
-```
+mkdir build
+cd build
+${MINGW_PREFIX}/bin/cmake -G "MinGW Makefiles"
+mingw32-make
 
-### MinGW Debian not working
-
-
-To compile for Windows with mingw, 
-
-```
-apt install mingw-64
-make lua-plugin CXX=x86_64-w64-mingw32-g++-posix
-```
+5. Install Plugin
 
 ```
-make install LUA_VERSION=lua5.4 SO_NAME=ipcvobj.dll INSTALL_PATH='/c/Program\ Files/Xournal++/share/xournalpp/plugins'
+ldd libipcvobj.dll | grep mingw64 | awk '{ print $3 }' | xargs -I {} cp {} ./lib
 ```
+
+6. In an admin MSYS2 MINGW64 shell...
+
+```
+cd build
+cp lib/* "/c/Program Files/Xournal++/bin"
+mkdir ImageTranscription/
+cp libipcvobj.dll ../plugin/* ImageTranscription
+```
+
+7. Run Xournal++ and enjoy
+
 
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
