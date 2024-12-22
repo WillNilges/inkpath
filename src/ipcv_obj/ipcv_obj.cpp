@@ -105,9 +105,41 @@ extern "C" {
     // Program entry
     WINEXPORT int luaopen_ipcvobj(lua_State *L)
     {
-        printf("Hello world");
+        printf("Entered Inkpath.");
+        #ifdef _WIN32
+        // Add Inkpath's directory to the DLL search path
+        //const wchar_t* dllDirectory = L"C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
+        //const char* newPath = "C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
+
+
+        //const char* inkpathLibPath = "C:\\Users\\willard\\AppData\\Local\\xournalpp\\plugins\\Inkpath\\lib";
+
+        const char* inkpathLibPath = "C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
+
+
+        // Get the current PATH
+        char currentPath[MAX_PATH];
+        GetEnvironmentVariable("PATH", currentPath, MAX_PATH);
+
+        // Check if the new path is already in the PATH
+        if (strstr(currentPath, newPath) == nullptr) {
+            // Append the new path to the current PATH
+            strcat(currentPath, ";");
+            strcat(currentPath, newPath);
+
+            // Set the new PATH environment variable
+            SetEnvironmentVariable("PATH", currentPath);
+
+            std::cout << "PATH updated successfully!" << std::endl;
+        } else {
+            std::cout << "Path is already in the PATH variable." << std::endl;
+        }
+
+        #endif
+
         luaL_openlibs(L);
         register_ipcvobj(L);
+
         return 1;
     }
 }

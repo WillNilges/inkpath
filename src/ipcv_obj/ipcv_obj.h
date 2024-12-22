@@ -2,6 +2,9 @@
 #define IPCV_OBJ
 
 #ifdef _WIN32
+#include <windows.h>
+#include <libloaderapi.h>
+#include <winbase.h>
 #define WINEXPORT __declspec(dllexport)
 #else
 #define WINEXPORT __declspec(dllimport) // IDK What this does but it'll probs break my shit
