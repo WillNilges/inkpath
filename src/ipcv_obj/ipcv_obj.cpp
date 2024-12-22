@@ -107,32 +107,29 @@ extern "C" {
     {
         printf("Entered Inkpath.");
         #ifdef _WIN32
-        // Add Inkpath's directory to the DLL search path
-        //const wchar_t* dllDirectory = L"C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
-        //const char* newPath = "C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
-
+        // This feels janky but it works for now(tm): Add Inkpath's plugin
+        // folder to the path so that Xournal++ can locate the requisite dlls
 
         //const char* inkpathLibPath = "C:\\Users\\willard\\AppData\\Local\\xournalpp\\plugins\\Inkpath\\lib";
 
         const char* inkpathLibPath = "C:\\Program Files\\Xournal++\\share\\xournalpp\\plugins\\ImageTranscription";
 
-
         // Get the current PATH
         char currentPath[MAX_PATH];
-        GetEnvironmentVariable("PATH", currentPath, MAX_PATH);
+        GetEnvironmentVariable("Path", currentPath, MAX_PATH);
 
-        // Check if the new path is already in the PATH
-        if (strstr(currentPath, newPath) == nullptr) {
-            // Append the new path to the current PATH
+        // Check if Inkpath is already in the PATH
+        if (strstr(currentPath, inkpathLibPath) == nullptr) {
+            // Append to current PATH
             strcat(currentPath, ";");
-            strcat(currentPath, newPath);
+            strcat(currentPath, inkpathLibPath);
 
             // Set the new PATH environment variable
-            SetEnvironmentVariable("PATH", currentPath);
+            SetEnvironmentVariable("Path", currentPath);
 
-            std::cout << "PATH updated successfully!" << std::endl;
+            std::cout << "Path updated successfully!" << std::endl;
         } else {
-            std::cout << "Path is already in the PATH variable." << std::endl;
+            std::cout << "Inkpath is already in the Path variable." << std::endl;
         }
 
         #endif
