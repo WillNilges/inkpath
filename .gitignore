@@ -5,7 +5,8 @@ out*
 build/
 *.svg
 do.sh
+ImageTranscription/
 ImageTranscription/inkpath.so
 ImageTranscription/ipcvobj.so
-ImageTranscription/ipcvobj.dll
+ImageTranscription/*.dll
 *.gch

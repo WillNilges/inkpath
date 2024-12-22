@@ -7,7 +7,7 @@ end
 -- Callback if the menu item is executed
 function drawStroke()
     print("Inkpath Activated. Transcribing image....")
-    inkpath = assert(package.loadlib([[C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription\ipcvobj.dll]], "luaopen_ipcvobj"))
+    inkpath = assert(package.loadlib([[C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription\libipcvobj.dll]], "luaopen_ipcvobj"))
     inkpath()
     path = app.getFilePath({'*.jpg', '*.png', '*.bmp'}) -- The current version of Autotrace I'm using only supports PNGs.
     --image_scale = app.msgbox("Select tracing scale", {[1] = "Small", [2] = "Medium", [3] = "Large"}) -- TODO: implement this again.

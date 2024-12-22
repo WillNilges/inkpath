@@ -1,6 +1,12 @@
 #ifndef IPCV_OBJ
 #define IPCV_OBJ
 
+#ifdef _WIN32
+#define WINEXPORT __declspec(dllexport)
+#else
+#define WINEXPORT __declspec(dllimport) // IDK What this does but it'll probs break my shit
+#endif
+
 /*
  * This is a barebones-af interface for allowing Lua to get data directly™ from OpenCV
  * */
@@ -45,5 +51,7 @@ static int ipcvobj_getContourLength(lua_State* L);
 
 // Receiving data
 static int ipcvobj_getContour(lua_State* L);
+
+extern "C" WINEXPORT int luaopen_ipcvobj(lua_State *L);
 
 #endif

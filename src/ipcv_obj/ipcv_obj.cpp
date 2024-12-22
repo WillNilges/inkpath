@@ -100,7 +100,7 @@ static void register_ipcvobj(lua_State* L){
 	lua_pushcfunction(L, ipcvobj_getContour); lua_setfield(L, -2, "getContour");
 	lua_pop(L, 1);
 }
- 
+
 extern "C" {
     // Program entry
     WINEXPORT int luaopen_ipcvobj(lua_State *L)

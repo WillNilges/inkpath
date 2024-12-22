@@ -33,7 +33,7 @@ ipcv: $(cv_source)
 	ar -crsT build/libipcv.a build/*.o
 
 # Compiles Inkpath's shared object library
-lua-plugin: $(ip_source) ipcv
+lua-plugin: $(ip_source)
 	$(CXX) $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(PLUGIN_NAME)/$(SO_NAME)
 
 # Installs the plugin into your Xournalpp installation
