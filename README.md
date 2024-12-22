@@ -88,28 +88,21 @@ pacman -S \
 mingw-w64-x86_64-cmake mingw-w64-x86_64-gtk3 base-devel libxml2 mingw-w64-x86_64-portaudio mingw-w64-x86_64-libsndfile mingw-w64-x86_64-poppler mingw-w64-x86_64-libzip mingw-w64-x86_64-lua54 mingw-w64-x86_64-lua54-lgi mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-opencv wget unzip git tmux
 ```
 
-4. Use `cmake`
+4. Use `cmake` to build and run post-build script to gather dependencies and assemble the plugin
 
 ```
 mkdir build
 cd build
 ${MINGW_PREFIX}/bin/cmake -G "MinGW Makefiles"
 mingw32-make
-
-5. Install Plugin
-
-```
-ldd libipcvobj.dll | grep mingw64 | awk '{ print $3 }' | xargs -I {} cp {} ./lib
+./../windows-post-build.sh
 ```
 
-6. In an admin MSYS2 MINGW64 shell...
+5. Copy ./build/ImageTranscription to the plugin path:
 
-```
-cd build
-cp lib/* "/c/Program Files/Xournal++/bin"
-mkdir ImageTranscription/
-cp libipcvobj.dll ../plugin/* ImageTranscription
-```
+`C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
+
+6. Run install.ps1 to update the user Path
 
 7. Run Xournal++ and enjoy
 

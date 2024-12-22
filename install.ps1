@@ -1,4 +1,4 @@
-
+# Inkpath stores its dependencies in the plugin folder on Windows. To make this work, we need to update the path to allow Xournal++ to see the dependencies, so we use this Powershell script to do that.
 
 $inkpathLibPath = "C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription"
 
