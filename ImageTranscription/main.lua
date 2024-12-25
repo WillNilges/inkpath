@@ -31,5 +31,6 @@ function drawStroke()
             ["allowUndoRedoAction"] = "grouped",
         })
     end
+    app.refreshPage() -- Refreshes the page after inserting the strokes.
     print("Image Transcription Complete. Exiting Inkpath.")
 end
