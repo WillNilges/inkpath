@@ -84,7 +84,7 @@ Shapes find_shapes(Mat img, std::string output_path) {
         // if(area < min_area)
         //     contours.erase(contours.begin() + i);
 
-        // This shit doesn't work
+        // This doesn't work
         //int points = contours[i].size();
         //if (points < min_points)
         //    cout << "Found short contour. Removing...\n";
