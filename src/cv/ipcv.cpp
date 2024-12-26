@@ -1,11 +1,50 @@
 #include "ipcv.h"
+#include <iostream>
+
+
+Mat burger(Mat img, std::string output_path) {
+    // Convert the image to HSV color space
+    cv::Mat hsvImage;
+    cv::cvtColor(img, hsvImage, cv::COLOR_BGR2HSV);
+
+    // Split the HSV image into channels
+    std::vector<cv::Mat> hsvChannels;
+    cv::split(hsvImage, hsvChannels);
+
+    // Extract the hue channel
+    cv::Mat hueChannel = hsvChannels[0];
+    
+
+    // Get the number of channels
+    int c = img.channels();
+    std::cout << "Number of channels in the image: " << c << std::endl;
+
+
+    Mat hsv;
+    cvtColor(img,hsv,COLOR_BGR2HSV);
+
+    std::vector<cv::Mat> channels;
+    split(hsv, channels);
+
+    Mat H = channels[0];
+    Mat S = channels[1];
+    Mat V = channels[2];
+    
+    //Mat downsampled;
+    //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
+    if (output_path != "") {
+        imwrite(output_path, H);
+        std::cout << "Image has been written to " << output_path << "\n";
+    }
+
+    return H;
+}
 
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where the hell did I find this?
 Mat skeletonize(Mat img_inv, std::string output_path) {
-    Mat img;
-    bitwise_not(img_inv, img);
+    Mat img = img_inv;
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
     cv::Mat temp;
     cv::Mat eroded;
@@ -76,6 +115,15 @@ Shapes find_shapes(Mat img, std::string output_path) {
     findContours( src, contours, hierarchy,
         RETR_TREE, CHAIN_APPROX_SIMPLE );
 
+    // Try to connect contours
+    vector<Rect> boundRect( contours.size() );
+    for (int i = 0; i >= 0; i = hierarchy[i][0])
+    {
+        boundRect[i] = boundingRect( contours[i] );
+    }
+    
+    // Try to group contours
+
     // Remove contours that are too small.
     /*int min_points=2; // area threshold
     for(int i = 0; i< contours.size(); i++) // iterate through each contour.
@@ -100,6 +148,7 @@ Shapes find_shapes(Mat img, std::string output_path) {
         {
             Scalar color( rand()&255, rand()&255, rand()&255 );
             drawContours( dst, contours, idx, color, FILLED, 8, hierarchy );
+            //rectangle( dst, boundRect[idx].tl(), boundRect[idx].br(), color, 2 );
         }
 
         imwrite(output_path, dst);

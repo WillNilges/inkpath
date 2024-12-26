@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
@@ -13,6 +14,7 @@ typedef struct Shapes {
     vector<Vec4i> hierarchy;
 } Shapes;
 
+Mat burger(Mat img_inv, std::string output_path);
 Mat skeletonize(Mat img_inv, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
 Shapes find_shapes(Mat img, std::string output_path);
