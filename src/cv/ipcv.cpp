@@ -118,56 +118,29 @@ Shapes find_shapes(Mat img, std::string output_path) {
     vector<Vec4i> hierarchy;
     findContours(src, contours, hierarchy,
         RETR_TREE, CHAIN_APPROX_SIMPLE );
-
-    // Try to connect contours
-    /*
-    vector<Rect> boundRect( contours.size() );
-    for (int i = 0; i >= 0; i = hierarchy[i][0])
-    {
-        boundRect[i] = boundingRect( contours[i] );
-    }
-    */
-
-    //for (int i = 0; i <= hierarchy.size(); i++) {
-    //    cout << hierarchy[i];
-    //}
-   
-    // Set a minimum area threshold
+    
+    // Remove contours that are too small in order to "de-noise" the image 
+    // a little
     double minArea = 2.0;
-
-    // Remove contours below the threshold
     contours.erase(remove_if(contours.begin(), contours.end(),
         [minArea](const vector<Point>& contour) {
             return contourArea(contour) < minArea;
         }), contours.end());
-
-    // Optional: Draw remaining contours on a new image
-    for (size_t i = 0; i < contours.size(); i++) {
-        drawContours(dst, contours, (int)i, Scalar(0, 255, 0), 2, LINE_8, hierarchy, 0);
-    }
-
-    //imshow("Contours", dst); 
-
+    
     if (output_path != "") {
-        /*
         // iterate through all the top-level contours,
         // draw each connected component with its own random color
-        int idx = 0;
-        for( ; idx >= 0; idx = hierarchy[idx][0] )
-        {
-            Scalar color( rand()&255, rand()&255, rand()&255 );
-            vector<Vec4i> hierarchy2;
-            drawContours( dst, contours, idx, color, FILLED, 8, hierarchy2 );
-            //rectangle( dst, boundRect[idx].tl(), boundRect[idx].br(), color, 2 );
-        }
-        */
+        for (size_t i = 0; i < contours.size(); i++) {
+            Scalar color( rand()&255, rand()&255, rand()&255 ); // Random color
+            drawContours(dst, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+        }   
 
         imwrite(output_path, dst);
         std::cout << "Image has been written to " << output_path << "\n";
     }
 
-    return Shapes{contours, hierarchy};
-}
+        return Shapes{contours, hierarchy};
+    }
 
 // FIXME: This shouldn't be necessary when I'm done >:)
 void prep_otsu(char* image_path)
