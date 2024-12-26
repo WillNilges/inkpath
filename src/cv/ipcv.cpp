@@ -27,24 +27,28 @@ Mat burger(Mat img, std::string output_path) {
     split(hsv, channels);
 
     Mat H = channels[0];
-    Mat S = channels[1];
-    Mat V = channels[2];
+
+    // Now draw a rectangle around the darkest edge
+
+    cv::Mat otsuH = otsu(H, "");
+
+    cv::Mat cannyH;
+    cv::Canny(otsuH, cannyH, 100, 50);
     
-    //Mat downsampled;
-    //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
     if (output_path != "") {
-        imwrite(output_path, H);
+        imwrite(output_path, cannyH);
         std::cout << "Image has been written to " << output_path << "\n";
     }
 
-    return H;
+    return cannyH;
 }
 
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where the hell did I find this?
 Mat skeletonize(Mat img_inv, std::string output_path) {
-    Mat img = img_inv;
+    Mat img;
+    bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
     cv::Mat temp;
     cv::Mat eroded;
@@ -112,44 +116,51 @@ Shapes find_shapes(Mat img, std::string output_path) {
     //imshow( "Source", src );
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
-    findContours( src, contours, hierarchy,
+    findContours(src, contours, hierarchy,
         RETR_TREE, CHAIN_APPROX_SIMPLE );
 
     // Try to connect contours
+    /*
     vector<Rect> boundRect( contours.size() );
     for (int i = 0; i >= 0; i = hierarchy[i][0])
     {
         boundRect[i] = boundingRect( contours[i] );
     }
-    
-    // Try to group contours
+    */
 
-    // Remove contours that are too small.
-    /*int min_points=2; // area threshold
-    for(int i = 0; i< contours.size(); i++) // iterate through each contour.
-    {
-        // double area=contourArea(contours[i],false); // Find the area of contour
-        // if(area < min_area)
-        //     contours.erase(contours.begin() + i);
+    //for (int i = 0; i <= hierarchy.size(); i++) {
+    //    cout << hierarchy[i];
+    //}
+   
+    // Set a minimum area threshold
+    double minArea = 2.0;
 
-        // This doesn't work
-        //int points = contours[i].size();
-        //if (points < min_points)
-        //    cout << "Found short contour. Removing...\n";
-        //    contours.erase(contours.begin() + i);
-        //    hierarchy.erase(hierarchy.begin() + i);
-    }*/
+    // Remove contours below the threshold
+    contours.erase(remove_if(contours.begin(), contours.end(),
+        [minArea](const vector<Point>& contour) {
+            return contourArea(contour) < minArea;
+        }), contours.end());
+
+    // Optional: Draw remaining contours on a new image
+    for (size_t i = 0; i < contours.size(); i++) {
+        drawContours(dst, contours, (int)i, Scalar(0, 255, 0), 2, LINE_8, hierarchy, 0);
+    }
+
+    //imshow("Contours", dst); 
 
     if (output_path != "") {
+        /*
         // iterate through all the top-level contours,
         // draw each connected component with its own random color
         int idx = 0;
         for( ; idx >= 0; idx = hierarchy[idx][0] )
         {
             Scalar color( rand()&255, rand()&255, rand()&255 );
-            drawContours( dst, contours, idx, color, FILLED, 8, hierarchy );
+            vector<Vec4i> hierarchy2;
+            drawContours( dst, contours, idx, color, FILLED, 8, hierarchy2 );
             //rectangle( dst, boundRect[idx].tl(), boundRect[idx].br(), color, 2 );
         }
+        */
 
         imwrite(output_path, dst);
         std::cout << "Image has been written to " << output_path << "\n";

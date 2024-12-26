@@ -56,7 +56,7 @@ dev-uninstall:
 # For generating a CV debugging binary
 ipcv-debug: $(cv_source) 
 	mkdir -p build
-	g++ src/cv/debug/debug.cpp $(cv_source) $(cv_deps) -static -o build/ipcv
+	g++ src/cv/debug/debug.cpp $(cv_source) $(cv_deps) -static -o build/ipcv-debug
 
 help:
 	@echo ipcv lua-plugin install uninstall dev-install dev-uninstall ipcv-debug
