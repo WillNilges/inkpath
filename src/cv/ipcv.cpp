@@ -38,7 +38,7 @@ void find_squares(Mat& image, vector<vector<Point> >& squares)
             // Canny helps to catch squares with gradient shading
             if (l == 0)
             {
-                Canny(gray0, gray, 10, 20, 3); // 
+                Canny(gray0, gray, 10, 20, 3);
 
                 // Dilate helps to remove potential holes between edge segments
                 dilate(gray, gray, Mat(), Point(-1,-1));
