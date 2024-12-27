@@ -35,6 +35,15 @@ void print_points(Shapes shapes)
     }
 }
 
+
+void drawSquares(Mat& image, const vector<vector<Point>>& squares) {
+    // Iterate over each square
+    for (const auto& square : squares) {
+        // Draw the polygon (square) using polylines
+        polylines(image, square, true, Scalar(0, 255, 0), 2, LINE_AA);
+    }
+}
+
 // Test function
 int main(int argc, char *argv[])
 {
@@ -113,12 +122,36 @@ int main(int argc, char *argv[])
         }
     }
     std::cout << "Using: " << path_string << file_title << "\n";
+
+    Mat squar_input;
+    squar_input = color_img;
+
+    vector<vector<Point>> squares;
+    find_squares(squar_input, squares);
+    for (int i = 0; i < squares.size(); i++) {
+        std::cout << squares[i] << "\n";
+    }
+
+    drawSquares(squar_input, squares);
+
+    std::string opath = path_string + "squar_" + file_title;
+
+    if (opath != "") {
+        imwrite(opath, squar_input);
+        std::cout << "Image has been written to " << opath << "\n";
+    }
+
+    /*
+    Mat color_reduced_img = processColors(color_img, path_string + "color_" + file_title);
+
+    //Mat hough_img = hough(img, path_string + "hough_" + file_title);
     
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
 
     //print_points(shapes);
+    */
 
 
     return 0;
