@@ -15,8 +15,36 @@ double angle( Point pt1, Point pt2, Point pt0 )
 }
 
 // https://stackoverflow.com/a/8863060/6095682
-void find_squares(Mat& image, vector<vector<Point> >& squares)
-{
+void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_string, std::string file_title)
+{ 
+    //TODO: Try converting to other color spaces. Doing this drastically improves
+    // results on images like IMG_0390.jpg (Senior design whiteboard)
+    /*
+    Mat hsv;
+    cvtColor(image,hsv,COLOR_BGR2HSV);
+
+    std::vector<cv::Mat> channels;
+    split(hsv, channels);
+
+    Mat H = channels[0];
+    Mat S = channels[1];
+    Mat V = channels[2];
+
+    imwrite(path_string + "thresh_H" + file_title, H);
+    imwrite(path_string + "thresh_S" + file_title, S);
+    imwrite(path_string + "thresh_V" + file_title, V);
+
+    image = hsv;
+    */
+    
+
+    // Make a border around the whole image to help with detecting boards who go
+    // to the edge of the image
+    int border_width = 10;
+    int borderType = BORDER_CONSTANT;
+    Scalar value(0, 0, 0);
+    copyMakeBorder(image, image, border_width, border_width, border_width, border_width, borderType, value );
+
     // blur will enhance edge detection
     Mat blurred(image);
     medianBlur(image, blurred, 9);
@@ -47,6 +75,12 @@ void find_squares(Mat& image, vector<vector<Point> >& squares)
             {
                     gray = gray0 >= (l+1) * 255 / threshold_level;
             }
+
+            // Otsu isn't great for the general case
+            // gray = otsu(gray0, "");
+            //adaptiveThreshold(gray0,gray,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,2);
+             
+            imwrite(path_string + "thresh_" + to_string(threshold_level) + file_title, gray);
 
             // Find contours and store them in a list
             findContours(gray, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);

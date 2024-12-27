@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     squar_input = color_img;
 
     vector<vector<Point>> squares;
-    find_squares(squar_input, squares);
+    find_squares(squar_input, squares, path_string, file_title);
     for (int i = 0; i < squares.size(); i++) {
         std::cout << squares[i] << "\n";
     }
@@ -140,18 +140,15 @@ int main(int argc, char *argv[])
         imwrite(opath, squar_input);
         std::cout << "Image has been written to " << opath << "\n";
     }
+    
 
     /*
-    Mat color_reduced_img = processColors(color_img, path_string + "color_" + file_title);
-
-    //Mat hough_img = hough(img, path_string + "hough_" + file_title);
-    
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
+    */
 
     //print_points(shapes);
-    */
 
 
     return 0;

@@ -14,7 +14,7 @@ typedef struct Shapes {
     vector<Vec4i> hierarchy;
 } Shapes;
 
-void find_squares(Mat& image, vector<vector<Point> >& squares);
+void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_string, std::string file_title);
 Mat processColors(Mat& img, std::string output_path);
 Mat hough(Mat src, std::string output_path);
 Mat crop(Mat img, std::string output_path);
