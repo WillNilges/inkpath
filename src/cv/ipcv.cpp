@@ -1,80 +1,53 @@
 #include "ipcv.h"
 #include <iostream>
 
+Mat hough(Mat src, std::string output_path) {
+    // Edge detection
+    Mat dst;
+    Mat cdst;
+    Mat cdstP;
+    
+    // Edge detection
+    Canny(src, dst, 50, 200, 3);
+    // Copy edges to the images that will display the results in BGR
+    cvtColor(dst, cdst, COLOR_GRAY2BGR);
+    cdstP = cdst.clone();
 
-Mat crop(Mat img, std::string output_path) {
-    // Convert the image to HSV color space
-    cv::Mat hsvImage;
-    cv::cvtColor(img, hsvImage, cv::COLOR_BGR2HSV);
-
-    // Split the HSV image into channels
-    std::vector<cv::Mat> hsvChannels;
-    cv::split(hsvImage, hsvChannels);
-
-    // Extract the hue channel
-    cv::Mat hueChannel = hsvChannels[0];
-
-    Mat hsv;
-    cvtColor(img, hsv, COLOR_BGR2HSV);
-
-    std::vector<cv::Mat> channels;
-    split(hsv, channels);
-
-    Mat H = channels[0];
-
-    // Now draw a rectangle around the darkest edge
-    //cv::Mat otsuH = otsu(H, "");
-
-    //cv::Mat cannyH;
-    //cv::Canny(otsuH, cannyH, 100, 50);
-
-    // Invert and otsu for better results
-    Mat burger_img_inv;
-    bitwise_not(H, burger_img_inv);
-
-    Mat otsu_burger_img_inv = otsu(burger_img_inv, "");
-
-    // Dialate to try to smooth the guy
-    cv::Mat temp;
-    cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
-    for (int i = 0; i < 25; i++)
+    // Standard Hough Line Transform
+    /*
+    vector<Vec2f> lines; // will hold the results of the detection
+    HoughLines(dst, lines, 1, CV_PI/180, 150, 500, 0 ); // runs the actual detection
+    // Draw the lines
+    for( size_t i = 0; i < lines.size(); i++ )
     {
-        cv::dilate(otsu_burger_img_inv, temp, element); // temp = open(img)
-        otsu_burger_img_inv = temp;
+        float rho = lines[i][0], theta = lines[i][1];
+        Point pt1, pt2;
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+        pt1.x = cvRound(x0 + 1000*(-b));
+        pt1.y = cvRound(y0 + 1000*(a));
+        pt2.x = cvRound(x0 - 1000*(-b));
+        pt2.y = cvRound(y0 - 1000*(a));
+        line( cdst, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
+    }*/
+
+    // Probabilistic Line Transform
+    vector<Vec4i> linesP; // will hold the results of the detection
+    HoughLinesP(dst, linesP, 1, CV_PI/180, 50, 150, 10 ); // runs the actual detection
+    // Draw the lines
+    for( size_t i = 0; i < linesP.size(); i++ )
+    {
+        Vec4i l = linesP[i];
+        line( cdstP, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
     }
 
-    Mat output = otsu_burger_img_inv;
-    
+    //Mat downsampled;
+    //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
     if (output_path != "") {
-        imwrite(output_path, output);
+        imwrite(output_path, cdstP);
         std::cout << "Image has been written to " << output_path << "\n";
     }
-
-    return output;
-}
-
-Mat hough(Mat img, std::string output_path) {
-    vector<vector<Point>> contours;
-    vector<Vec4i> hierarchy;
-    findContours(src, contours, hierarchy,
-        RETR_TREE, CHAIN_APPROX_SIMPLE );
-    
-    // Remove contours that are too big.
-    double maxArea = 0.2 * img.width * img.height;
-    contours.erase(remove_if(contours.begin(), contours.end(),
-        [minArea](const vector<Point>& contour) {
-            return contourArea(contour) > maxArea;
-        }), contours.end());
-
-    Mat output = otsu_burger_img_inv;
-    
-    if (output_path != "") {
-        imwrite(output_path, output);
-        std::cout << "Image has been written to " << output_path << "\n";
-    }
-
-    return output;
-
+    return cdstP;
 }
 
 // Skeletonization algorithm. I might mess around with this
@@ -98,7 +71,7 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
       cv::bitwise_or(skel, temp, skel);
       eroded.copyTo(img);
      
-      done = (cv::countNonZero(ipg) == 0);
+      done = (cv::countNonZero(img) == 0);
     } while (!done);
 
     Mat skel_invert;
