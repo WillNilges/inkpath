@@ -100,7 +100,6 @@ int main(int argc, char *argv[])
     }
 
     // Separate the file title from the rest of the path
-    // FIXME: This feels awful, but I don't know enough about C++ to be sure.
     std::vector<std::string> path_vec = adv_tokenizer(output_path, '/');
     std::string file_title = path_vec.back();
     path_vec.pop_back();
@@ -115,16 +114,12 @@ int main(int argc, char *argv[])
     }
     std::cout << "Using: " << path_string << file_title << "\n";
 
-    /*
+    
     // Get the Hue value of the image and use it to crop the area of interest
-    Mat burger_img = burger(color_img, path_string + "burg_" + file_title);
-
-    // Invert and otsu for better results
-    Mat burger_img_inv;
-    bitwise_not(burger_img, burger_img_inv);
-    */
+    Mat hough_img = hough(color_img, path_string + "hough_" + file_title);
     
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
+
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
 

@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-Mat burger(Mat img, std::string output_path) {
+Mat crop(Mat img, std::string output_path) {
     // Convert the image to HSV color space
     cv::Mat hsvImage;
     cv::cvtColor(img, hsvImage, cv::COLOR_BGR2HSV);
@@ -13,15 +13,9 @@ Mat burger(Mat img, std::string output_path) {
 
     // Extract the hue channel
     cv::Mat hueChannel = hsvChannels[0];
-    
-
-    // Get the number of channels
-    int c = img.channels();
-    std::cout << "Number of channels in the image: " << c << std::endl;
-
 
     Mat hsv;
-    cvtColor(img,hsv,COLOR_BGR2HSV);
+    cvtColor(img, hsv, COLOR_BGR2HSV);
 
     std::vector<cv::Mat> channels;
     split(hsv, channels);
@@ -29,18 +23,58 @@ Mat burger(Mat img, std::string output_path) {
     Mat H = channels[0];
 
     // Now draw a rectangle around the darkest edge
+    //cv::Mat otsuH = otsu(H, "");
 
-    cv::Mat otsuH = otsu(H, "");
+    //cv::Mat cannyH;
+    //cv::Canny(otsuH, cannyH, 100, 50);
 
-    cv::Mat cannyH;
-    cv::Canny(otsuH, cannyH, 100, 50);
+    // Invert and otsu for better results
+    Mat burger_img_inv;
+    bitwise_not(H, burger_img_inv);
+
+    Mat otsu_burger_img_inv = otsu(burger_img_inv, "");
+
+    // Dialate to try to smooth the guy
+    cv::Mat temp;
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(3, 3));
+    for (int i = 0; i < 25; i++)
+    {
+        cv::dilate(otsu_burger_img_inv, temp, element); // temp = open(img)
+        otsu_burger_img_inv = temp;
+    }
+
+    Mat output = otsu_burger_img_inv;
     
     if (output_path != "") {
-        imwrite(output_path, cannyH);
+        imwrite(output_path, output);
         std::cout << "Image has been written to " << output_path << "\n";
     }
 
-    return cannyH;
+    return output;
+}
+
+Mat hough(Mat img, std::string output_path) {
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+    findContours(src, contours, hierarchy,
+        RETR_TREE, CHAIN_APPROX_SIMPLE );
+    
+    // Remove contours that are too big.
+    double maxArea = 0.2 * img.width * img.height;
+    contours.erase(remove_if(contours.begin(), contours.end(),
+        [minArea](const vector<Point>& contour) {
+            return contourArea(contour) > maxArea;
+        }), contours.end());
+
+    Mat output = otsu_burger_img_inv;
+    
+    if (output_path != "") {
+        imwrite(output_path, output);
+        std::cout << "Image has been written to " << output_path << "\n";
+    }
+
+    return output;
+
 }
 
 // Skeletonization algorithm. I might mess around with this
@@ -64,7 +98,7 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
       cv::bitwise_or(skel, temp, skel);
       eroded.copyTo(img);
      
-      done = (cv::countNonZero(img) == 0);
+      done = (cv::countNonZero(ipg) == 0);
     } while (!done);
 
     Mat skel_invert;
@@ -141,15 +175,3 @@ Shapes find_shapes(Mat img, std::string output_path) {
 
         return Shapes{contours, hierarchy};
     }
-
-// FIXME: This shouldn't be necessary when I'm done >:)
-void prep_otsu(char* image_path)
-{
-    Mat img = imread(image_path, 0);
-    if(img.empty())
-    {
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return;
-    }
-    otsu(img, image_path);
-}
