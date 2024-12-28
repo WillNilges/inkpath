@@ -123,11 +123,14 @@ int main(int argc, char *argv[])
     }
     std::cout << "Using: " << path_string << file_title << "\n";
 
-    Mat squar_input;
+    Mat squar_input, squar_input_hsv;
     squar_input = color_img;
 
     vector<vector<Point>> squares;
     find_squares(squar_input, squares, path_string, file_title);
+    // Also try in HSV
+    cvtColor(squar_input, squar_input_hsv, COLOR_BGR2HSV);
+    find_squares(squar_input_hsv, squares, path_string, file_title);
     for (int i = 0; i < squares.size(); i++) {
         std::cout << squares[i] << "\n";
     }
@@ -152,9 +155,12 @@ int main(int argc, char *argv[])
     // But for now, just get the 2nd biggest one (can't think it's 22:17)
     // FIXME: This will crash if there are no squares found
     // FIXME: There's probably a big where we're using color_img here instead of squar_input
+
+    // Only use these results if you find a square that covers more than half the area
+    // but less than 90%
     vector<Point> second_biggest_square;
     for (int i = squares.size() - 1; i > 0; i--) {
-        if (contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.95)) {
+        if ((color_img.rows * color_img.cols * 0.50) < contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.90)) {
             second_biggest_square = squares[i];
             break;
         }
@@ -176,28 +182,36 @@ int main(int argc, char *argv[])
     // FIXME: I'm sure this won't get the perspective/ratios perfect. This seems
     // to work off the dimensions of the source image, and not of the bounding box.
     // Need to confirm that.
-    
-    // Compute the bounding box of the contour
-    cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
 
-    std::vector<cv::Point2f> dstPoints = {
-        {boundingBox.width - 1, 0},
-        {boundingBox.width - 1, boundingBox.height - 1},
-        {0, boundingBox.height - 1},
-        {0, 0},
-    };
-
-    Mat homography = findHomography(second_biggest_square, dstPoints, RANSAC);
-    
-    // Warp the perspective
     cv::Mat warpedImage;
-    cv::warpPerspective(color_img, warpedImage, homography, cv::Size(boundingBox.width, boundingBox.height));
+    
+    if (second_biggest_square.size() > 0) {
+    
+        // Compute the bounding box of the contour
+        cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
 
-    opath = path_string + "warped_" + file_title;
-    if (opath != "") {
-        imwrite(opath, warpedImage);
-        std::cout << "Image has been written to " << opath << "\n";
+        std::vector<cv::Point2f> dstPoints = {
+            {(float) boundingBox.width - 1, 0},
+            {(float) boundingBox.width - 1, (float) boundingBox.height - 1},
+            {0, (float) boundingBox.height - 1},
+            {0, 0},
+        };
+
+        Mat homography = findHomography(second_biggest_square, dstPoints, RANSAC);
+        
+        // Warp the perspective
+        cv::warpPerspective(color_img, warpedImage, homography, cv::Size(boundingBox.width, boundingBox.height));
+
+        opath = path_string + "warped_" + file_title;
+        if (opath != "") {
+            imwrite(opath, warpedImage);
+            std::cout << "Image has been written to " << opath << "\n";
+        }
+    } else {
+        warpedImage = color_img;
     }
+
+    // TODO: sort in normal grayscale as well
 
     Mat hsv;
     cvtColor(warpedImage,hsv,COLOR_BGR2HSV);
@@ -226,17 +240,19 @@ int main(int argc, char *argv[])
         return c1_stddev[0] < c2_stddev[0];
     });
 
+    // FIXME: we don't always need to invert
+    // FIXME: something is flipping the image
     Mat inverted;
     bitwise_not(channels[2], inverted);
+
+    // FIXME: It feels like I'm getting more spaghetti. Why is that?
 
     // Main pipeline
     Mat otsu_img = otsu(inverted, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
 
-
     //print_points(shapes);
-
 
     return 0;
 }
