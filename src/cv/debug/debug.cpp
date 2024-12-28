@@ -37,10 +37,16 @@ void print_points(Shapes shapes)
 
 
 void drawSquares(Mat& image, const vector<vector<Point>>& squares) {
+
+    // Use a different shade for each color
+    int greenness = 100;
+
     // Iterate over each square
     for (const auto& square : squares) {
         // Draw the polygon (square) using polylines
-        polylines(image, square, true, Scalar(0, 255, 0), 2, LINE_AA);
+        polylines(image, square, true, Scalar(0, greenness, 0), 2, LINE_AA);
+        // Increment in brightness the next square
+        greenness += 155 / squares.size();
     }
 }
 
@@ -135,6 +141,11 @@ int main(int argc, char *argv[])
         std::cout << squares[i] << "\n";
     }
 
+    // Sort 'em by area
+    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
+        return contourArea(c1, false) < contourArea(c2, false);
+    });
+
     drawSquares(squar_input, squares);
 
     std::string opath = path_string + "squar_" + file_title;
@@ -144,10 +155,6 @@ int main(int argc, char *argv[])
         std::cout << "Image has been written to " << opath << "\n";
     }
 
-    // Sort 'em by area
-    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
-        return contourArea(c1, false) < contourArea(c2, false);
-    });
 
     // TODO: If biggest is larger than total image area minus border, then we should
     // try the second biggest image area
@@ -165,19 +172,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-
-    /*
-    // Get the bounding rectangle of the largest contour
-    cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
-
-    // Crop the image
-    cv::Mat croppedImage = color_img(boundingBox);
-
-    opath = path_string + "cropped_" + file_title;
-    if (opath != "") {
-        imwrite(opath, croppedImage);
-        std::cout << "Image has been written to " << opath << "\n";
-    }*/
 
     // FIXME: I'm sure this won't get the perspective/ratios perfect. This seems
     // to work off the dimensions of the source image, and not of the bounding box.
@@ -213,6 +207,7 @@ int main(int argc, char *argv[])
 
     // TODO: sort in normal grayscale as well
 
+    /*
     Mat hsv;
     cvtColor(warpedImage,hsv,COLOR_BGR2HSV);
 
@@ -251,6 +246,7 @@ int main(int argc, char *argv[])
     Mat otsu_img = otsu(inverted, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
+    */
 
     //print_points(shapes);
 
