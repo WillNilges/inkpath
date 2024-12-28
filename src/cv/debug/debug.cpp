@@ -140,7 +140,62 @@ int main(int argc, char *argv[])
         imwrite(opath, squar_input);
         std::cout << "Image has been written to " << opath << "\n";
     }
+
+    // Sort 'em by area
+    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
+        return contourArea(c1, false) < contourArea(c2, false);
+    });
+
+    // TODO: If biggest is larger than total image area minus border, then we should
+    // try the second biggest image area
     
+    // But for now, just get the 2nd biggest one (can't think it's 22:17)
+    // FIXME: This will crash if there are no squares found
+    // FIXME: There's probably a big where we're using color_img here instead of squar_input
+    vector<Point> second_biggest_square;
+    for (int i = squares.size() - 1; i > 0; i--) {
+        if (contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.95)) {
+            second_biggest_square = squares[i];
+            break;
+        }
+    }
+
+    /*
+    // Get the bounding rectangle of the largest contour
+    cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
+
+    // Crop the image
+    cv::Mat croppedImage = color_img(boundingBox);
+
+    opath = path_string + "cropped_" + file_title;
+    if (opath != "") {
+        imwrite(opath, croppedImage);
+        std::cout << "Image has been written to " << opath << "\n";
+    }*/
+
+    
+    // Compute the bounding box of the contour
+    cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
+
+    std::vector<cv::Point2f> dstPoints = {
+        {boundingBox.width - 1, 0},
+        {boundingBox.width - 1, boundingBox.height - 1},
+        {0, boundingBox.height - 1},
+        {0, 0},
+    };
+
+    Mat H = findHomography(second_biggest_square, dstPoints, RANSAC);
+    
+    // Warp the perspective
+    cv::Mat warpedImage;
+    cv::warpPerspective(color_img, warpedImage, H, cv::Size(boundingBox.width, boundingBox.height));
+
+    opath = path_string + "warped_" + file_title;
+    if (opath != "") {
+        imwrite(opath, warpedImage);
+        std::cout << "Image has been written to " << opath << "\n";
+    }
+
 
     /*
     Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
