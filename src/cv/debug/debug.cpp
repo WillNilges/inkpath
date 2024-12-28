@@ -173,6 +173,9 @@ int main(int argc, char *argv[])
         std::cout << "Image has been written to " << opath << "\n";
     }*/
 
+    // FIXME: I'm sure this won't get the perspective/ratios perfect. This seems
+    // to work off the dimensions of the source image, and not of the bounding box.
+    // Need to confirm that.
     
     // Compute the bounding box of the contour
     cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
@@ -184,11 +187,11 @@ int main(int argc, char *argv[])
         {0, 0},
     };
 
-    Mat H = findHomography(second_biggest_square, dstPoints, RANSAC);
+    Mat homography = findHomography(second_biggest_square, dstPoints, RANSAC);
     
     // Warp the perspective
     cv::Mat warpedImage;
-    cv::warpPerspective(color_img, warpedImage, H, cv::Size(boundingBox.width, boundingBox.height));
+    cv::warpPerspective(color_img, warpedImage, homography, cv::Size(boundingBox.width, boundingBox.height));
 
     opath = path_string + "warped_" + file_title;
     if (opath != "") {
@@ -196,12 +199,28 @@ int main(int argc, char *argv[])
         std::cout << "Image has been written to " << opath << "\n";
     }
 
+    Mat hsv;
+    cvtColor(warpedImage,hsv,COLOR_BGR2HSV);
 
-    /*
-    Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
+    std::vector<cv::Mat> channels;
+    split(hsv, channels);
+
+    Mat H = channels[0];
+    Mat S = channels[1];
+    Mat V = channels[2];
+
+    imwrite(path_string + "thresh_H" + file_title, H);
+    imwrite(path_string + "thresh_S" + file_title, S);
+    imwrite(path_string + "thresh_V" + file_title, V);
+
+    Mat H_inv;
+    bitwise_not(H, H_inv);
+
+    // Main pipeline
+    Mat otsu_img = otsu(H_inv, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
-    */
+
 
     //print_points(shapes);
 
