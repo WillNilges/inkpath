@@ -80,7 +80,7 @@ void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_
             // gray = otsu(gray0, "");
             //adaptiveThreshold(gray0,gray,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,2);
              
-            imwrite(path_string + "thresh_" + to_string(threshold_level) + file_title, gray);
+            //imwrite(path_string + "thresh_" + to_string(threshold_level) + file_title, gray);
 
             // Find contours and store them in a list
             findContours(gray, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);

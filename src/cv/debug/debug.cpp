@@ -248,13 +248,15 @@ int main(int argc, char *argv[])
 
         inkpath_input = warpedImage;
     } else {
-        std::cout << "Found no good squares :(";
+        std::cout << "Found no good squares :(\n";
         inkpath_input = img;
     }
 
+    /*
     Mat otsu_img = otsu(inkpath_input, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
+    */
 
     //print_points(shapes);
 
