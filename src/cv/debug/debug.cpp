@@ -128,11 +128,38 @@ int main(int argc, char *argv[])
 
     vector<vector<Point>> squares;
     find_squares(squar_input, squares, path_string, file_title);
+    /*
     for (int i = 0; i < squares.size(); i++) {
         std::cout << squares[i] << "\n";
     }
+    */
 
-    drawSquares(squar_input, squares);
+    // Sort squares by area
+    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
+        return contourArea(c1, false) < contourArea(c2, false);
+    });
+
+    // Remove contours that are too small, or too big.
+    // Aribitrarily, I'm saying if it's <25% or >90% of the size of the image,
+    // it's too small or too big to be our target area.
+    vector<vector<Point>> good_squares;
+    for (int i = 0; i < squares.size(); i++) {
+        int img_area = color_img.rows * color_img.cols;
+        int contour_area = contourArea(squares[i]);
+        if (contour_area < img_area * 0.25) {
+            continue;
+        }
+        if (contour_area > img_area * 0.75) {
+            continue;
+        }
+        std::cout << img_area << "\n";
+        std::cout << contour_area << "\n";
+        good_squares.push_back(squares[i]);
+    }
+    std::cout << "Good squares: " << to_string(good_squares.size()) << ". Bad Squares: " << to_string(squares.size()) << "\n";
+    squares = good_squares;
+
+    drawSquares(squar_input, good_squares);
 
     std::string opath = path_string + "squar_" + file_title;
 
@@ -141,10 +168,7 @@ int main(int argc, char *argv[])
         std::cout << "Image has been written to " << opath << "\n";
     }
 
-    // Sort 'em by area
-    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
-        return contourArea(c1, false) < contourArea(c2, false);
-    });
+    // Find the biggest contour with no contours inside it?
 
     // TODO: If biggest is larger than total image area minus border, then we should
     // try the second biggest image area
@@ -152,17 +176,28 @@ int main(int argc, char *argv[])
     // But for now, just get the 2nd biggest one (can't think it's 22:17)
     // FIXME: This will crash if there are no squares found
     // FIXME: There's probably a big where we're using color_img here instead of squar_input
-    vector<Point> second_biggest_square;
+    
+    vector<Point> best_square = squares[squares.size() - 1];
+    /*
     for (int i = squares.size() - 1; i > 0; i--) {
         if (contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.95)) {
-            second_biggest_square = squares[i];
+            best_square = squares[i];
             break;
         }
     }
+    */
+
+    // Sort the corners clockwise
+    sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
+        return p1.x < p1.x;
+    });
+    sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
+        return p1.y < p1.y;
+    });
 
     /*
     // Get the bounding rectangle of the largest contour
-    cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
+    cv::Rect boundingBox = cv::boundingRect(best_square);
 
     // Crop the image
     cv::Mat croppedImage = color_img(boundingBox);
@@ -175,16 +210,16 @@ int main(int argc, char *argv[])
 
     
     // Compute the bounding box of the contour
-    cv::Rect boundingBox = cv::boundingRect(second_biggest_square);
+    cv::Rect boundingBox = cv::boundingRect(best_square);
 
     std::vector<cv::Point2f> dstPoints = {
-        {boundingBox.width - 1, 0},
-        {boundingBox.width - 1, boundingBox.height - 1},
-        {0, boundingBox.height - 1},
         {0, 0},
+        {(float) boundingBox.width - 1, 0},
+        {(float) boundingBox.width - 1, (float) boundingBox.height - 1},
+        {0, (float) boundingBox.height - 1},
     };
 
-    Mat H = findHomography(second_biggest_square, dstPoints, RANSAC);
+    Mat H = findHomography(best_square, dstPoints, RANSAC);
     
     // Warp the perspective
     cv::Mat warpedImage;
