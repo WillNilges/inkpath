@@ -2,9 +2,111 @@
 #include <iostream>
 
 
-// helper function:
-// finds a cosine of angle between vectors
-// from pt0->pt1 and from pt0->pt2
+void draw_squares(Mat& image, const vector<vector<Point>>& squares) {
+    // Iterate over each square
+    for (const auto& square : squares) {
+        // Draw the polygon (square) using polylines
+        polylines(image, square, true, Scalar(0, 255, 0), 2, LINE_AA);
+    }
+}
+
+vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_path)
+{
+    // Locate quadrangles in the image that are likely to be whiteboards
+    vector<vector<Point>> squares;
+    find_squares(image, squares);
+
+    // Switch to HSV colorspace and try to find some more squares.
+    Mat hsv;
+    cvtColor(image, hsv, COLOR_BGR2HSV);
+    find_squares(hsv, squares);
+
+    // Sort squares by area
+    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
+        return contourArea(c1, false) < contourArea(c2, false);
+    });
+
+    // Remove squares that are too small, or too big.
+    // Aribitrarily, I'm saying if it's <25% or >90% of the size of the image,
+    // it's too small or too big to be our target area.
+    vector<vector<Point>> good_squares;
+    for (int i = 0; i < squares.size(); i++) {
+        int img_area = image.rows * image.cols;
+        int contour_area = contourArea(squares[i]);
+        if ((contour_area < img_area * 0.25) || (contour_area > img_area * 0.90))
+        {
+            continue;
+        }
+        good_squares.push_back(squares[i]);
+    }
+
+    return good_squares;
+
+    // TODO: Debug macros?
+    /*
+    std::cout << "Good squares: " << std::to_string(good_squares.size()) << ". Bad Squares: " << std::to_string(squares.size()) << "\n";
+    draw_squares(image, good_squares);
+
+    std::string opath = path_string + "squar_" + file_title;
+
+    if (output_path != "") {
+        imwrite(opath, image);
+        std::cout << "Image has been written to " << opath << "\n";
+    }
+    */
+}
+
+// Extracts a quadrangle out of an image that is supposed to represent a whiteboard.
+Mat get_whiteboard(Mat image, std::string output_dir)
+{
+    // Locate squares in an image most likely to be the whiteboard
+    vector<vector<Point>> good_squares = locate_quadrangles(image, output_dir);
+
+    // If we didn't find any good squares, then we just have to give up, because
+    // whatever squares we did find are either totally wrong or encapsulate
+    // the whole image anyway.
+    if (good_squares.size() == 0)
+    {
+        std::cout << "Found no good squares :(\n";
+        return image;
+    }
+
+    // Get the biggest square 
+    vector<Point> best_square = good_squares[good_squares.size() - 1];
+
+    // Sort the corners 
+    sort_points_clockwise(best_square);
+
+    // Compute the bounding box of the contour
+    cv::Rect boundingBox = cv::boundingRect(best_square);
+
+    // Clockwise order
+    std::vector<cv::Point2f> dstPoints = {
+        {0, 0},
+        {(float) boundingBox.width - 1, 0},
+        {(float) boundingBox.width - 1, (float) boundingBox.height - 1},
+        {0, (float) boundingBox.height - 1},
+    };
+
+    Mat homography = findHomography(best_square, dstPoints, RANSAC);
+    
+    // Warp the perspective
+    cv::Mat warpedImage;
+    cv::warpPerspective(image, warpedImage, homography, cv::Size(boundingBox.width, boundingBox.height));
+
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
+        std::string opath = output_dir + "warped.jpg";
+        imwrite(opath, warpedImage);
+        std::cout << "Image has been written to " << opath << "\n";
+    }
+    #endif
+
+    return warpedImage;
+}
+
+// helper function: finds a cosine of angle between vectors from 
+// pt0->pt1 and from pt0->pt2
 double angle( Point pt1, Point pt2, Point pt0 )
 {
     double dx1 = pt1.x - pt0.x;
@@ -15,29 +117,8 @@ double angle( Point pt1, Point pt2, Point pt0 )
 }
 
 // https://stackoverflow.com/a/8863060/6095682
-void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_string, std::string file_title)
-{ 
-    //TODO: Try converting to other color spaces. Doing this drastically improves
-    // results on images like IMG_0390.jpg (Senior design whiteboard)
-    /*
-    Mat hsv;
-    cvtColor(image,hsv,COLOR_BGR2HSV);
-
-    std::vector<cv::Mat> channels;
-    split(hsv, channels);
-
-    Mat H = channels[0];
-    Mat S = channels[1];
-    Mat V = channels[2];
-
-    imwrite(path_string + "thresh_H" + file_title, H);
-    imwrite(path_string + "thresh_S" + file_title, S);
-    imwrite(path_string + "thresh_V" + file_title, V);
-
-    image = hsv;
-    */
-    
-
+void find_squares(Mat& image, vector<vector<Point> >& squares)
+{
     // Make a border around the whole image to help with detecting boards who go
     // to the edge of the image
     int border_width = 10;
@@ -76,12 +157,6 @@ void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_
                     gray = gray0 >= (l+1) * 255 / threshold_level;
             }
 
-            // Otsu isn't great for the general case
-            // gray = otsu(gray0, "");
-            //adaptiveThreshold(gray0,gray,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,2);
-             
-            //imwrite(path_string + "thresh_" + to_string(threshold_level) + file_title, gray);
-
             // Find contours and store them in a list
             findContours(gray, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
@@ -116,89 +191,9 @@ void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_
     }
 }
 
-inline uchar reduceVal(const uchar val)
-{
-    if (val < 64) return 0;
-    if (val < 128) return 64;
-    return 255;
-}
-
-Mat processColors(Mat& img, std::string output_path)
-{
-    uchar* pixelPtr = img.data;
-    for (int i = 0; i < img.rows; i++)
-    {
-        for (int j = 0; j < img.cols; j++)
-        {
-            const int pi = i*img.cols*3 + j*3;
-            pixelPtr[pi + 0] = reduceVal(pixelPtr[pi + 0]); // B
-            pixelPtr[pi + 1] = reduceVal(pixelPtr[pi + 1]); // G
-            pixelPtr[pi + 2] = reduceVal(pixelPtr[pi + 2]); // R
-        }
-    }
-
-    if (output_path != "") {
-        imwrite(output_path, img);
-        std::cout << "Image has been written to " << output_path << "\n";
-    }
-
-    return img;
-}
-
-
-Mat hough(Mat src, std::string output_path) {
-    // Edge detection
-    Mat dst;
-    Mat cdst;
-    Mat cdstP;
-
-    // Edge detection
-    Canny(src, dst, 50, 200, 3);
-    // Copy edges to the images that will display the results in BGR
-    cvtColor(dst, cdst, COLOR_GRAY2BGR);
-    cdstP = cdst.clone();
-
-    // Standard Hough Line Transform
-    
-    vector<Vec2f> lines; // will hold the results of the detection
-    HoughLines(dst, lines, 1, CV_PI/180, 150, 500, 0 ); // runs the actual detection
-    // Draw the lines
-    for( size_t i = 0; i < lines.size(); i++ )
-    {
-        float rho = lines[i][0], theta = lines[i][1];
-        Point pt1, pt2;
-        double a = cos(theta), b = sin(theta);
-        double x0 = a*rho, y0 = b*rho;
-        pt1.x = cvRound(x0 + 1000*(-b));
-        pt1.y = cvRound(y0 + 1000*(a));
-        pt2.x = cvRound(x0 - 1000*(-b));
-        pt2.y = cvRound(y0 - 1000*(a));
-        line( cdst, pt1, pt2, Scalar(0,0,255), 3, LINE_AA);
-    }
-
-    // Probabilistic Line Transform
-    /*vector<Vec4i> linesP; // will hold the results of the detection
-    HoughLinesP(dst, linesP, 1, CV_PI/180, 50, 150, 10 ); // runs the actual detection
-    // Draw the lines
-    for( size_t i = 0; i < linesP.size(); i++ )
-    {
-        Vec4i l = linesP[i];
-        line( cdstP, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, LINE_AA);
-    }*/
-
-    //Mat downsampled;
-    //pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    Mat output = cdst;
-    if (output_path != "") {
-        imwrite(output_path, output);
-        std::cout << "Image has been written to " << output_path << "\n";
-    }
-    return output;
-}
-
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
-// TODO: Where the hell did I find this?
+// TODO: Where did I find this? 
 Mat skeletonize(Mat img_inv, std::string output_path) {
     Mat img;
     bitwise_not(img_inv, img);
@@ -295,14 +290,7 @@ Shapes find_shapes(Mat img, std::string output_path) {
         return Shapes{contours, hierarchy};
 }
 
-
-bool clockwiseComparator(const cv::Point& a, const cv::Point& b, const cv::Point& center) {
-    double angleA = atan2(a.y - center.y, a.x - center.x);
-    double angleB = atan2(b.y - center.y, b.x - center.x);
-    return angleA < angleB;
-}
-
-void sortPointsClockwise(std::vector<cv::Point>& points) {
+void sort_points_clockwise(std::vector<cv::Point>& points) {
     // Step 1: Find the point closest to (0, 0)
     auto closestPoint = std::min_element(points.begin(), points.end(),
         [](const cv::Point& a, const cv::Point& b) {
@@ -321,6 +309,8 @@ void sortPointsClockwise(std::vector<cv::Point>& points) {
     // Step 3: Sort points in clockwise order relative to the centroid
     std::sort(points.begin(), points.end(),
         [&center](const cv::Point& a, const cv::Point& b) {
-            return clockwiseComparator(a, b, center);
+            double angleA = atan2(a.y - center.y, a.x - center.x);
+            double angleB = atan2(b.y - center.y, b.x - center.x);
+            return angleA < angleB;
         });
 }

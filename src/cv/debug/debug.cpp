@@ -35,15 +35,6 @@ void print_points(Shapes shapes)
     }
 }
 
-
-void drawSquares(Mat& image, const vector<vector<Point>>& squares) {
-    // Iterate over each square
-    for (const auto& square : squares) {
-        // Draw the polygon (square) using polylines
-        polylines(image, square, true, Scalar(0, 255, 0), 2, LINE_AA);
-    }
-}
-
 // Test function
 int main(int argc, char *argv[])
 {
@@ -123,140 +114,18 @@ int main(int argc, char *argv[])
     }
     std::cout << "Using: " << path_string << file_title << "\n";
 
-    Mat squar_input;
-    squar_input = color_img;
+    // Detect a whiteboard in the image, crop, and straighten
+    Mat whiteboard_img = get_whiteboard(color_img, output_path);
+    return 0;
 
-    vector<vector<Point>> squares;
-    find_squares(squar_input, squares, path_string, file_title);
+    // Convert to grayscale for thresholding
+    Mat whiteboard_img_gray;
+    cvtColor(whiteboard_img, whiteboard_img_gray, COLOR_BGR2GRAY);
 
-    // Switch to HSV colorspace and try to find some more squares.
-    Mat hsv;
-    cvtColor(color_img,hsv,COLOR_BGR2HSV);
-    find_squares(hsv, squares, path_string, file_title);
-
-    /*
-    for (int i = 0; i < squares.size(); i++) {
-        std::cout << squares[i] << "\n";
-    }
-    */
-
-    // Sort squares by area
-    sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
-        return contourArea(c1, false) < contourArea(c2, false);
-    });
-
-    // Remove contours that are too small, or too big.
-    // Aribitrarily, I'm saying if it's <25% or >90% of the size of the image,
-    // it's too small or too big to be our target area.
-    vector<vector<Point>> good_squares;
-    for (int i = 0; i < squares.size(); i++) {
-        int img_area = color_img.rows * color_img.cols;
-        int contour_area = contourArea(squares[i]);
-        if (contour_area < img_area * 0.25) {
-            continue;
-        }
-        if (contour_area > img_area * 0.90) {
-            continue;
-        }
-        //std::cout << img_area << "\n";
-        //std::cout << contour_area << "\n";
-        good_squares.push_back(squares[i]);
-    }
-    std::cout << "Good squares: " << to_string(good_squares.size()) << ". Bad Squares: " << to_string(squares.size()) << "\n";
-    squares = good_squares;
-
-    drawSquares(squar_input, good_squares);
-
-    std::string opath = path_string + "squar_" + file_title;
-
-    if (opath != "") {
-        imwrite(opath, squar_input);
-        std::cout << "Image has been written to " << opath << "\n";
-    }
-
-    Mat inkpath_input;
-    if (good_squares.size() > 0)
-    {
-        // Find the biggest contour with no contours inside it?
-
-        // TODO: If biggest is larger than total image area minus border, then we should
-        // try the second biggest image area
-        
-        // But for now, just get the 2nd biggest one (can't think it's 22:17)
-        // FIXME: This will crash if there are no squares found
-        // FIXME: There's probably a big where we're using color_img here instead of squar_input
-        
-        vector<Point> best_square = squares[squares.size() - 1];
-        /*
-        for (int i = squares.size() - 1; i > 0; i--) {
-            if (contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.95)) {
-                best_square = squares[i];
-                break;
-            }
-        }
-        */
-
-        // Sort the corners 
-        for (int i = 0; i < best_square.size(); i++)
-        {
-             std::cout << best_square[i] << "\n";
-        }
-        std::cout << "\n";
-
-        /*
-        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
-            if (p1.y == p2.y)
-                return p1.x < p2.x; // Sort by x-coordinate if y is the same
-            return p1.y < p2.y;     // Sort by y-coordinate
-        });
-        */
-
-        /*
-        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
-            return p1.y < p2.y;
-        });
-        */
-
-        sortPointsClockwise(best_square);
-
-        for (int i = 0; i < best_square.size(); i++)
-        {
-             std::cout << best_square[i] << "\n";
-        }
-
-        // Compute the bounding box of the contour
-        cv::Rect boundingBox = cv::boundingRect(best_square);
-
-        std::vector<cv::Point2f> dstPoints = {
-            {0, 0},
-            {(float) boundingBox.width - 1, 0},
-            {(float) boundingBox.width - 1, (float) boundingBox.height - 1},
-            {0, (float) boundingBox.height - 1},
-        };
-
-        Mat H = findHomography(best_square, dstPoints, RANSAC);
-        
-        // Warp the perspective
-        cv::Mat warpedImage;
-        cv::warpPerspective(img, warpedImage, H, cv::Size(boundingBox.width, boundingBox.height));
-
-        opath = path_string + "warped_" + file_title;
-        if (opath != "") {
-            imwrite(opath, warpedImage);
-            std::cout << "Image has been written to " << opath << "\n";
-        }
-
-        inkpath_input = warpedImage;
-    } else {
-        std::cout << "Found no good squares :(\n";
-        inkpath_input = img;
-    }
-
-    /*
-    Mat otsu_img = otsu(inkpath_input, path_string + "otsu_" + file_title);
-    Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
+    // Run stroke detection algorithms
+    Mat otsu_img = otsu(whiteboard_img_gray, /*path_string + "otsu_" + file_title*/"");
+    Mat skel_img = skeletonize(otsu_img, /*path_string + "skel_" + file_title*/"");
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
-    */
 
     //print_points(shapes);
 

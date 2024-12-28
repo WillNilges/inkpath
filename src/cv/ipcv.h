@@ -14,15 +14,13 @@ typedef struct Shapes {
     vector<Vec4i> hierarchy;
 } Shapes;
 
-void find_squares(Mat& image, vector<vector<Point> >& squares, std::string path_string, std::string file_title);
-Mat processColors(Mat& img, std::string output_path);
-Mat hough(Mat src, std::string output_path);
-Mat crop(Mat img, std::string output_path);
-Mat mask_large_contours(Mat img, std::string output_path);
+void find_squares(Mat& image, vector<vector<Point> >& squares);
 Mat skeletonize(Mat img_inv, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
 Shapes find_shapes(Mat img, std::string output_path);
 
-bool clockwiseComparator(const cv::Point& a, const cv::Point& b, const cv::Point& center);
-void sortPointsClockwise(std::vector<cv::Point>& points);
+void sort_points_clockwise(std::vector<cv::Point>& points);
 
+Mat get_whiteboard(Mat image, std::string output_dir);
+
+vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_path);
