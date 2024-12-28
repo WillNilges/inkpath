@@ -212,12 +212,25 @@ int main(int argc, char *argv[])
     imwrite(path_string + "thresh_H" + file_title, H);
     imwrite(path_string + "thresh_S" + file_title, S);
     imwrite(path_string + "thresh_V" + file_title, V);
+    
+    // FIXME: can I check maximum contrast in H,S,V and pick that way?
+    // what results in good, what results in bad?
+    // Sort the channels by max contrast
+    sort(channels.begin(), channels.end(), [](const Mat& c1, const Mat& c2){
+        // Compute the mean and standard deviation of the grayscale image
+        cv::Scalar c1_mean, c1_stddev, c2_mean, c2_stddev;
+        cv::meanStdDev(c1, c1_mean, c1_stddev);
+        cv::meanStdDev(c2, c2_mean, c2_stddev);
 
-    Mat H_inv;
-    bitwise_not(H, H_inv);
+        // Return the standard deviation as the contrast measure
+        return c1_stddev[0] < c2_stddev[0];
+    });
+
+    Mat inverted;
+    bitwise_not(channels[2], inverted);
 
     // Main pipeline
-    Mat otsu_img = otsu(H_inv, path_string + "otsu_" + file_title);
+    Mat otsu_img = otsu(inverted, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
 
