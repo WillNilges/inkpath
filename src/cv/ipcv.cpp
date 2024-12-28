@@ -293,4 +293,36 @@ Shapes find_shapes(Mat img, std::string output_path) {
     }
 
         return Shapes{contours, hierarchy};
+}
+
+
+// Helper function to calculate the centroid of a set of points
+Point2f computeCentroid(const std::vector<Point>& points) {
+    Point2f centroid(0, 0);
+    for (const Point& point : points) {
+        centroid.x += point.x;
+        centroid.y += point.y;
     }
+    centroid.x /= points.size();
+    centroid.y /= points.size();
+    return centroid;
+}
+
+// Function to sort points in clockwise order
+void sortPointsClockwise(std::vector<Point>& points) {
+    // Compute the centroid
+    Point2f centroid = computeCentroid(points);
+
+    // Define the comparator for sorting
+    auto clockwiseComparator = [&centroid](const Point& p1, const Point& p2) {
+        // Compute angles relative to the centroid
+        double angle1 = atan2(p1.y - centroid.y, p1.x - centroid.x);
+        double angle2 = atan2(p2.y - centroid.y, p2.x - centroid.x);
+
+        // Sort in clockwise order
+        return angle1 > angle2; // Clockwise
+    };
+
+    // Sort the points
+    std::sort(points.begin(), points.end(), clockwiseComparator);
+}

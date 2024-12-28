@@ -22,3 +22,7 @@ Mat mask_large_contours(Mat img, std::string output_path);
 Mat skeletonize(Mat img_inv, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
 Shapes find_shapes(Mat img, std::string output_path);
+
+Point2f computeCentroid(const std::vector<Point>& points);
+void sortPointsClockwise(std::vector<Point>& points);
+

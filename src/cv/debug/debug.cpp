@@ -128,6 +128,12 @@ int main(int argc, char *argv[])
 
     vector<vector<Point>> squares;
     find_squares(squar_input, squares, path_string, file_title);
+
+    // Switch to HSV colorspace and try to find some more squares.
+    Mat hsv;
+    cvtColor(color_img,hsv,COLOR_BGR2HSV);
+    find_squares(hsv, squares, path_string, file_title);
+
     /*
     for (int i = 0; i < squares.size(); i++) {
         std::cout << squares[i] << "\n";
@@ -149,11 +155,11 @@ int main(int argc, char *argv[])
         if (contour_area < img_area * 0.25) {
             continue;
         }
-        if (contour_area > img_area * 0.75) {
+        if (contour_area > img_area * 0.90) {
             continue;
         }
-        std::cout << img_area << "\n";
-        std::cout << contour_area << "\n";
+        //std::cout << img_area << "\n";
+        //std::cout << contour_area << "\n";
         good_squares.push_back(squares[i]);
     }
     std::cout << "Good squares: " << to_string(good_squares.size()) << ". Bad Squares: " << to_string(squares.size()) << "\n";
@@ -168,75 +174,75 @@ int main(int argc, char *argv[])
         std::cout << "Image has been written to " << opath << "\n";
     }
 
-    // Find the biggest contour with no contours inside it?
+    Mat inkpath_input;
+    if (good_squares.size() > 0)
+    {
+        // Find the biggest contour with no contours inside it?
 
-    // TODO: If biggest is larger than total image area minus border, then we should
-    // try the second biggest image area
-    
-    // But for now, just get the 2nd biggest one (can't think it's 22:17)
-    // FIXME: This will crash if there are no squares found
-    // FIXME: There's probably a big where we're using color_img here instead of squar_input
-    
-    vector<Point> best_square = squares[squares.size() - 1];
-    /*
-    for (int i = squares.size() - 1; i > 0; i--) {
-        if (contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.95)) {
-            best_square = squares[i];
-            break;
+        // TODO: If biggest is larger than total image area minus border, then we should
+        // try the second biggest image area
+        
+        // But for now, just get the 2nd biggest one (can't think it's 22:17)
+        // FIXME: This will crash if there are no squares found
+        // FIXME: There's probably a big where we're using color_img here instead of squar_input
+        
+        vector<Point> best_square = squares[squares.size() - 1];
+        /*
+        for (int i = squares.size() - 1; i > 0; i--) {
+            if (contourArea(squares[i]) < (color_img.rows * color_img.cols * 0.95)) {
+                best_square = squares[i];
+                break;
+            }
         }
+        */
+
+        // Sort the corners clockwise
+        /*
+        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
+            return p1.x < p1.x;
+        });
+        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
+            return p1.y < p1.y;
+        });
+        */
+
+        sortPointsClockwise(best_square);
+        
+        // Compute the bounding box of the contour
+        cv::Rect boundingBox = cv::boundingRect(best_square);
+        for (int i = 0; i < best_square.size(); i++)
+        {
+             std::cout << best_square[i] << "\n";
+        }
+
+        std::vector<cv::Point2f> dstPoints = {
+            {0, 0},
+            {(float) boundingBox.width - 1, 0},
+            {(float) boundingBox.width - 1, (float) boundingBox.height - 1},
+            {0, (float) boundingBox.height - 1},
+        };
+
+        Mat H = findHomography(best_square, dstPoints, RANSAC);
+        
+        // Warp the perspective
+        cv::Mat warpedImage;
+        cv::warpPerspective(img, warpedImage, H, cv::Size(boundingBox.width, boundingBox.height));
+
+        opath = path_string + "warped_" + file_title;
+        if (opath != "") {
+            imwrite(opath, warpedImage);
+            std::cout << "Image has been written to " << opath << "\n";
+        }
+
+        inkpath_input = warpedImage;
+    } else {
+        std::cout << "Found no good squares :(";
+        inkpath_input = img;
     }
-    */
 
-    // Sort the corners clockwise
-    sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
-        return p1.x < p1.x;
-    });
-    sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
-        return p1.y < p1.y;
-    });
-
-    /*
-    // Get the bounding rectangle of the largest contour
-    cv::Rect boundingBox = cv::boundingRect(best_square);
-
-    // Crop the image
-    cv::Mat croppedImage = color_img(boundingBox);
-
-    opath = path_string + "cropped_" + file_title;
-    if (opath != "") {
-        imwrite(opath, croppedImage);
-        std::cout << "Image has been written to " << opath << "\n";
-    }*/
-
-    
-    // Compute the bounding box of the contour
-    cv::Rect boundingBox = cv::boundingRect(best_square);
-
-    std::vector<cv::Point2f> dstPoints = {
-        {0, 0},
-        {(float) boundingBox.width - 1, 0},
-        {(float) boundingBox.width - 1, (float) boundingBox.height - 1},
-        {0, (float) boundingBox.height - 1},
-    };
-
-    Mat H = findHomography(best_square, dstPoints, RANSAC);
-    
-    // Warp the perspective
-    cv::Mat warpedImage;
-    cv::warpPerspective(color_img, warpedImage, H, cv::Size(boundingBox.width, boundingBox.height));
-
-    opath = path_string + "warped_" + file_title;
-    if (opath != "") {
-        imwrite(opath, warpedImage);
-        std::cout << "Image has been written to " << opath << "\n";
-    }
-
-
-    /*
-    Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
+    Mat otsu_img = otsu(inkpath_input, path_string + "otsu_" + file_title);
     Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
     Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
-    */
 
     //print_points(shapes);
 
