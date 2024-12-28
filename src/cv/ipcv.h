@@ -23,6 +23,6 @@ Mat skeletonize(Mat img_inv, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
 Shapes find_shapes(Mat img, std::string output_path);
 
-Point2f computeCentroid(const std::vector<Point>& points);
-void sortPointsClockwise(std::vector<Point>& points);
+bool clockwiseComparator(const cv::Point& a, const cv::Point& b, const cv::Point& center);
+void sortPointsClockwise(std::vector<cv::Point>& points);
 

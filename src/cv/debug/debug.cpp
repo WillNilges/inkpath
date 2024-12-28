@@ -196,24 +196,36 @@ int main(int argc, char *argv[])
         }
         */
 
-        // Sort the corners clockwise
-        /*
-        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
-            return p1.x < p1.x;
-        });
-        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
-            return p1.y < p1.y;
-        });
-        */
-
-        sortPointsClockwise(best_square);
-        
-        // Compute the bounding box of the contour
-        cv::Rect boundingBox = cv::boundingRect(best_square);
+        // Sort the corners 
         for (int i = 0; i < best_square.size(); i++)
         {
              std::cout << best_square[i] << "\n";
         }
+        std::cout << "\n";
+
+        /*
+        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
+            if (p1.y == p2.y)
+                return p1.x < p2.x; // Sort by x-coordinate if y is the same
+            return p1.y < p2.y;     // Sort by y-coordinate
+        });
+        */
+
+        /*
+        sort(best_square.begin(), best_square.end(), [](const Point& p1, const Point& p2) {
+            return p1.y < p2.y;
+        });
+        */
+
+        sortPointsClockwise(best_square);
+
+        for (int i = 0; i < best_square.size(); i++)
+        {
+             std::cout << best_square[i] << "\n";
+        }
+
+        // Compute the bounding box of the contour
+        cv::Rect boundingBox = cv::boundingRect(best_square);
 
         std::vector<cv::Point2f> dstPoints = {
             {0, 0},

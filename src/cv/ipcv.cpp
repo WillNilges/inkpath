@@ -296,33 +296,31 @@ Shapes find_shapes(Mat img, std::string output_path) {
 }
 
 
-// Helper function to calculate the centroid of a set of points
-Point2f computeCentroid(const std::vector<Point>& points) {
-    Point2f centroid(0, 0);
-    for (const Point& point : points) {
-        centroid.x += point.x;
-        centroid.y += point.y;
-    }
-    centroid.x /= points.size();
-    centroid.y /= points.size();
-    return centroid;
+bool clockwiseComparator(const cv::Point& a, const cv::Point& b, const cv::Point& center) {
+    double angleA = atan2(a.y - center.y, a.x - center.x);
+    double angleB = atan2(b.y - center.y, b.x - center.x);
+    return angleA < angleB;
 }
 
-// Function to sort points in clockwise order
-void sortPointsClockwise(std::vector<Point>& points) {
-    // Compute the centroid
-    Point2f centroid = computeCentroid(points);
+void sortPointsClockwise(std::vector<cv::Point>& points) {
+    // Step 1: Find the point closest to (0, 0)
+    auto closestPoint = std::min_element(points.begin(), points.end(),
+        [](const cv::Point& a, const cv::Point& b) {
+            return (a.x * a.x + a.y * a.y) < (b.x * b.x + b.y * b.y);
+        });
 
-    // Define the comparator for sorting
-    auto clockwiseComparator = [&centroid](const Point& p1, const Point& p2) {
-        // Compute angles relative to the centroid
-        double angle1 = atan2(p1.y - centroid.y, p1.x - centroid.x);
-        double angle2 = atan2(p2.y - centroid.y, p2.x - centroid.x);
+    // Step 2: Find the centroid
+    cv::Point center(0, 0);
+    for (const auto& point : points) {
+        center.x += point.x;
+        center.y += point.y;
+    }
+    center.x /= points.size();
+    center.y /= points.size();
 
-        // Sort in clockwise order
-        return angle1 > angle2; // Clockwise
-    };
-
-    // Sort the points
-    std::sort(points.begin(), points.end(), clockwiseComparator);
+    // Step 3: Sort points in clockwise order relative to the centroid
+    std::sort(points.begin(), points.end(),
+        [&center](const cv::Point& a, const cv::Point& b) {
+            return clockwiseComparator(a, b, center);
+        });
 }
