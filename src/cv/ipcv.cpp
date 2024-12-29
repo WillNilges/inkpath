@@ -10,19 +10,24 @@ void draw_squares(Mat& image, const vector<vector<Point>>& squares, cv::Scalar c
     }
 }
 
+// Locate quadrangles in the image that are likely to be whiteboards
 vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_dir)
 {
-    // Locate quadrangles in the image that are likely to be whiteboards
     vector<vector<Point>> squares;
-    find_squares(image, squares);
 
-    // Switch to HSV colorspace and try to find some more squares.
+    // Also check HSV colorspace and try to find more squares.
+    // XXX (wdn): We can probably just check HSV. No need to check RGB. Need to
+    // do some testing.
     Mat hsv;
     cvtColor(image, hsv, COLOR_BGR2HSV);
+
+    // Copy image to avoid blurring the original image when we run find squares
+    Mat bgr;
+    bgr = image;
+
+    find_squares(bgr, squares);
     find_squares(hsv, squares);
     
-    imshow("gaming", image);
-
     // Sort squares by area
     sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
         return contourArea(c1, false) < contourArea(c2, false);
