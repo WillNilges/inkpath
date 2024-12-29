@@ -303,23 +303,13 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
     cv::Mat blur;
     GaussianBlur(upsampled, blur, cv::Size(5, 5), 0, 0);
 
-    // otsu's thresholding after gaussian filtering
+    // adaptive thresholding after gaussian filtering
     cv::Mat gauss_thresh;
-    //threshold(blur, gauss_thresh, 0, 255, cv::THRESH_OTSU);
     
     // https://stackoverflow.com/questions/65891315/opencv-adaptive-thresholding-effective-noise-reduction
+    // I was getting a lot of Rice Krispies in the image. This SO post told me
+    // to increase C, and that made it mostly acceptable.
     adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 51, 12);
-
-    /*
-    cv::Mat denoised;
-    cv::fastNlMeansDenoising(
-		gauss_thresh,
-        denoised,
-		3, // h
-		7, // templateWindowSize
-		21 // searchWindowSize
-	);
-    */
 
     #ifdef INKPATH_DEBUG
     if (output_dir != "") {
