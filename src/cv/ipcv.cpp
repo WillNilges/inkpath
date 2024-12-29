@@ -24,8 +24,7 @@ std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
     cvtColor(image, hsv, cv::COLOR_BGR2HSV);
 
     // Copy image to avoid blurring the original image when we run find squares
-    cv::Mat bgr;
-    bgr = image;
+    cv::Mat bgr = image.clone();
 
     find_squares(bgr, squares);
     find_squares(hsv, squares);
@@ -56,10 +55,13 @@ std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
               << ". Bad Squares: " << std::to_string(squares.size()) << "\n";
 
     if (output_dir != "") {
-        draw_squares(image, squares, cv::Scalar(0, 0, 255));
-        draw_squares(image, good_squares, cv::Scalar(0, 255, 0));
+        // Clone the image to ensure we don't soil the original one
+        cv::Mat draw_image = image.clone();
+        draw_squares(draw_image, squares, cv::Scalar(0, 0, 255));
+        draw_squares(draw_image, good_squares, cv::Scalar(0, 255, 0));
+
         std::string opath = output_dir + "squars.jpg";
-        cv::imwrite(opath, image);
+        cv::imwrite(opath, draw_image);
         std::cout << "Image has been written to " << opath << "\n";
     }
 #endif // INKPATH_DEBUG
@@ -238,26 +240,91 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
 
 // Apply an Otsu's thresholding to the object. I found that this was
 // the best function of the ones I tried
-cv::Mat otsu(cv::Mat img, std::string output_path) {
+cv::Mat otsu(cv::Mat img, std::string output_dir) {
+
+    /*
+    // Convert image to HSV. This is supposed to let us the color channel with
+    // maximum contrast.
+    cv::Mat hsv;
+    cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
+    std::vector<cv::Mat> channels;
+    split(hsv, channels);
+
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
+        cv::Mat H = channels[0];
+        cv::Mat S = channels[1];
+        cv::Mat V = channels[2];
+        cv::imwrite(output_dir + "thresh_H.jpg", H);
+        cv::imwrite(output_dir + "thresh_S.jpg", S);
+        cv::imwrite(output_dir + "thresh_V.jpg", V);
+    }
+    #endif // INKPATH_DEBUG
+
+    // Sort the channels by max contrast
+    sort(channels.begin(), channels.end(), [](const cv::Mat& c1, const cv::Mat& c2){
+        // Compute the mean and standard deviation of the grayscale image
+        cv::Scalar c1_mean, c1_stddev, c2_mean, c2_stddev;
+        cv::meanStdDev(c1, c1_mean, c1_stddev);
+        cv::meanStdDev(c2, c2_mean, c2_stddev);
+        // Return the standard deviation as the contrast measure
+        return c1_stddev[0] < c2_stddev[0];
+    });
+    */
+
+    // FIXME: we don't always need to invert. The image should be mostly white
+    // and we trace the black.
+    //cv::Mat inverted;
+    //bitwise_not(channels[2], inverted);
+
+    // Convert to grayscale for thresholding
+    cv::Mat whiteboard_img_gray;
+    cvtColor(img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
+
+    #ifdef INKPATH_DEBUG
+    cv::imwrite(output_dir + "whiteboard_img_gray.jpg", whiteboard_img_gray);
+    #endif // INKPATH_DEBUG
+    
+    cv::Mat thresh_input;
+    thresh_input = whiteboard_img_gray; //channels[2];
+
     int k;
     // Upsample our image, if needed.
     cv::Mat upsampled;
-    if (img.rows < 1000 || img.cols < 1000) {
-        pyrUp(img, upsampled, cv::Size(img.cols * 2, img.rows * 2));
+    if (thresh_input.rows < 1000 || thresh_input.cols < 1000) {
+        pyrUp(thresh_input, upsampled, cv::Size(thresh_input.cols * 2, thresh_input.rows * 2));
     } else {
-        upsampled = img;
+        upsampled = thresh_input;
     }
+
+    // Blur improves results
+    cv::Mat blur;
+    GaussianBlur(upsampled, blur, cv::Size(5, 5), 0, 0);
 
     // otsu's thresholding after gaussian filtering
     cv::Mat gauss_thresh;
-    cv::Mat blur;
-    GaussianBlur(upsampled, blur, cv::Size(5, 5), 0, 0);
-    threshold(blur, gauss_thresh, 0, 255, cv::THRESH_OTSU);
+    //threshold(blur, gauss_thresh, 0, 255, cv::THRESH_OTSU);
+    adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 51, 12);
 
-    if (output_path != "") {
-        imwrite(output_path, gauss_thresh);
-        std::cout << "Image has been written to " << output_path << "\n";
+    /*
+    cv::Mat denoised;
+    cv::fastNlMeansDenoising(
+		gauss_thresh,
+        denoised,
+		3, // h
+		7, // templateWindowSize
+		21 // searchWindowSize
+	);
+    */
+
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
+        std::string opath = output_dir + "otsu.jpg";
+        cv::imwrite(opath, gauss_thresh);
+        std::cout << "Image has been written to " << opath << "\n";
     }
+    #endif // INKPATH_DEBUG
+
     return gauss_thresh;
 }
 

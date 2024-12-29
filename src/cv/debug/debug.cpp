@@ -107,44 +107,11 @@ int main(int argc, char* argv[]) {
     // Detect a whiteboard in the image, crop, and straighten
     cv::Mat whiteboard_img = get_whiteboard(color_img, output_path);
 
-    // Convert to grayscale for thresholding
-    cv::Mat whiteboard_img_gray;
-    cvtColor(whiteboard_img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
-
-    /*
-    cv::Mat hsv;
-    cv::cvtColor(warpedImage, hsv, cv::COLOR_BGR2HSV);
-    std::vector<cv::Mat> channels;
-    split(hsv, channels);
-    cv::Mat H = channels[0];
-    cv::Mat S = channels[1];
-    cv::Mat V = channels[2];
-    cv::imwrite(path_string + "thresh_H" + file_title, H);
-    cv::imwrite(path_string + "thresh_S" + file_title, S);
-    cv::imwrite(path_string + "thresh_V" + file_title, V);
-
-    // FIXME: can I check maximum contrast in H,S,V and pick that way?
-    // what results in good, what results in bad?
-    // Sort the channels by max contrast
-    sort(channels.begin(), channels.end(), [](const cv::Mat& c1, const cv::Mat& c2){
-        // Compute the mean and standard deviation of the grayscale image
-        cv::Scalar c1_mean, c1_stddev, c2_mean, c2_stddev;
-        cv::meanStdDev(c1, c1_mean, c1_stddev);
-        cv::meanStdDev(c2, c2_mean, c2_stddev);
-        // Return the standard deviation as the contrast measure
-        return c1_stddev[0] < c2_stddev[0];
-    });
-    // FIXME: we don't always need to invert
-    // FIXME: something is flipping the image
-    cv::Mat inverted;
-    bitwise_not(channels[2], inverted);
-    */
-
     // Run stroke detection algorithms
     cv::Mat otsu_img =
-        otsu(whiteboard_img_gray, /*path_string + "otsu_" + file_title*/ "");
+        otsu(whiteboard_img, path_string);
     cv::Mat skel_img =
-        skeletonize(otsu_img, /*path_string + "skel_" + file_title*/ "");
+        skeletonize(otsu_img, "");
     Shapes shapes = find_strokes(skel_img, path_string);
 
     // print_points(shapes);
