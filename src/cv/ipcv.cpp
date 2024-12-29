@@ -254,20 +254,19 @@ Mat otsu(Mat img, std::string output_path)
 }
 
 // Prereqs: Must be binary color image, target must be black
-Shapes find_shapes(Mat img, std::string output_path) {
-    Mat src;
+Shapes find_strokes(cv::Mat img, std::string output_dir) {
+    // XXX (wdn): Does this bitwise not matter?
+    cv::Mat src;
     bitwise_not(img, src);
 
-    Mat dst = Mat::zeros(src.rows, src.cols, CV_8UC3);
+    cv::Mat dst = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
     src = src > 1;
-    //namedWindow( "Source", 1 );
-    //imshow( "Source", src );
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours(src, contours, hierarchy,
         RETR_TREE, CHAIN_APPROX_SIMPLE );
     
-    // Remove contours that are too small in order to "de-noise" the image 
+    // Remove strokes that are too small in order to "de-noise" the image 
     // a little
     double minArea = 2.0;
     contours.erase(remove_if(contours.begin(), contours.end(),
@@ -275,19 +274,22 @@ Shapes find_shapes(Mat img, std::string output_path) {
             return contourArea(contour) < minArea;
         }), contours.end());
     
-    if (output_path != "") {
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
         // iterate through all the top-level contours,
         // draw each connected component with its own random color
         for (size_t i = 0; i < contours.size(); i++) {
             Scalar color( rand()&255, rand()&255, rand()&255 ); // Random color
             drawContours(dst, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
         }   
+        std::string opath = output_dir + "strokes.jpg";
 
-        imwrite(output_path, dst);
-        std::cout << "Image has been written to " << output_path << "\n";
+        imwrite(opath, dst);
+        std::cout << "Image has been written to " << opath << "\n";
     }
+    #endif
 
-        return Shapes{contours, hierarchy};
+    return Shapes{contours, hierarchy};
 }
 
 void sort_points_clockwise(std::vector<cv::Point>& points) {

@@ -116,7 +116,6 @@ int main(int argc, char *argv[])
 
     // Detect a whiteboard in the image, crop, and straighten
     Mat whiteboard_img = get_whiteboard(color_img, output_path);
-    return 0;
 
     // Convert to grayscale for thresholding
     Mat whiteboard_img_gray;
@@ -125,10 +124,9 @@ int main(int argc, char *argv[])
     // Run stroke detection algorithms
     Mat otsu_img = otsu(whiteboard_img_gray, /*path_string + "otsu_" + file_title*/"");
     Mat skel_img = skeletonize(otsu_img, /*path_string + "skel_" + file_title*/"");
-    Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
+    Shapes shapes = find_strokes(skel_img, path_string);
 
     //print_points(shapes);
-
 
     return 0;
 }
