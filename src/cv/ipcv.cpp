@@ -281,9 +281,11 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
     cv::Mat whiteboard_img_gray;
     cvtColor(img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
 
+    /*
     #ifdef INKPATH_DEBUG
     cv::imwrite(output_dir + "whiteboard_img_gray.jpg", whiteboard_img_gray);
     #endif // INKPATH_DEBUG
+    */
     
     cv::Mat thresh_input;
     thresh_input = whiteboard_img_gray; //channels[2];
@@ -304,6 +306,8 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
     // otsu's thresholding after gaussian filtering
     cv::Mat gauss_thresh;
     //threshold(blur, gauss_thresh, 0, 255, cv::THRESH_OTSU);
+    
+    // https://stackoverflow.com/questions/65891315/opencv-adaptive-thresholding-effective-noise-reduction
     adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 51, 12);
 
     /*
