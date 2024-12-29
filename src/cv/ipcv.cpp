@@ -24,8 +24,7 @@ std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
     cvtColor(image, hsv, cv::COLOR_BGR2HSV);
 
     // Copy image to avoid blurring the original image when we run find squares
-    cv::Mat bgr;
-    bgr = image;
+    cv::Mat bgr = image.clone();
 
     find_squares(bgr, squares);
     find_squares(hsv, squares);
@@ -56,10 +55,13 @@ std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
               << ". Bad Squares: " << std::to_string(squares.size()) << "\n";
 
     if (output_dir != "") {
-        draw_squares(image, squares, cv::Scalar(0, 0, 255));
-        draw_squares(image, good_squares, cv::Scalar(0, 255, 0));
+        // Clone the image to ensure we don't soil the original one
+        cv::Mat draw_image = image.clone();
+        draw_squares(draw_image, squares, cv::Scalar(0, 0, 255));
+        draw_squares(draw_image, good_squares, cv::Scalar(0, 255, 0));
+
         std::string opath = output_dir + "squars.jpg";
-        cv::imwrite(opath, image);
+        cv::imwrite(opath, draw_image);
         std::cout << "Image has been written to " << opath << "\n";
     }
 #endif // INKPATH_DEBUG
@@ -203,7 +205,7 @@ void find_squares(cv::Mat& image,
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where did I find this?
-cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
+cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir) {
     cv::Mat img;
     bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
@@ -229,35 +231,54 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
 
     // cv::Mat downsampled;
     // pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    if (output_path != "") {
-        imwrite(output_path, skel_invert);
-        std::cout << "Image has been written to " << output_path << "\n";
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
+        imwrite(output_dir + "skel.jpg", skel_invert);
+        std::cout << "Image has been written to " << output_dir << "\n";
     }
+    #endif // INKPATH_DEBUG
+
     return skel_invert;
 }
 
 // Apply an Otsu's thresholding to the object. I found that this was
 // the best function of the ones I tried
-cv::Mat otsu(cv::Mat img, std::string output_path) {
-    int k;
+cv::Mat otsu(cv::Mat img, std::string output_dir) {
+    // Convert to grayscale for thresholding
+    cv::Mat thresh_input;
+    cvtColor(img, thresh_input, cv::COLOR_BGR2GRAY);
+
     // Upsample our image, if needed.
+    // XXX (wdn): Maybe I should normalize the resolution of the images
+    // to make scaling the storkes in xournalpp easier.
+    int k;
     cv::Mat upsampled;
-    if (img.rows < 1000 || img.cols < 1000) {
-        pyrUp(img, upsampled, cv::Size(img.cols * 2, img.rows * 2));
+    if (thresh_input.rows < 1000 || thresh_input.cols < 1000) {
+        pyrUp(thresh_input, upsampled, cv::Size(thresh_input.cols * 2, thresh_input.rows * 2));
     } else {
-        upsampled = img;
+        upsampled = thresh_input;
     }
 
-    // otsu's thresholding after gaussian filtering
-    cv::Mat gauss_thresh;
+    // Blur improves results
     cv::Mat blur;
     GaussianBlur(upsampled, blur, cv::Size(5, 5), 0, 0);
-    threshold(blur, gauss_thresh, 0, 255, cv::THRESH_OTSU);
 
-    if (output_path != "") {
-        imwrite(output_path, gauss_thresh);
-        std::cout << "Image has been written to " << output_path << "\n";
+    // adaptive thresholding after gaussian filtering
+    cv::Mat gauss_thresh;
+    
+    // https://stackoverflow.com/questions/65891315/opencv-adaptive-thresholding-effective-noise-reduction
+    // I was getting a lot of Rice Krispies in the image. This SO post told me
+    // to increase C, and that made it mostly acceptable.
+    adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 12);
+
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
+        std::string opath = output_dir + "otsu.jpg";
+        cv::imwrite(opath, gauss_thresh);
+        std::cout << "Image has been written to " << opath << "\n";
     }
+    #endif // INKPATH_DEBUG
+
     return gauss_thresh;
 }
 

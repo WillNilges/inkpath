@@ -54,9 +54,9 @@ dev-uninstall:
 	rm -rf HACKING/StrokeTest $(XOPP_DEV_INSTALL_PATH)/plugins
 
 # For generating a CV debugging binary
-ipcv-debug: $(cv_source) 
+debug: $(cv_source) 
 	mkdir -p build
-	g++ src/cv/debug/debug.cpp -DINKPATH_DEBUG $(cv_source) $(cv_deps) -static -o build/ipcv-debug
+	g++ src/cv/debug/debug.cpp -DINKPATH_DEBUG $(cv_source) $(cv_deps) -static -o build/inkpath-debug
 
 help:
 	@echo ipcv lua-plugin install uninstall dev-install dev-uninstall ipcv-debug

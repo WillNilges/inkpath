@@ -10,12 +10,13 @@ int cv_perform_processing(const char* image_path, IPCVObj* data) {
 
     // Detect a whiteboard in the image, crop, and straighten
     cv::Mat whiteboard_img = get_whiteboard(img, "");
+    
+    // Do it again --- this should solve the "projector problem" where you have
+    // content on a projector framed by the border of the photo. Nominally this
+    // should find no more squares.
+    cv::Mat whiteboard_img_2 = get_whiteboard(whiteboard_img, "");
 
-    // Convert to grayscale for thresholding
-    cv::Mat whiteboard_img_gray;
-    cvtColor(whiteboard_img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
-
-    cv::Mat otsu_img = otsu(whiteboard_img_gray, "");
+    cv::Mat otsu_img = otsu(whiteboard_img_2, "");
     std::cout << "Performing otsu filtering...\n";
     cv::Mat skel_img = skeletonize(otsu_img, "");
     std::cout << "Performing Skeletonization...\n";
@@ -77,14 +78,14 @@ static int ipcvobj_getContour(lua_State* L) {
     // Push all the X coords to the stack
     lua_newtable(L);
     for (int i = 0; i < selectedContour.size(); i++) {
-        lua_pushnumber(L, selectedContour[i].x / scalingFactor);
+        lua_pushnumber(L, selectedContour[i].x * scalingFactor);
         lua_rawseti(L, -2, i);
     }
 
     // Push all the Y coords to the stack
     lua_newtable(L);
     for (int i = 0; i < selectedContour.size(); i++) {
-        lua_pushnumber(L, selectedContour[i].y / scalingFactor);
+        lua_pushnumber(L, selectedContour[i].y * scalingFactor);
         lua_rawseti(L, -2, i);
     }
 
