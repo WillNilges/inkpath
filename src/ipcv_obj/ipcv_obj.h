@@ -21,13 +21,13 @@ typedef vector<vector<Point>> ContourList;
 
 // IPCVObj as C++ class
 class IPCVObj {
-private:
-  ContourList contours;
+  private:
+    ContourList contours;
 
-public:
-  IPCVObj() {}
-  void set(ContourList contours) { this->contours = contours; }
-  ContourList get() const { return this->contours; }
+  public:
+    IPCVObj() {}
+    void set(ContourList contours) { this->contours = contours; }
+    ContourList get() const { return this->contours; }
 };
 
 int cv_perform_processing(const char *image_path, IPCVObj *data);
