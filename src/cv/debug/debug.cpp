@@ -34,7 +34,7 @@ void print_points(Shapes shapes) {
 }
 
 // Test function
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     // CLI arguments and such
     int verbose = 0;
     int order = 0;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     int option_index = 0;
 
     /* This contains the short command line parameters list */
-    const char *getoptOptions = "f:o:h"; /* add lots of stuff here */
+    const char* getoptOptions = "f:o:h"; /* add lots of stuff here */
 
     /* This contains the long command line parameter list, it should mostly
       match the short list                                                  */
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     std::string path_string;
     if (output_path[0] == '/')
         path_string += '/';
-    for (auto &dir : path_vec) {
+    for (auto& dir : path_vec) {
         if (!dir.empty()) {
             path_string += dir + '/';
         }

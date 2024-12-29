@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-void draw_squares(Mat &image, const vector<vector<Point>> &squares,
+void draw_squares(Mat& image, const vector<vector<Point>>& squares,
                   cv::Scalar color) {
     // Iterate over each square
-    for (const auto &square : squares) {
+    for (const auto& square : squares) {
         // Draw the polygon (square) using polylines
         polylines(image, square, true, color, 2, LINE_AA);
     }
@@ -31,7 +31,7 @@ vector<vector<Point>> locate_quadrangles(cv::Mat image,
 
     // Sort squares by area
     sort(squares.begin(), squares.end(),
-         [](const vector<Point> &c1, const vector<Point> &c2) {
+         [](const vector<Point>& c1, const vector<Point>& c2) {
              return contourArea(c1, false) < contourArea(c2, false);
          });
 
@@ -126,7 +126,7 @@ double angle(Point pt1, Point pt2, Point pt0) {
 }
 
 // https://stackoverflow.com/a/8863060/6095682
-void find_squares(Mat &image, vector<vector<Point>> &squares) {
+void find_squares(Mat& image, vector<vector<Point>>& squares) {
     // Make a border around the whole image to help with detecting boards who go
     // to the edge of the image
     int border_width = 10;
@@ -271,7 +271,7 @@ Shapes find_strokes(cv::Mat img, std::string output_dir) {
     // a little
     double minArea = 2.0;
     contours.erase(remove_if(contours.begin(), contours.end(),
-                             [minArea](const vector<Point> &contour) {
+                             [minArea](const vector<Point>& contour) {
                                  return contourArea(contour) < minArea;
                              }),
                    contours.end());
@@ -295,17 +295,17 @@ Shapes find_strokes(cv::Mat img, std::string output_dir) {
     return Shapes{contours, hierarchy};
 }
 
-void sort_points_clockwise(std::vector<cv::Point> &points) {
+void sort_points_clockwise(std::vector<cv::Point>& points) {
     // Step 1: Find the point closest to (0, 0)
     auto closestPoint = std::min_element(
         points.begin(), points.end(),
-        [](const cv::Point &a, const cv::Point &b) {
+        [](const cv::Point& a, const cv::Point& b) {
             return (a.x * a.x + a.y * a.y) < (b.x * b.x + b.y * b.y);
         });
 
     // Step 2: Find the centroid
     cv::Point center(0, 0);
-    for (const auto &point : points) {
+    for (const auto& point : points) {
         center.x += point.x;
         center.y += point.y;
     }
@@ -314,7 +314,7 @@ void sort_points_clockwise(std::vector<cv::Point> &points) {
 
     // Step 3: Sort points in clockwise order relative to the centroid
     std::sort(points.begin(), points.end(),
-              [&center](const cv::Point &a, const cv::Point &b) {
+              [&center](const cv::Point& a, const cv::Point& b) {
                   double angleA = atan2(a.y - center.y, a.x - center.x);
                   double angleB = atan2(b.y - center.y, b.x - center.x);
                   return angleA < angleB;

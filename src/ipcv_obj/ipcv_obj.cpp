@@ -1,7 +1,7 @@
 #include "ipcv_obj.h"
 
 // Do OpenCV stuff
-int cv_perform_processing(const char *image_path, IPCVObj *data) {
+int cv_perform_processing(const char* image_path, IPCVObj* data) {
     Mat img = imread(image_path, IMREAD_COLOR);
     if (img.empty()) {
         std::cout << "Could not read the image: " << image_path << std::endl;
@@ -26,13 +26,13 @@ int cv_perform_processing(const char *image_path, IPCVObj *data) {
 }
 
 // Create & return IPCVObj instance to Lua
-static int ipcvobj_new(lua_State *L) {
-    const char *image_path = luaL_checkstring(L, 1);
+static int ipcvobj_new(lua_State* L) {
+    const char* image_path = luaL_checkstring(L, 1);
     int tracing_scale = luaL_checkinteger(L, 2);
 
-    IPCVObj *object;        // Declare pointer
+    IPCVObj* object;        // Declare pointer
     object = new IPCVObj(); // Initialize pointer
-    *reinterpret_cast<IPCVObj **>(lua_newuserdata(L, sizeof(IPCVObj *))) =
+    *reinterpret_cast<IPCVObj**>(lua_newuserdata(L, sizeof(IPCVObj*))) =
         object;                        // Make Lua aware of it
     luaL_setmetatable(L, LUA_IPCVOBJ); // Metatable magic
 
@@ -43,35 +43,35 @@ static int ipcvobj_new(lua_State *L) {
 }
 
 // Free IPCVObj instance by Lua garbage collection
-static int ipcvobj_delete(lua_State *L) {
-    delete *reinterpret_cast<IPCVObj **>(lua_touserdata(L, 1));
+static int ipcvobj_delete(lua_State* L) {
+    delete *reinterpret_cast<IPCVObj**>(lua_touserdata(L, 1));
     return 0;
 }
 
 // Length stuff
-static int ipcvobj_getLength(lua_State *L) {
+static int ipcvobj_getLength(lua_State* L) {
     lua_pushinteger(
-        L, (*reinterpret_cast<IPCVObj **>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
+        L, (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
                ->get()
                .size());
     return 1;
 }
 
-static int ipcvobj_getContourLength(lua_State *L) {
+static int ipcvobj_getContourLength(lua_State* L) {
     lua_pushinteger(
-        L, (*reinterpret_cast<IPCVObj **>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
+        L, (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
                ->get()[luaL_checkinteger(L, 2)]
                .size());
     return 1;
 }
 
 // Receiving data
-static int ipcvobj_getContour(lua_State *L) {
+static int ipcvobj_getContour(lua_State* L) {
     int contourIdx = luaL_checkinteger(L, 2);
     double scalingFactor = luaL_checknumber(L, 3);
 
     vector<Point> selectedContour =
-        (*reinterpret_cast<IPCVObj **>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
+        (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
             ->get()[contourIdx];
 
     // Push all the X coords to the stack
@@ -92,7 +92,7 @@ static int ipcvobj_getContour(lua_State *L) {
 }
 
 // Register IPCVObj to Lua
-static void register_ipcvobj(lua_State *L) {
+static void register_ipcvobj(lua_State* L) {
     lua_register(L, LUA_IPCVOBJ, ipcvobj_new);
     luaL_newmetatable(L, LUA_IPCVOBJ);
     lua_pushcfunction(L, ipcvobj_delete);
@@ -110,7 +110,7 @@ static void register_ipcvobj(lua_State *L) {
 
 extern "C" {
 // Program entry
-int luaopen_ipcvobj(lua_State *L) {
+int luaopen_ipcvobj(lua_State* L) {
     luaL_openlibs(L);
     register_ipcvobj(L);
     return 1;

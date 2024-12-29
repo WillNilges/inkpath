@@ -22,4 +22,4 @@ RUN bash /build-xopp.sh 16
 
 # Install dev tools
 RUN apt-get update
-RUN apt-get install --fix-missing -y tmux gdb vim x11-apps tree nautilus eog 
+RUN apt-get install --fix-missing -y tmux gdb vim x11-apps tree nautilus eog clang-format

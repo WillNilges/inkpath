@@ -13,12 +13,12 @@ typedef struct Shapes {
     vector<Vec4i> hierarchy;
 } Shapes;
 
-void find_squares(Mat &image, vector<vector<Point>> &squares);
+void find_squares(Mat& image, vector<vector<Point>>& squares);
 Mat skeletonize(Mat img_inv, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
 Shapes find_strokes(Mat img, std::string output_path);
 
-void sort_points_clockwise(std::vector<cv::Point> &points);
+void sort_points_clockwise(std::vector<cv::Point>& points);
 
 Mat get_whiteboard(Mat image, std::string output_dir);
 
