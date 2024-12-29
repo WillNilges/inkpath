@@ -2,15 +2,15 @@
 #include <iostream>
 
 
-void draw_squares(Mat& image, const vector<vector<Point>>& squares) {
+void draw_squares(Mat& image, const vector<vector<Point>>& squares, cv::Scalar color) {
     // Iterate over each square
     for (const auto& square : squares) {
         // Draw the polygon (square) using polylines
-        polylines(image, square, true, Scalar(0, 255, 0), 2, LINE_AA);
+        polylines(image, square, true, color, 2, LINE_AA);
     }
 }
 
-vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_path)
+vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_dir)
 {
     // Locate quadrangles in the image that are likely to be whiteboards
     vector<vector<Point>> squares;
@@ -20,6 +20,8 @@ vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_path)
     Mat hsv;
     cvtColor(image, hsv, COLOR_BGR2HSV);
     find_squares(hsv, squares);
+    
+    imshow("gaming", image);
 
     // Sort squares by area
     sort(squares.begin(), squares.end(), [](const vector<Point>& c1, const vector<Point>& c2){
@@ -39,6 +41,18 @@ vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_path)
         }
         good_squares.push_back(squares[i]);
     }
+
+    #ifdef INKPATH_DEBUG 
+    std::cout << "Good squares: " << std::to_string(good_squares.size()) << ". Bad Squares: " << std::to_string(squares.size()) << "\n";
+
+    if (output_dir != "") {
+        draw_squares(image, squares, Scalar(0, 0, 255));
+        draw_squares(image, good_squares, Scalar(0, 255, 0));
+        std::string opath = output_dir + "squars.jpg";
+        imwrite(opath, image);
+        std::cout << "Image has been written to " << opath << "\n";
+    }
+    #endif // INKPATH_DEBUG
 
     return good_squares;
 
