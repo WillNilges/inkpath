@@ -1,47 +1,49 @@
 #include "ipcv.h"
 
-#include <iostream>
+namespace inkp {
 
-void draw_squares(Mat& image, const vector<vector<Point>>& squares,
+void draw_squares(cv::Mat& image,
+                  const std::vector<std::vector<cv::Point>>& squares,
                   cv::Scalar color) {
     // Iterate over each square
     for (const auto& square : squares) {
         // Draw the polygon (square) using polylines
-        polylines(image, square, true, color, 2, LINE_AA);
+        cv::polylines(image, square, true, color, 2, cv::LINE_AA);
     }
 }
 
 // Locate quadrangles in the image that are likely to be whiteboards
-vector<vector<Point>> locate_quadrangles(cv::Mat image,
-                                         std::string output_dir) {
-    vector<vector<Point>> squares;
+std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
+                                                       std::string output_dir) {
+    std::vector<std::vector<cv::Point>> squares;
 
     // Also check HSV colorspace and try to find more squares.
     // XXX (wdn): We can probably just check HSV. No need to check RGB. Need to
     // do some testing.
-    Mat hsv;
-    cvtColor(image, hsv, COLOR_BGR2HSV);
+    cv::Mat hsv;
+    cvtColor(image, hsv, cv::COLOR_BGR2HSV);
 
     // Copy image to avoid blurring the original image when we run find squares
-    Mat bgr;
+    cv::Mat bgr;
     bgr = image;
 
     find_squares(bgr, squares);
     find_squares(hsv, squares);
 
     // Sort squares by area
-    sort(squares.begin(), squares.end(),
-         [](const vector<Point>& c1, const vector<Point>& c2) {
-             return contourArea(c1, false) < contourArea(c2, false);
-         });
+    sort(
+        squares.begin(), squares.end(),
+        [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2) {
+            return cv::contourArea(c1, false) < cv::contourArea(c2, false);
+        });
 
     // Remove squares that are too small, or too big.
     // Aribitrarily, I'm saying if it's <25% or >90% of the size of the image,
     // it's too small or too big to be our target area.
-    vector<vector<Point>> good_squares;
+    std::vector<std::vector<cv::Point>> good_squares;
     for (int i = 0; i < squares.size(); i++) {
         int img_area = image.rows * image.cols;
-        int contour_area = contourArea(squares[i]);
+        int contour_area = cv::contourArea(squares[i]);
         if ((contour_area < img_area * 0.25) ||
             (contour_area > img_area * 0.90)) {
             continue;
@@ -67,9 +69,10 @@ vector<vector<Point>> locate_quadrangles(cv::Mat image,
 
 // Extracts a quadrangle out of an image that is supposed to represent a
 // whiteboard.
-Mat get_whiteboard(Mat image, std::string output_dir) {
+cv::Mat get_whiteboard(cv::Mat image, std::string output_dir) {
     // Locate squares in an image most likely to be the whiteboard
-    vector<vector<Point>> good_squares = locate_quadrangles(image, output_dir);
+    std::vector<std::vector<cv::Point>> good_squares =
+        locate_quadrangles(image, output_dir);
 
     // If we didn't find any good squares, then we just have to give up, because
     // whatever squares we did find are either totally wrong or encapsulate
@@ -80,7 +83,7 @@ Mat get_whiteboard(Mat image, std::string output_dir) {
     }
 
     // Get the biggest square
-    vector<Point> best_square = good_squares[good_squares.size() - 1];
+    std::vector<cv::Point> best_square = good_squares[good_squares.size() - 1];
 
     // Sort the corners
     sort_points_clockwise(best_square);
@@ -96,7 +99,7 @@ Mat get_whiteboard(Mat image, std::string output_dir) {
         {0, (float)boundingBox.height - 1},
     };
 
-    Mat homography = findHomography(best_square, dstPoints, RANSAC);
+    cv::Mat homography = findHomography(best_square, dstPoints, cv::RANSAC);
 
     // Warp the perspective
     cv::Mat warpedImage;
@@ -114,9 +117,9 @@ Mat get_whiteboard(Mat image, std::string output_dir) {
     return warpedImage;
 }
 
-// helper function: finds a cosine of angle between vectors from
+// helper function: finds a cosine of angle between std::vectors from
 // pt0->pt1 and from pt0->pt2
-double angle(Point pt1, Point pt2, Point pt0) {
+double angle(cv::Point pt1, cv::Point pt2, cv::Point pt0) {
     double dx1 = pt1.x - pt0.x;
     double dy1 = pt1.y - pt0.y;
     double dx2 = pt2.x - pt0.x;
@@ -126,21 +129,22 @@ double angle(Point pt1, Point pt2, Point pt0) {
 }
 
 // https://stackoverflow.com/a/8863060/6095682
-void find_squares(Mat& image, vector<vector<Point>>& squares) {
+void find_squares(cv::Mat& image,
+                  std::vector<std::vector<cv::Point>>& squares) {
     // Make a border around the whole image to help with detecting boards who go
     // to the edge of the image
     int border_width = 10;
-    int borderType = BORDER_CONSTANT;
-    Scalar value(0, 0, 0);
+    int borderType = cv::BORDER_CONSTANT;
+    cv::Scalar value(0, 0, 0);
     copyMakeBorder(image, image, border_width, border_width, border_width,
                    border_width, borderType, value);
 
     // blur will enhance edge detection
-    Mat blurred(image);
+    cv::Mat blurred(image);
     medianBlur(image, blurred, 9);
 
-    Mat gray0(blurred.size(), CV_8U), gray;
-    vector<vector<Point>> contours;
+    cv::Mat gray0(blurred.size(), CV_8U), gray;
+    std::vector<std::vector<cv::Point>> contours;
 
     // find squares in every color plane of the image
     for (int c = 0; c < 3; c++) {
@@ -156,28 +160,30 @@ void find_squares(Mat& image, vector<vector<Point>>& squares) {
                 Canny(gray0, gray, 10, 20, 3);
 
                 // Dilate helps to remove potential holes between edge segments
-                dilate(gray, gray, Mat(), Point(-1, -1));
+                dilate(gray, gray, cv::Mat(), cv::Point(-1, -1));
             } else {
                 gray = gray0 >= (l + 1) * 255 / threshold_level;
             }
 
             // Find contours and store them in a list
-            findContours(gray, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+            findContours(gray, contours, cv::RETR_LIST,
+                         cv::CHAIN_APPROX_SIMPLE);
 
             // Test contours
-            vector<Point> approx;
+            std::vector<cv::Point> approx;
             for (size_t i = 0; i < contours.size(); i++) {
                 // approximate contour with accuracy proportional
                 // to the contour perimeter
-                approxPolyDP(Mat(contours[i]), approx,
-                             arcLength(Mat(contours[i]), true) * 0.02, true);
+                cv::approxPolyDP(
+                    cv::Mat(contours[i]), approx,
+                    cv::arcLength(cv::Mat(contours[i]), true) * 0.02, true);
 
                 // Note: absolute value of an area is used because
                 // area may be positive or negative - in accordance with the
                 // contour orientation
                 if (approx.size() == 4 &&
-                    fabs(contourArea(Mat(approx))) > 1000 &&
-                    isContourConvex(Mat(approx))) {
+                    fabs(cv::contourArea(cv::Mat(approx))) > 1000 &&
+                    cv::isContourConvex(cv::Mat(approx))) {
                     double maxCosine = 0;
 
                     for (int j = 2; j < 5; j++) {
@@ -197,8 +203,8 @@ void find_squares(Mat& image, vector<vector<Point>>& squares) {
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where did I find this?
-Mat skeletonize(Mat img_inv, std::string output_path) {
-    Mat img;
+cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
+    cv::Mat img;
     bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
     cv::Mat temp;
@@ -218,10 +224,10 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
         done = (cv::countNonZero(img) == 0);
     } while (!done);
 
-    Mat skel_invert;
+    cv::Mat skel_invert;
     bitwise_not(skel, skel_invert);
 
-    // Mat downsampled;
+    // cv::Mat downsampled;
     // pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
     if (output_path != "") {
         imwrite(output_path, skel_invert);
@@ -232,21 +238,21 @@ Mat skeletonize(Mat img_inv, std::string output_path) {
 
 // Apply an Otsu's thresholding to the object. I found that this was
 // the best function of the ones I tried
-Mat otsu(Mat img, std::string output_path) {
+cv::Mat otsu(cv::Mat img, std::string output_path) {
     int k;
     // Upsample our image, if needed.
-    Mat upsampled;
+    cv::Mat upsampled;
     if (img.rows < 1000 || img.cols < 1000) {
-        pyrUp(img, upsampled, Size(img.cols * 2, img.rows * 2));
+        pyrUp(img, upsampled, cv::Size(img.cols * 2, img.rows * 2));
     } else {
         upsampled = img;
     }
 
     // otsu's thresholding after gaussian filtering
-    Mat gauss_thresh;
-    Mat blur;
-    GaussianBlur(upsampled, blur, Size(5, 5), 0, 0);
-    threshold(blur, gauss_thresh, 0, 255, THRESH_OTSU);
+    cv::Mat gauss_thresh;
+    cv::Mat blur;
+    GaussianBlur(upsampled, blur, cv::Size(5, 5), 0, 0);
+    threshold(blur, gauss_thresh, 0, 255, cv::THRESH_OTSU);
 
     if (output_path != "") {
         imwrite(output_path, gauss_thresh);
@@ -263,18 +269,20 @@ Shapes find_strokes(cv::Mat img, std::string output_dir) {
 
     cv::Mat dst = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
     src = src > 1;
-    vector<vector<Point>> contours;
-    vector<Vec4i> hierarchy;
-    findContours(src, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
+    findContours(src, contours, hierarchy, cv::RETR_TREE,
+                 cv::CHAIN_APPROX_SIMPLE);
 
     // Remove strokes that are too small in order to "de-noise" the image
     // a little
     double minArea = 2.0;
-    contours.erase(remove_if(contours.begin(), contours.end(),
-                             [minArea](const vector<Point>& contour) {
-                                 return contourArea(contour) < minArea;
-                             }),
-                   contours.end());
+    contours.erase(
+        std::remove_if(contours.begin(), contours.end(),
+                       [minArea](const std::vector<cv::Point>& contour) {
+                           return cv::contourArea(contour) < minArea;
+                       }),
+        contours.end());
 
 #ifdef INKPATH_DEBUG
     if (output_dir != "") {
@@ -320,3 +328,4 @@ void sort_points_clockwise(std::vector<cv::Point>& points) {
                   return angleA < angleB;
               });
 }
+} // namespace inkp

@@ -81,8 +81,8 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    Mat img = imread(image_path, 0);
-    Mat color_img = imread(image_path, IMREAD_COLOR);
+    cv::Mat img = cv::imread(image_path, 0);
+    cv::Mat color_img = imread(image_path, IMREAD_COLOR);
     if (img.empty()) {
         std::cout << "Could not read the image: " << image_path << std::endl;
         return 1;
@@ -108,6 +108,35 @@ int main(int argc, char* argv[]) {
     // Convert to grayscale for thresholding
     Mat whiteboard_img_gray;
     cvtColor(whiteboard_img, whiteboard_img_gray, COLOR_BGR2GRAY);
+
+    /*
+    Mat hsv;
+    cvtColor(warpedImage,hsv,COLOR_BGR2HSV);
+    std::vector<cv::Mat> channels;
+    split(hsv, channels);
+    Mat H = channels[0];
+    Mat S = channels[1];
+    Mat V = channels[2];
+    imwrite(path_string + "thresh_H" + file_title, H);
+    imwrite(path_string + "thresh_S" + file_title, S);
+    imwrite(path_string + "thresh_V" + file_title, V);
+
+    // FIXME: can I check maximum contrast in H,S,V and pick that way?
+    // what results in good, what results in bad?
+    // Sort the channels by max contrast
+    sort(channels.begin(), channels.end(), [](const Mat& c1, const Mat& c2){
+        // Compute the mean and standard deviation of the grayscale image
+        cv::Scalar c1_mean, c1_stddev, c2_mean, c2_stddev;
+        cv::meanStdDev(c1, c1_mean, c1_stddev);
+        cv::meanStdDev(c2, c2_mean, c2_stddev);
+        // Return the standard deviation as the contrast measure
+        return c1_stddev[0] < c2_stddev[0];
+    });
+    // FIXME: we don't always need to invert
+    // FIXME: something is flipping the image
+    Mat inverted;
+    bitwise_not(channels[2], inverted);
+    */
 
     // Run stroke detection algorithms
     Mat otsu_img =

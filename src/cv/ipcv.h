@@ -5,22 +5,19 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
-using namespace cv;
-using namespace std;
-
 typedef struct Shapes {
-    std::vector<std::vector<Point>> contours;
-    vector<Vec4i> hierarchy;
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
 } Shapes;
 
-void find_squares(Mat& image, vector<vector<Point>>& squares);
-Mat skeletonize(Mat img_inv, std::string output_path);
-Mat otsu(Mat img, std::string output_path);
-Shapes find_strokes(Mat img, std::string output_path);
+void find_squares(cv::Mat& image, std::vector<std::vector<cv::Point>>& squares);
+cv::Mat skeletonize(cv::Mat img_inv, std::string output_path);
+cv::Mat otsu(cv::Mat img, std::string output_path);
+Shapes find_strokes(cv::Mat img, std::string output_path);
 
 void sort_points_clockwise(std::vector<cv::Point>& points);
 
-Mat get_whiteboard(Mat image, std::string output_dir);
+cv::Mat get_whiteboard(cv::Mat image, std::string output_dir);
 
-vector<vector<Point>> locate_quadrangles(cv::Mat image,
-                                         std::string output_path);
+std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
+                                                       std::string output_path);
