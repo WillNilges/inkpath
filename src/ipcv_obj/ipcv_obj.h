@@ -14,10 +14,9 @@
 
 #include "../cv/ipcv.h"
 
-using namespace cv;
-using namespace std;
+using namespace inkp;
 
-typedef vector<vector<Point>> ContourList;
+typedef std::vector<std::vector<cv::Point>> ContourList;
 
 // IPCVObj as C++ class
 class IPCVObj {

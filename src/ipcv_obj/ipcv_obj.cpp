@@ -2,22 +2,22 @@
 
 // Do OpenCV stuff
 int cv_perform_processing(const char* image_path, IPCVObj* data) {
-    Mat img = imread(image_path, IMREAD_COLOR);
+    cv::Mat img = cv::imread(image_path, cv::IMREAD_COLOR);
     if (img.empty()) {
         std::cout << "Could not read the image: " << image_path << std::endl;
         exit(1);
     }
 
     // Detect a whiteboard in the image, crop, and straighten
-    Mat whiteboard_img = get_whiteboard(img, "");
+    cv::Mat whiteboard_img = get_whiteboard(img, "");
 
     // Convert to grayscale for thresholding
-    Mat whiteboard_img_gray;
-    cvtColor(whiteboard_img, whiteboard_img_gray, COLOR_BGR2GRAY);
+    cv::Mat whiteboard_img_gray;
+    cvtColor(whiteboard_img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
 
-    Mat otsu_img = otsu(whiteboard_img_gray, "");
+    cv::Mat otsu_img = otsu(whiteboard_img_gray, "");
     std::cout << "Performing otsu filtering...\n";
-    Mat skel_img = skeletonize(otsu_img, "");
+    cv::Mat skel_img = skeletonize(otsu_img, "");
     std::cout << "Performing Skeletonization...\n";
     Shapes shapes = find_strokes(skel_img, "");
     std::cout << "Looking for shapes...\n";
@@ -70,7 +70,7 @@ static int ipcvobj_getContour(lua_State* L) {
     int contourIdx = luaL_checkinteger(L, 2);
     double scalingFactor = luaL_checknumber(L, 3);
 
-    vector<Point> selectedContour =
+    std::vector<cv::Point> selectedContour =
         (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
             ->get()[contourIdx];
 

@@ -5,6 +5,8 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+namespace inkp {
+
 typedef struct Shapes {
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -21,3 +23,5 @@ cv::Mat get_whiteboard(cv::Mat image, std::string output_dir);
 
 std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
                                                        std::string output_path);
+
+}

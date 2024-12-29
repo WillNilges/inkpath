@@ -56,10 +56,10 @@ std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
               << ". Bad Squares: " << std::to_string(squares.size()) << "\n";
 
     if (output_dir != "") {
-        draw_squares(image, squares, Scalar(0, 0, 255));
-        draw_squares(image, good_squares, Scalar(0, 255, 0));
+        draw_squares(image, squares, cv::Scalar(0, 0, 255));
+        draw_squares(image, good_squares, cv::Scalar(0, 255, 0));
         std::string opath = output_dir + "squars.jpg";
-        imwrite(opath, image);
+        cv::imwrite(opath, image);
         std::cout << "Image has been written to " << opath << "\n";
     }
 #endif // INKPATH_DEBUG
@@ -109,7 +109,7 @@ cv::Mat get_whiteboard(cv::Mat image, std::string output_dir) {
 #ifdef INKPATH_DEBUG
     if (output_dir != "") {
         std::string opath = output_dir + "warped.jpg";
-        imwrite(opath, warpedImage);
+        cv::imwrite(opath, warpedImage);
         std::cout << "Image has been written to " << opath << "\n";
     }
 #endif
@@ -289,9 +289,9 @@ Shapes find_strokes(cv::Mat img, std::string output_dir) {
         // iterate through all the top-level contours,
         // draw each connected component with its own random color
         for (size_t i = 0; i < contours.size(); i++) {
-            Scalar color(rand() & 255, rand() & 255,
+            cv::Scalar color(rand() & 255, rand() & 255,
                          rand() & 255); // Random color
-            drawContours(dst, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+            drawContours(dst, contours, (int)i, color, 2, cv::LINE_8, hierarchy, 0);
         }
         std::string opath = output_dir + "strokes.jpg";
 

@@ -2,6 +2,8 @@
 
 #include "../ipcv.h"
 
+using namespace inkp;
+
 // A quick way to split strings separated via any character
 // delimiter.
 std::vector<std::string> adv_tokenizer(std::string s, char del) {
@@ -10,7 +12,7 @@ std::vector<std::string> adv_tokenizer(std::string s, char del) {
     std::vector<std::string> tokens;
     while (!ss.eof()) {
         getline(ss, word, del);
-        //        cout << word << endl;
+        //        std::cout << word << endl;
         tokens.push_back(word);
     }
     return tokens;
@@ -24,10 +26,10 @@ void print_help() {
 
 void print_points(Shapes shapes) {
     int i = 0;
-    for (vector<Point> contour : shapes.contours) {
-        cout << "CONTOUR #" << i << "\n";
-        for (Point point : contour) {
-            cout << "Point: " << point.x << ", " << point.y << "\n";
+    for (std::vector<cv::Point> contour : shapes.contours) {
+        std::cout << "CONTOUR #" << i << "\n";
+        for (cv::Point point : contour) {
+            std::cout << "Point: " << point.x << ", " << point.y << "\n";
         }
         i++;
     }
@@ -82,7 +84,7 @@ int main(int argc, char* argv[]) {
     }
 
     cv::Mat img = cv::imread(image_path, 0);
-    cv::Mat color_img = imread(image_path, IMREAD_COLOR);
+    cv::Mat color_img = cv::imread(image_path, cv::IMREAD_COLOR);
     if (img.empty()) {
         std::cout << "Could not read the image: " << image_path << std::endl;
         return 1;
@@ -103,28 +105,28 @@ int main(int argc, char* argv[]) {
     std::cout << "Using: " << path_string << file_title << "\n";
 
     // Detect a whiteboard in the image, crop, and straighten
-    Mat whiteboard_img = get_whiteboard(color_img, output_path);
+    cv::Mat whiteboard_img = get_whiteboard(color_img, output_path);
 
     // Convert to grayscale for thresholding
-    Mat whiteboard_img_gray;
-    cvtColor(whiteboard_img, whiteboard_img_gray, COLOR_BGR2GRAY);
+    cv::Mat whiteboard_img_gray;
+    cvtColor(whiteboard_img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
 
     /*
-    Mat hsv;
-    cvtColor(warpedImage,hsv,COLOR_BGR2HSV);
+    cv::Mat hsv;
+    cv::cvtColor(warpedImage, hsv, cv::COLOR_BGR2HSV);
     std::vector<cv::Mat> channels;
     split(hsv, channels);
-    Mat H = channels[0];
-    Mat S = channels[1];
-    Mat V = channels[2];
-    imwrite(path_string + "thresh_H" + file_title, H);
-    imwrite(path_string + "thresh_S" + file_title, S);
-    imwrite(path_string + "thresh_V" + file_title, V);
+    cv::Mat H = channels[0];
+    cv::Mat S = channels[1];
+    cv::Mat V = channels[2];
+    cv::imwrite(path_string + "thresh_H" + file_title, H);
+    cv::imwrite(path_string + "thresh_S" + file_title, S);
+    cv::imwrite(path_string + "thresh_V" + file_title, V);
 
     // FIXME: can I check maximum contrast in H,S,V and pick that way?
     // what results in good, what results in bad?
     // Sort the channels by max contrast
-    sort(channels.begin(), channels.end(), [](const Mat& c1, const Mat& c2){
+    sort(channels.begin(), channels.end(), [](const cv::Mat& c1, const cv::Mat& c2){
         // Compute the mean and standard deviation of the grayscale image
         cv::Scalar c1_mean, c1_stddev, c2_mean, c2_stddev;
         cv::meanStdDev(c1, c1_mean, c1_stddev);
@@ -134,14 +136,14 @@ int main(int argc, char* argv[]) {
     });
     // FIXME: we don't always need to invert
     // FIXME: something is flipping the image
-    Mat inverted;
+    cv::Mat inverted;
     bitwise_not(channels[2], inverted);
     */
 
     // Run stroke detection algorithms
-    Mat otsu_img =
+    cv::Mat otsu_img =
         otsu(whiteboard_img_gray, /*path_string + "otsu_" + file_title*/ "");
-    Mat skel_img =
+    cv::Mat skel_img =
         skeletonize(otsu_img, /*path_string + "skel_" + file_title*/ "");
     Shapes shapes = find_strokes(skel_img, path_string);
 
