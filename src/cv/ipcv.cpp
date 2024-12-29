@@ -241,57 +241,12 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
 // Apply an Otsu's thresholding to the object. I found that this was
 // the best function of the ones I tried
 cv::Mat otsu(cv::Mat img, std::string output_dir) {
-
-    /*
-    // Convert image to HSV. This is supposed to let us the color channel with
-    // maximum contrast.
-    cv::Mat hsv;
-    cv::cvtColor(img, hsv, cv::COLOR_BGR2HSV);
-    std::vector<cv::Mat> channels;
-    split(hsv, channels);
-
-    #ifdef INKPATH_DEBUG
-    if (output_dir != "") {
-        cv::Mat H = channels[0];
-        cv::Mat S = channels[1];
-        cv::Mat V = channels[2];
-        cv::imwrite(output_dir + "thresh_H.jpg", H);
-        cv::imwrite(output_dir + "thresh_S.jpg", S);
-        cv::imwrite(output_dir + "thresh_V.jpg", V);
-    }
-    #endif // INKPATH_DEBUG
-
-    // Sort the channels by max contrast
-    sort(channels.begin(), channels.end(), [](const cv::Mat& c1, const cv::Mat& c2){
-        // Compute the mean and standard deviation of the grayscale image
-        cv::Scalar c1_mean, c1_stddev, c2_mean, c2_stddev;
-        cv::meanStdDev(c1, c1_mean, c1_stddev);
-        cv::meanStdDev(c2, c2_mean, c2_stddev);
-        // Return the standard deviation as the contrast measure
-        return c1_stddev[0] < c2_stddev[0];
-    });
-    */
-
-    // FIXME: we don't always need to invert. The image should be mostly white
-    // and we trace the black.
-    //cv::Mat inverted;
-    //bitwise_not(channels[2], inverted);
-
     // Convert to grayscale for thresholding
-    cv::Mat whiteboard_img_gray;
-    cvtColor(img, whiteboard_img_gray, cv::COLOR_BGR2GRAY);
-
-    /*
-    #ifdef INKPATH_DEBUG
-    cv::imwrite(output_dir + "whiteboard_img_gray.jpg", whiteboard_img_gray);
-    #endif // INKPATH_DEBUG
-    */
-    
     cv::Mat thresh_input;
-    thresh_input = whiteboard_img_gray; //channels[2];
+    cvtColor(img, thresh_input, cv::COLOR_BGR2GRAY);
 
-    int k;
     // Upsample our image, if needed.
+    int k;
     cv::Mat upsampled;
     if (thresh_input.rows < 1000 || thresh_input.cols < 1000) {
         pyrUp(thresh_input, upsampled, cv::Size(thresh_input.cols * 2, thresh_input.rows * 2));
