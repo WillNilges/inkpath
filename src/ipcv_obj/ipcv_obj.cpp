@@ -78,14 +78,14 @@ static int ipcvobj_getContour(lua_State* L) {
     // Push all the X coords to the stack
     lua_newtable(L);
     for (int i = 0; i < selectedContour.size(); i++) {
-        lua_pushnumber(L, selectedContour[i].x / scalingFactor);
+        lua_pushnumber(L, selectedContour[i].x * scalingFactor);
         lua_rawseti(L, -2, i);
     }
 
     // Push all the Y coords to the stack
     lua_newtable(L);
     for (int i = 0; i < selectedContour.size(); i++) {
-        lua_pushnumber(L, selectedContour[i].y / scalingFactor);
+        lua_pushnumber(L, selectedContour[i].y * scalingFactor);
         lua_rawseti(L, -2, i);
     }
 

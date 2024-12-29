@@ -205,7 +205,7 @@ void find_squares(cv::Mat& image,
 // Skeletonization algorithm. I might mess around with this
 // more down the road.
 // TODO: Where did I find this?
-cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
+cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir) {
     cv::Mat img;
     bitwise_not(img_inv, img);
     cv::Mat skel(img.size(), CV_8UC1, cv::Scalar(0));
@@ -231,10 +231,13 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_path) {
 
     // cv::Mat downsampled;
     // pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    if (output_path != "") {
-        imwrite(output_path, skel_invert);
-        std::cout << "Image has been written to " << output_path << "\n";
+    #ifdef INKPATH_DEBUG
+    if (output_dir != "") {
+        imwrite(output_dir + "skel.jpg", skel_invert);
+        std::cout << "Image has been written to " << output_dir << "\n";
     }
+    #endif // INKPATH_DEBUG
+
     return skel_invert;
 }
 
@@ -246,6 +249,8 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
     cvtColor(img, thresh_input, cv::COLOR_BGR2GRAY);
 
     // Upsample our image, if needed.
+    // XXX (wdn): Maybe I should normalize the resolution of the images
+    // to make scaling the storkes in xournalpp easier.
     int k;
     cv::Mat upsampled;
     if (thresh_input.rows < 1000 || thresh_input.cols < 1000) {
@@ -264,7 +269,7 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
     // https://stackoverflow.com/questions/65891315/opencv-adaptive-thresholding-effective-noise-reduction
     // I was getting a lot of Rice Krispies in the image. This SO post told me
     // to increase C, and that made it mostly acceptable.
-    adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 51, 12);
+    adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 12);
 
     #ifdef INKPATH_DEBUG
     if (output_dir != "") {

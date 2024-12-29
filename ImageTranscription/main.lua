@@ -9,14 +9,15 @@ function drawStroke()
     print("Inkpath Activated. Transcribing image....")
     local inkpath = assert(package.loadlib("/usr/share/xournalpp/plugins/ImageTranscription/ipcvobj.so", "luaopen_ipcvobj"))
     inkpath()
-    local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'}) -- The current version of Autotrace I'm using only supports PNGs.
-    --image_scale = app.msgbox("Select tracing scale", {[1] = "Small", [2] = "Medium", [3] = "Large"}) -- TODO: implement this again.
-    local image_scale = 1
-    local scaling_factor = 10.0 -- how much do you want to divide your content by? must be float!
+    local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
+    -- Floating point value to scale stroke data coordinates. 0.1x is usually
+    -- necessary to cleanly map strokes to the document
+    local scaling_factor = 0.1
     local obj = IPCVObj(path, 1)
     print("Strokes retrieved.")
     local contourCt = obj:getLength()
     print("Got ", contourCt, " strokes.")
+
     -- TODO: This could be much, MUCH faster.
     for i = 0,contourCt-1,1 do
         local pointCt = obj:getContourLength(i)
