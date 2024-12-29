@@ -19,7 +19,8 @@ unzip opencv.zip
 # Create opencv build directory
 mkdir -p build && cd build
 # Configure
-cmake  ../opencv-4.5.1 -DBUILD_SHARED_LIBS=OFF -DOPENCV_GENERATE_PKGCONFIG=YES -DWITH_GTK=OFF -D BUILD_TESTS=OFF
+cmake  ../opencv-4.5.1 -DBUILD_SHARED_LIBS=OFF -DOPENCV_GENERATE_PKGCONFIG=YES -DWITH_GTK=OFF -D BUILD_TESTS=OFF -D BUILD_TIFF=ON
+
 # Build
 cmake --build . -j$cores
 

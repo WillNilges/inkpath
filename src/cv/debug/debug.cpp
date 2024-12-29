@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
     }
 
     Mat img = imread(image_path, 0);
+    Mat color_img = imread(image_path, IMREAD_COLOR);
     if(img.empty())
     {
         std::cout << "Could not read the image: " << image_path << std::endl;
@@ -99,7 +100,6 @@ int main(int argc, char *argv[])
     }
 
     // Separate the file title from the rest of the path
-    // FIXME: This feels awful, but I don't know enough about C++ to be sure.
     std::vector<std::string> path_vec = adv_tokenizer(output_path, '/');
     std::string file_title = path_vec.back();
     path_vec.pop_back();
@@ -113,11 +113,20 @@ int main(int argc, char *argv[])
         }
     }
     std::cout << "Using: " << path_string << file_title << "\n";
-    Mat otsu_img = otsu(img, path_string + "otsu_" + file_title);
-    Mat skel_img = skeletonize(otsu_img, path_string + "skel_" + file_title);
-    Shapes shapes = find_shapes(skel_img, path_string + "shape_" + file_title);
-    print_points(shapes);
 
+    // Detect a whiteboard in the image, crop, and straighten
+    Mat whiteboard_img = get_whiteboard(color_img, output_path);
+
+    // Convert to grayscale for thresholding
+    Mat whiteboard_img_gray;
+    cvtColor(whiteboard_img, whiteboard_img_gray, COLOR_BGR2GRAY);
+
+    // Run stroke detection algorithms
+    Mat otsu_img = otsu(whiteboard_img_gray, /*path_string + "otsu_" + file_title*/"");
+    Mat skel_img = skeletonize(otsu_img, /*path_string + "skel_" + file_title*/"");
+    Shapes shapes = find_strokes(skel_img, path_string);
+
+    //print_points(shapes);
 
     return 0;
 }

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
@@ -13,8 +14,13 @@ typedef struct Shapes {
     vector<Vec4i> hierarchy;
 } Shapes;
 
+void find_squares(Mat& image, vector<vector<Point> >& squares);
 Mat skeletonize(Mat img_inv, std::string output_path);
 Mat otsu(Mat img, std::string output_path);
-Shapes find_shapes(Mat img, std::string output_path);
-void prep_otsu(char* image_path);
+Shapes find_strokes(Mat img, std::string output_path);
 
+void sort_points_clockwise(std::vector<cv::Point>& points);
+
+Mat get_whiteboard(Mat image, std::string output_dir);
+
+vector<vector<Point>> locate_quadrangles(cv::Mat image, std::string output_path);

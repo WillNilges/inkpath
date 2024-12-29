@@ -3,17 +3,25 @@
 // Do OpenCV stuff
 int cv_perform_processing(const char* image_path, IPCVObj* data)
 {
-    Mat img = imread(image_path, 0);
+    Mat img = imread(image_path, IMREAD_COLOR);
     if(img.empty())
     {
         std::cout << "Could not read the image: " << image_path << std::endl;
         exit(1);
     }
-    Mat otsu_img = otsu(img, "");
+
+    // Detect a whiteboard in the image, crop, and straighten
+    Mat whiteboard_img = get_whiteboard(img, "");
+
+    // Convert to grayscale for thresholding
+    Mat whiteboard_img_gray;
+    cvtColor(whiteboard_img, whiteboard_img_gray, COLOR_BGR2GRAY);
+
+    Mat otsu_img = otsu(whiteboard_img_gray, "");
     std::cout << "Performing otsu filtering...\n";
     Mat skel_img = skeletonize(otsu_img, "");
     std::cout << "Performing Skeletonization...\n";
-    Shapes shapes = find_shapes(skel_img, "");
+    Shapes shapes = find_strokes(skel_img, "");
     std::cout << "Looking for shapes...\n";
     data->set(shapes.contours); 
     return 0;
