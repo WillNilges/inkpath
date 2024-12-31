@@ -7,7 +7,9 @@ end
 -- Callback if the menu item is executed
 function drawStroke()
     print("Inkpath Activated. Transcribing image....")
-    local inkpath = assert(package.loadlib("/usr/share/xournalpp/plugins/ImageTranscription/ipcvobj.so", "luaopen_ipcvobj"))
+    -- Inkpath is installed differently depending on Windows vs Unix platforms
+    local library_path = package.config:sub(1,1) == "\\" and [[C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription\libinkpath.dll]] or "/usr/share/xournalpp/plugins/ImageTranscription/inkpath.a"
+    local inkpath = assert(package.loadlib(library_path, "luaopen_ipcvobj"))
     inkpath()
     local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
     -- Floating point value to scale stroke data coordinates. 0.1x is usually
