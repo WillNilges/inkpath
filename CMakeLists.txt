@@ -7,9 +7,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 
-# Need position-independent code flag enabled to make Lua work
-if (NOT WIN32)
-		set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Things work a little differently on Windows vs Linux.
+if (WIN32)
+	# Need to specify specific generator b/c building on MSYS2 MINGW64
+	set (CMAKE_GENERATOR "MinGW Makefiles" CACHE INTERNAL "" FORCE)
+	set(INSTALL_DESTINATION "C:/Program Files/Xournal++/share/xournalpp/plugins")
+ELSE()
+	# Need position-independent code flag enabled to make Lua work
+	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+	set(INSTALL_DESTINATION /usr/share/xournalpp/plugins)
 ENDIF()
 
 # Define our sources
@@ -48,10 +54,5 @@ foreach(FILE ${PLUGIN_FILES})
 endforeach()
 
 # Finally, set an install target.
-IF (WIN32)
-		set(INSTALL_DESTINATION "C:/Program Files/Xournal++/share/xournalpp/plugins")
-ELSE()
-		set(INSTALL_DESTINATION /usr/share/xournalpp/plugins)
-ENDIF()
 install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DESTINATION ${INSTALL_DESTINATION})
 
