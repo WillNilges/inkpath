@@ -32,6 +32,8 @@ Xournal++ API. Unlike the previous implementation, this operates purely on raste
 
 ## Installation and Usage
 
+Requires Xournalpp >=1.2.0
+
 Inkpath is packaged as a statically-linked `.so` file coupled with a Lua script,
 so you should be able to download the release from the [releases page](https://github.com/WillNilges/inkpath/releases)
 and have it Just Work™.
