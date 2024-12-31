@@ -50,7 +50,7 @@ _Inkpath is coming to a package manager near you soon™!_
 # Install dependencies
 pacman -S \
 cmake gtk3 base-devel libxml2 portaudio libsndfile \
-poppler-glib texlive-bin texlive-pictures gettext libzip lua53 lua53-lgi \
+poppler-glib texlive-bin texlive-pictures gettext libzip lua54 lua54-lgi \
 gtksourceview4 wget unzip git tmux
 
 # Build openCV
@@ -62,7 +62,7 @@ gtksourceview4 wget unzip git tmux
 ```BASH
 # Install dependencies
 apt -y install \
-make liblua5.3-dev build-essential pkg-config libglib2.0-dev libpng-dev \
+make liblua5.4-dev build-essential pkg-config libglib2.0-dev libpng-dev \
 cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev \
 dvipng texlive libxml2-dev libzip-dev librsvg2-dev gettext lua-lgi \
 libgtksourceview-4-dev git gdb x11-apps wget unzip
