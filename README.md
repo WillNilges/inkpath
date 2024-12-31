@@ -74,3 +74,35 @@ make install
 ```
 
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
+
+### Windows
+
+1. Install MSYS2
+
+2. Open MSYS2 MINGW64 shell
+
+3. Install dependencies
+
+```
+pacman -S \
+mingw-w64-x86_64-cmake mingw-w64-x86_64-gtk3 base-devel libxml2 mingw-w64-x86_64-portaudio mingw-w64-x86_64-libsndfile mingw-w64-x86_64-poppler mingw-w64-x86_64-libzip mingw-w64-x86_64-lua53 mingw-w64-x86_64-lua53-lgi mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-opencv wget unzip git tmux
+```
+
+4. Launch MSYS2 MINGW64 shell as Administrator, and use `cmake` to build and
+run post-build script to gather dependencies and assemble the plugin
+
+```
+mkdir build
+cd build
+cmake # Use ${MINGW_PREFIX}/bin/cmake if normal cmake doesn't work
+mingw32-make.exe install
+./../windows-post-build.sh
+```
+
+5. Copy ./build/ImageTranscription to the plugin path:
+
+`C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
+
+6. Run install.ps1 to update the user Path
+
+7. Run Xournal++ and enjoy
