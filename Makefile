@@ -34,14 +34,14 @@ ipcv: $(cv_source)
 	ar -crsT build/libipcv.a build/*.o
 
 # Compiles Inkpath's shared object library
-lua-plugin: $(ip_source) ipcv
+plugin: $(ip_source) ipcv
 	@mkdir -p $(ARTIFACT)
 	@cp plugin/* $(ARTIFACT)
 	$(CXX) $(LIGHT_WARNINGS) $(ip_source) -L./build -lipcv $(cv_deps) $(lua_deps) -g -fPIC -shared -o $(ARTIFACT)/$(LIB_NAME)
 
 # Installs the plugin into your Xournalpp installation
 # FIXME: Not smart enough to avoid re-building the app every time :(
-install: lua-plugin
+install: plugin
 	cp -r $(ARTIFACT) $(INSTALL_PATH)
 
 # Remove the plugin files from the xournalpp install dir
@@ -49,7 +49,7 @@ uninstall:
 	rm -rf $(INSTALL_PATH)$(PLUGIN_NAME)
 
 # Used to install the plugin into a source code repository of xournalpp
-dev-install: lua-plugin
+dev-install: plugin
 	cp -r $(ARTIFACT) $(XOPP_DEV_INSTALL_PATH)/plugins
 	cp -r HACKING/StrokeTest $(XOPP_DEV_INSTALL_PATH)/plugins
 
@@ -64,7 +64,7 @@ debug: $(cv_source)
 	$(CXX) src/cv/debug/debug.cpp -DINKPATH_DEBUG $(cv_source) $(cv_deps) -static -o build/inkpath-debug
 
 help:
-	@echo ipcv lua-plugin install uninstall dev-install dev-uninstall ipcv-debug
+	@echo ipcv plugin install uninstall dev-install dev-uninstall ipcv-debug
 
 clean:
 	rm -rf build
