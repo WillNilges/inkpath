@@ -6,8 +6,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+if (NOT WIN32)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+ENDIF()
 
 # OpenCV
 FIND_PACKAGE( OpenCV REQUIRED )                              
@@ -31,13 +33,19 @@ include_directories(${LUA_INCLUDE_DIR})
 
 PROJECT(inkpath)
 
-file(GLOB SOURCES src/cv/*.cpp src/ipcv_obj/*.cpp)
+file(GLOB CV_SOURCES src/cv/*.cpp)
+file(GLOB PLUGIN_SOURCES src/ipcv_obj/*.cpp)
 IF (WIN32)
-		ADD_LIBRARY(inkpath SHARED ${SOURCES})
+		ADD_LIBRARY(inkpath SHARED ${CV_SOURCES} ${PLUGIN_SOURCES})
 		target_link_libraries(inkpath ${LUA_LIBRARIES}/liblua.a)
 ELSE()
-		ADD_LIBRARY(inkpath STATIC ${SOURCES})
-		target_link_libraries(inkpath ${LUA_LIBRARIES}/liblua5.3.a)
+		ADD_LIBRARY(ipcv STATIC ${CV_SOURCES})
+		target_link_libraries(ipcv ${OpenCV_LIBRARIES})
+
+		ADD_LIBRARY(inkpath SHARED ${PLUGIN_SOURCES})
+		target_compile_options(inkpath PRIVATE)
+		target_link_libraries(inkpath ipcv)
+		#target_link_libraries(inkpath ${LUA_LIBRARIES}/liblua5.3.a -fPIC)
 ENDIF()
 
 # Link OpenCV
