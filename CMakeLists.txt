@@ -9,8 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 
 # Things work a little differently on Windows vs Linux.
 if (WIN32)
-	# Need to specify specific generator b/c building on MSYS2 MINGW64
-	set (CMAKE_GENERATOR "MinGW Makefiles" CACHE INTERNAL "" FORCE)
+    message("Building for Windows")
 	set(INSTALL_DESTINATION "C:/Program Files/Xournal++/share/xournalpp/plugins")
 ELSE()
 	# Need position-independent code flag enabled to make Lua work
@@ -28,24 +27,30 @@ FIND_PACKAGE(Lua 5.3 REQUIRED)
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
-#IF (WIN32)
-#		# Specify the paths where Lua is installed (adjust if necessary)
-#		set(LUA_INCLUDE_DIR "C:/msys64/mingw64/include")
-#		set(LUA_LIBRARIES "C:/msys64/mingw64/lib")
-#ENDIF()
-	#set(LUA_INCLUDE_DIR "/usr/include/lua5.3")
-	#set(LUA_LIBRARIES "/usr/lib/x86_64-linux-gnu")
+# We link OpenCV statically in Linux,
+# but link totally dynamically and redistribute dlls in Windows
+# FIXME (wdn): Fix FIND_PACKAGE behavior for Lua on Windows
+IF(WIN32)
+	# Specify the paths where Lua is installed (adjust if necessary)
+	set(LUA_INCLUDE_DIR "C:/msys64/mingw64/include")
+	set(LUA_LIBRARIES "C:/msys64/mingw64/lib")
 
-# Compile the CV component of Inkpath separately. This is mostly so that we
-# can build our debug program and such.
-ADD_LIBRARY(ipcv STATIC ${CV_SOURCES})
-target_link_libraries(ipcv ${OpenCV_LIBRARIES})
+	file(GLOB SOURCES src/cv/*.cpp src/ipcv_obj/*.cpp)
+	ADD_LIBRARY(ipcvobj SHARED ${SOURCES})
+	target_link_libraries(ipcvobj ${LUA_LIBRARIES}/liblua5.3.a)
+	target_link_libraries(ipcvobj ${OpenCV_LIBRARIES})
+ELSE()
+	# Compile the CV component of Inkpath separately. This is mostly so that we
+	# can build our debug program and such.
+	ADD_LIBRARY(ipcv STATIC ${CV_SOURCES})
+	target_link_libraries(ipcv ${OpenCV_LIBRARIES})
 
-# Compile plugin component of Inkpath.
-ADD_LIBRARY(inkpath SHARED ${PLUGIN_SOURCES})
-target_compile_options(inkpath PRIVATE)
-target_link_libraries(inkpath ipcv)
-target_link_libraries(inkpath ${OpenCV_LIBRARIES})
+	# Compile plugin component of Inkpath.
+	ADD_LIBRARY(inkpath SHARED ${PLUGIN_SOURCES})
+	target_compile_options(inkpath PRIVATE)
+	target_link_libraries(inkpath ipcv)
+	target_link_libraries(inkpath ${OpenCV_LIBRARIES})
+ENDIF()
 
 # Copy the script and manifest into the build artifact
 file(GLOB PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/plugin/*")
