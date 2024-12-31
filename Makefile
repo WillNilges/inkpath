@@ -12,7 +12,7 @@ LIB_NAME=inkpath.a
 ARTIFACT=build/$(PLUGIN_NAME)
 INSTALL_PATH=/usr/share/xournalpp/plugins/
 XOPP_DEV_INSTALL_PATH=/xournalpp
-LUA_VERSION=lua54
+LUA_VERSION=lua53
 
 .PHONY: clean install uninstall dev-install dev-uninstall
 
@@ -29,7 +29,7 @@ build_dir:
 # Compiles and statically links Inkpath's OpenCV code to the necessary OpenCV libraries
 ipcv: $(cv_source)
 	@mkdir -p build
-	$(CXX) -c $(cv_source) $(lua_deps) $(cv_deps) -fPIC -static
+	$(CXX) -c $(cv_source) $(cv_deps) -fPIC -static
 	@mv *.o build
 	ar -crsT build/libipcv.a build/*.o
 
