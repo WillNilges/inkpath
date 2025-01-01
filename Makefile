@@ -1,3 +1,5 @@
+# DEPRECATED DO NOT USE
+
 CC=gcc
 CXX=g++
 
@@ -40,12 +42,6 @@ uninstall:
 dev-uninstall:
 	rm -rf $(XOPP_DEV_INSTALL_PATH)/plugins/$(PLUGIN_NAME)
 	rm -rf HACKING/StrokeTest $(XOPP_DEV_INSTALL_PATH)/plugins
-
-# For generating a CV debugging binary
-# TODO: Port to CMake
-#debug: $(cv_source) 
-#	mkdir -p build
-#	$(CXX) src/cv/debug/debug.cpp -DINKPATH_DEBUG $(cv_source) $(cv_deps) -static -o build/inkpath-debug
 
 help:
 	@echo uninstall dev-uninstall 
