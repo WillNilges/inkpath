@@ -85,7 +85,8 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir) {
 
 // PErform contour detection
 // Prereqs: Must be binary color image, target must be black
-std::vector<std::vector<cv::Point>> findStrokes(cv::Mat img, std::string output_dir) {
+std::vector<std::vector<cv::Point>> findStrokes(cv::Mat img,
+                                                std::string output_dir) {
     // XXX (wdn): Does this bitwise not matter?
     cv::Mat src;
     bitwise_not(img, src);
@@ -93,8 +94,7 @@ std::vector<std::vector<cv::Point>> findStrokes(cv::Mat img, std::string output_
     cv::Mat dst = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
     src = src > 1;
     std::vector<std::vector<cv::Point>> strokes;
-    findContours(src, strokes, cv::RETR_TREE,
-                 cv::CHAIN_APPROX_SIMPLE);
+    findContours(src, strokes, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 
     // Remove strokes that are too small in order to "de-noise" the image
     // a little
@@ -114,7 +114,7 @@ std::vector<std::vector<cv::Point>> findStrokes(cv::Mat img, std::string output_
             cv::Scalar color(rand() & 255, rand() & 255,
                              rand() & 255); // Random color
             drawContours(dst, strokes, (int)i, color, 2, cv::LINE_8,
-                         0);
+                         cv::noArray(), 0);
         }
         std::string opath = output_dir + "strokes.jpg";
 
