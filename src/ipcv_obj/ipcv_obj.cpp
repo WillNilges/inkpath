@@ -111,7 +111,8 @@ static void register_ipcvobj(lua_State* L) {
 
 extern "C" {
 // Program entry
-int luaopen_ipcvobj(lua_State* L) {
+WINEXPORT int luaopen_ipcvobj(lua_State* L) {
+    printf("Entered Inkpath.");
     luaL_openlibs(L);
     register_ipcvobj(L);
     return 1;

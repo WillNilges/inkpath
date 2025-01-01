@@ -32,6 +32,8 @@ Xournal++ API. Unlike the previous implementation, this operates purely on raste
 
 ## Installation and Usage
 
+Requires Xournalpp >=1.2.0
+
 Inkpath is packaged as a statically-linked `.so` file coupled with a Lua script,
 so you should be able to download the release from the [releases page](https://github.com/WillNilges/inkpath/releases)
 and have it Just Work™.
@@ -42,7 +44,30 @@ in order to get them._
 
 _Inkpath is coming to a package manager near you soon™!_
 
-## Manual Installation
+### Installation on Windows
+
+1. Download the latest release of [ImageTranscription-win.zip](https://github.com/WillNilges/inkpath/releases/)
+
+2. Unzip the archive and copy ImageTranscription/ to the plugin path:
+
+`C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
+
+3. Run install.ps1 to update the user Path
+
+4. Run Xournal++ and enjoy
+
+#### To Uninstall
+
+1. Delete `C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
+
+2. Remove environment variable
+
+- Type `Win+R` and type `sysdm.cpl`
+- Go to Advanced > Enviornment Variables > Path > Edit
+- Delete ImageTranscription entry
+- Press OK until all dialogs are closed
+
+## Compiling
 
 ### Arch
 
@@ -50,7 +75,7 @@ _Inkpath is coming to a package manager near you soon™!_
 # Install dependencies
 pacman -S \
 cmake gtk3 base-devel libxml2 portaudio libsndfile \
-poppler-glib texlive-bin texlive-pictures gettext libzip lua53 lua53-lgi \
+poppler-glib texlive-bin texlive-pictures gettext libzip lua54 lua54-lgi \
 gtksourceview4 wget unzip git tmux
 
 # Build openCV
@@ -62,7 +87,7 @@ gtksourceview4 wget unzip git tmux
 ```BASH
 # Install dependencies
 apt -y install \
-make liblua5.3-dev build-essential pkg-config libglib2.0-dev libpng-dev \
+make liblua5.4-dev build-essential pkg-config libglib2.0-dev libpng-dev \
 cmake libgtk-3-dev libpoppler-glib-dev portaudio19-dev libsndfile-dev \
 dvipng texlive libxml2-dev libzip-dev librsvg2-dev gettext lua-lgi \
 libgtksourceview-4-dev git gdb x11-apps wget unzip
@@ -72,3 +97,30 @@ make install
 ```
 
 <img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" alt="C badge" height="30px"/>
+
+### Windows
+
+1. Install MSYS2
+
+2. Open MSYS2 MINGW64 shell
+
+3. Install dependencies
+
+```
+pacman -S \
+mingw-w64-x86_64-cmake mingw-w64-x86_64-gtk3 base-devel libxml2 mingw-w64-x86_64-portaudio mingw-w64-x86_64-libsndfile mingw-w64-x86_64-poppler mingw-w64-x86_64-libzip mingw-w64-x86_64-lua53 mingw-w64-x86_64-lua53-lgi mingw-w64-x86_64-gtksourceview4 mingw-w64-x86_64-opencv wget unzip git tmux
+```
+
+4. Launch MSYS2 MINGW64 shell as Administrator, and use `cmake` to build and
+run post-build script to gather dependencies and assemble the plugin
+
+```
+mkdir build
+cd build
+cmake .. # Use ${MINGW_PREFIX}/bin/cmake if normal cmake doesn't work
+mingw32-make.exe install
+```
+
+6. Run scripts/win_configure_path.ps1 to update the user Path
+
+7. Run Xournal++ and enjoy
