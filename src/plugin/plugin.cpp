@@ -10,7 +10,7 @@ int cv_perform_processing(const char* image_path, Inkpath* data) {
 
     // Detect a whiteboard in the image, crop, and straighten
     cv::Mat whiteboard_img = get_whiteboard(img, "");
-    
+
     // Do it again --- this should solve the "projector problem" where you have
     // content on a projector framed by the border of the photo. Nominally this
     // should find no more squares.

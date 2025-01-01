@@ -35,7 +35,7 @@ class Inkpath {
     ContourList get() const { return this->contours; }
 };
 
-// XXX (wdn): Make CV object and make a new function for it 
+// XXX (wdn): Make CV object and make a new function for it
 int cv_perform_processing(const char* image_path, Inkpath* data);
 
 // inkpath identifier for the Lua metatable
@@ -53,6 +53,6 @@ static int inkpath_getContourLength(lua_State* L);
 // Receiving stroke data
 static int inkpath_getContour(lua_State* L);
 
-extern "C" WINEXPORT int luaopen_loadInkpath(lua_State *L);
+extern "C" WINEXPORT int luaopen_loadInkpath(lua_State* L);
 
 #endif

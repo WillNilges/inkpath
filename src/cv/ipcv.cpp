@@ -229,14 +229,14 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir) {
     cv::Mat skel_invert;
     bitwise_not(skel, skel_invert);
 
-    // cv::Mat downsampled;
-    // pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
-    #ifdef INKPATH_DEBUG
+// cv::Mat downsampled;
+// pyrDown(skel_invert, downsampled, Size( img.cols/2, img.rows/2 ));
+#ifdef INKPATH_DEBUG
     if (output_dir != "") {
         imwrite(output_dir + "skel.jpg", skel_invert);
         std::cout << "Image has been written to " << output_dir << "\n";
     }
-    #endif // INKPATH_DEBUG
+#endif // INKPATH_DEBUG
 
     return skel_invert;
 }
@@ -254,7 +254,8 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
     int k;
     cv::Mat upsampled;
     if (thresh_input.rows < 1000 || thresh_input.cols < 1000) {
-        pyrUp(thresh_input, upsampled, cv::Size(thresh_input.cols * 2, thresh_input.rows * 2));
+        pyrUp(thresh_input, upsampled,
+              cv::Size(thresh_input.cols * 2, thresh_input.rows * 2));
     } else {
         upsampled = thresh_input;
     }
@@ -265,19 +266,20 @@ cv::Mat otsu(cv::Mat img, std::string output_dir) {
 
     // adaptive thresholding after gaussian filtering
     cv::Mat gauss_thresh;
-    
+
     // https://stackoverflow.com/questions/65891315/opencv-adaptive-thresholding-effective-noise-reduction
     // I was getting a lot of Rice Krispies in the image. This SO post told me
     // to increase C, and that made it mostly acceptable.
-    adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 12);
+    adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
+                      cv::THRESH_BINARY, 11, 12);
 
-    #ifdef INKPATH_DEBUG
+#ifdef INKPATH_DEBUG
     if (output_dir != "") {
         std::string opath = output_dir + "otsu.jpg";
         cv::imwrite(opath, gauss_thresh);
         std::cout << "Image has been written to " << opath << "\n";
     }
-    #endif // INKPATH_DEBUG
+#endif // INKPATH_DEBUG
 
     return gauss_thresh;
 }
@@ -311,8 +313,9 @@ Shapes find_strokes(cv::Mat img, std::string output_dir) {
         // draw each connected component with its own random color
         for (size_t i = 0; i < contours.size(); i++) {
             cv::Scalar color(rand() & 255, rand() & 255,
-                         rand() & 255); // Random color
-            drawContours(dst, contours, (int)i, color, 2, cv::LINE_8, hierarchy, 0);
+                             rand() & 255); // Random color
+            drawContours(dst, contours, (int)i, color, 2, cv::LINE_8, hierarchy,
+                         0);
         }
         std::string opath = output_dir + "strokes.jpg";
 

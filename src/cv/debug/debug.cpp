@@ -113,10 +113,8 @@ int main(int argc, char* argv[]) {
     cv::Mat whiteboard_img_2 = get_whiteboard(whiteboard_img, output_path);
 
     // Run stroke detection algorithms
-    cv::Mat otsu_img =
-        otsu(whiteboard_img_2, path_string);
-    cv::Mat skel_img =
-        skeletonize(otsu_img, "");
+    cv::Mat otsu_img = otsu(whiteboard_img_2, path_string);
+    cv::Mat skel_img = skeletonize(otsu_img, "");
     Shapes shapes = find_strokes(skel_img, path_string);
 
     // print_points(shapes);

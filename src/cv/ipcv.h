@@ -12,8 +12,9 @@ typedef struct Shapes {
     std::vector<cv::Vec4i> hierarchy;
 } Shapes;
 
-
-void draw_squares(cv::Mat& image, const std::vector<std::vector<cv::Point>>& squares, cv::Scalar color);
+void draw_squares(cv::Mat& image,
+                  const std::vector<std::vector<cv::Point>>& squares,
+                  cv::Scalar color);
 void find_squares(cv::Mat& image, std::vector<std::vector<cv::Point>>& squares);
 cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir);
 cv::Mat otsu(cv::Mat img, std::string output_dir);
@@ -26,4 +27,4 @@ cv::Mat get_whiteboard(cv::Mat image, std::string output_dir);
 std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
                                                        std::string output_path);
 
-}
+} // namespace inkp
