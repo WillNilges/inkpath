@@ -69,6 +69,15 @@ _Inkpath is coming to a package manager near you soon™!_
 
 ## Compiling
 
+### Linux
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
 ### Arch
 
 ```BASH

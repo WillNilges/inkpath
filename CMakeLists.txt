@@ -20,6 +20,7 @@ ENDIF()
 # Define our sources
 file(GLOB CV_SOURCES src/cv/*.cpp)
 file(GLOB PLUGIN_SOURCES src/ipcv_obj/*.cpp)
+file(GLOB DEBUG_SOURCES src/cv/debug/*.cpp)
 
 # Locate dependent packages
 FIND_PACKAGE(OpenCV REQUIRED)
@@ -72,3 +73,9 @@ ENDIF()
 
 # Finally, set an install target.
 install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DESTINATION ${INSTALL_DESTINATION})
+
+# Also set up debugging target
+add_executable(inkpath-debug EXCLUDE_FROM_ALL ${CV_SOURCES} ${DEBUG_SOURCES})
+target_link_libraries(inkpath-debug ${OpenCV_LIBRARIES})
+set_target_properties(inkpath-debug PROPERTIES OUTPUT_NAME "inkpath-debug")
+set_target_properties(inkpath-debug PROPERTIES RUNTIME_OUTPUT_DIRECTORY "debug")

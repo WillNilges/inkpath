@@ -62,6 +62,14 @@ To run the container:
 
 - `./launch-environment.sh`
 
+# Debugging
+
+You can build a debug binary with
+
+```
+cmake --build . --target inkpath-debug
+```
+
 ## Debugging Lua
 
 You might find the following to be useful
