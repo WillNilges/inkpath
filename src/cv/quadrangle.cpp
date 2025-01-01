@@ -52,9 +52,9 @@ cv::Mat getWhiteboard(cv::Mat image, std::string output_dir) {
     return warpedImage;
 }
 
-// Filter quadrangles for area 
+// Filter quadrangles for area
 std::vector<std::vector<cv::Point>> filterQuadrangles(cv::Mat image,
-                                                     std::string output_dir) {
+                                                      std::string output_dir) {
     // Also check HSV colorspace and try to find more squares.
     // XXX (wdn): We can probably just check HSV. No need to check RGB. Need to
     // do some testing.
@@ -82,8 +82,7 @@ std::vector<std::vector<cv::Point>> filterQuadrangles(cv::Mat image,
     for (int i = 0; i < squares.size(); i++) {
         int imgArea = image.rows * image.cols;
         int contourArea = cv::contourArea(squares[i]);
-        if ((contourArea < imgArea * 0.25) ||
-            (contourArea > imgArea * 0.90)) {
+        if ((contourArea < imgArea * 0.25) || (contourArea > imgArea * 0.90)) {
             continue;
         }
         goodSquares.push_back(squares[i]);
@@ -110,7 +109,7 @@ std::vector<std::vector<cv::Point>> filterQuadrangles(cv::Mat image,
 
 // https://stackoverflow.com/a/8863060/6095682
 void findQuadrangles(cv::Mat& image,
-                  std::vector<std::vector<cv::Point>>& squares) {
+                     std::vector<std::vector<cv::Point>>& squares) {
     // Make a border around the whole image to help with detecting boards who go
     // to the edge of the image
     int border_width = 10;
@@ -207,7 +206,6 @@ void sortPointsClockwise(std::vector<cv::Point>& points) {
               });
 }
 
-
 // helper function: finds a cosine of angle between std::vectors from
 // pt0->pt1 and from pt0->pt2
 // https://docs.opencv.org/4.5.1/db/d00/samples_2cpp_2squares_8cpp-example.html
@@ -223,8 +221,8 @@ double angle(cv::Point pt1, cv::Point pt2, cv::Point pt0) {
 #ifdef INKPATH_DEBUG
 // Debug function that visualizes the squares found
 void drawSquares(cv::Mat& image,
-                  const std::vector<std::vector<cv::Point>>& squares,
-                  cv::Scalar color) {
+                 const std::vector<std::vector<cv::Point>>& squares,
+                 cv::Scalar color) {
     // Iterate over each square
     for (const auto& square : squares) {
         // Draw the polygon (square) using polylines
@@ -233,4 +231,4 @@ void drawSquares(cv::Mat& image,
 }
 #endif
 
-}
+} // namespace inkp

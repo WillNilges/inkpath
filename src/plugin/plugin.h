@@ -35,7 +35,6 @@ class Inkpath {
     StrokeList get() const { return this->strokes; }
 };
 
-
 // inkpath identifier for the Lua metatable
 #define LUA_INKPATH "Inkpath"
 
@@ -55,4 +54,4 @@ static int inkpath_delete(lua_State* L);
 // XXX (wdn): Make CV object and make a new function for it
 int cv_perform_processing(const char* image_path, Inkpath* data);
 
-#endif //INKPATH
+#endif // INKPATH

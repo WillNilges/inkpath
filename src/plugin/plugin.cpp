@@ -18,7 +18,7 @@ static void registerInkpath(lua_State* L) {
 }
 
 extern "C" {
-// Loads function headers into memory so Lua can access them 
+// Loads function headers into memory so Lua can access them
 WINEXPORT int luaopen_loadInkpath(lua_State* L) {
     printf("Entered Inkpath.");
     luaL_openlibs(L);
@@ -44,7 +44,7 @@ static int inkpath_new(lua_State* L) {
     return 1;
 }
 
-// Get the number of strokes that Inkpath found in the image 
+// Get the number of strokes that Inkpath found in the image
 static int inkpath_getStrokeCount(lua_State* L) {
     lua_pushinteger(
         L, (*reinterpret_cast<Inkpath**>(luaL_checkudata(L, 1, LUA_INKPATH)))
