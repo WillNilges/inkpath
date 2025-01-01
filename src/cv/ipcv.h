@@ -12,19 +12,23 @@ typedef struct Shapes {
     std::vector<cv::Vec4i> hierarchy;
 } Shapes;
 
-void draw_squares(cv::Mat& image,
+//class StrokeFinder {
+//}
+
+cv::Mat thresholdWithPrep(cv::Mat img, std::string output_dir);
+cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir);
+Shapes findStrokes(cv::Mat img, std::string output_dir);
+
+// quadrangle.cpp
+
+cv::Mat getWhiteboard(cv::Mat image, std::string output_dir);
+std::vector<std::vector<cv::Point>> filterQuadrangles(cv::Mat image,
+                                                       std::string output_path);
+void findQuadrangles(cv::Mat& image, std::vector<std::vector<cv::Point>>& squares);
+void sortPointsClockwise(std::vector<cv::Point>& points);
+double angle(cv::Point pt1, cv::Point pt2, cv::Point pt0);
+void drawSquares(cv::Mat& image,
                   const std::vector<std::vector<cv::Point>>& squares,
                   cv::Scalar color);
-void find_squares(cv::Mat& image, std::vector<std::vector<cv::Point>>& squares);
-cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir);
-cv::Mat otsu(cv::Mat img, std::string output_dir);
-Shapes find_strokes(cv::Mat img, std::string output_dir);
-
-void sort_points_clockwise(std::vector<cv::Point>& points);
-
-cv::Mat get_whiteboard(cv::Mat image, std::string output_dir);
-
-std::vector<std::vector<cv::Point>> locate_quadrangles(cv::Mat image,
-                                                       std::string output_path);
 
 } // namespace inkp

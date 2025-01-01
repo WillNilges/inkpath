@@ -103,18 +103,18 @@ int cv_perform_processing(const char* image_path, Inkpath* data) {
     }
 
     // Detect a whiteboard in the image, crop, and straighten
-    cv::Mat whiteboard_img = get_whiteboard(img, "");
+    cv::Mat whiteboard_img = getWhiteboard(img, "");
 
     // Do it again --- this should solve the "projector problem" where you have
     // content on a projector framed by the border of the photo. Nominally this
     // should find no more squares.
-    cv::Mat whiteboard_img_2 = get_whiteboard(whiteboard_img, "");
+    cv::Mat whiteboard_img_2 = getWhiteboard(whiteboard_img, "");
 
-    cv::Mat otsu_img = otsu(whiteboard_img_2, "");
+    cv::Mat otsu_img = thresholdWithPrep(whiteboard_img_2, "");
     std::cout << "Performing otsu filtering...\n";
     cv::Mat skel_img = skeletonize(otsu_img, "");
     std::cout << "Performing Skeletonization...\n";
-    Shapes shapes = find_strokes(skel_img, "");
+    Shapes shapes = findStrokes(skel_img, "");
     std::cout << "Looking for shapes...\n";
     data->set(shapes.contours);
     return 0;
