@@ -44,7 +44,30 @@ in order to get them._
 
 _Inkpath is coming to a package manager near you soon™!_
 
-## Manual Installation
+### Installation on Windows
+
+1. Download the latest release of [ImageTranscription-win.zip](https://github.com/WillNilges/inkpath/releases/)
+
+2. Unzip the archive and copy ImageTranscription/ to the plugin path:
+
+`C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
+
+3. Run install.ps1 to update the user Path
+
+4. Run Xournal++ and enjoy
+
+#### To Uninstall
+
+1. Delete `C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
+
+2. Remove environment variable
+
+- Type `Win+R` and type `sysdm.cpl`
+- Go to Advanced > Enviornment Variables > Path > Edit
+- Delete ImageTranscription entry
+- Press OK until all dialogs are closed
+
+## Compiling
 
 ### Arch
 
@@ -94,15 +117,10 @@ run post-build script to gather dependencies and assemble the plugin
 ```
 mkdir build
 cd build
-cmake # Use ${MINGW_PREFIX}/bin/cmake if normal cmake doesn't work
+cmake .. # Use ${MINGW_PREFIX}/bin/cmake if normal cmake doesn't work
 mingw32-make.exe install
-./../windows-post-build.sh
 ```
 
-5. Copy ./build/ImageTranscription to the plugin path:
-
-`C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription`
-
-6. Run install.ps1 to update the user Path
+6. Run scripts/win_configure_path.ps1 to update the user Path
 
 7. Run Xournal++ and enjoy
