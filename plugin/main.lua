@@ -16,16 +16,16 @@ function drawStroke()
     -- necessary to cleanly map strokes to the document
     local scaling_factor = 0.1
     local obj = Inkpath(path, 1)
-    local contourCt = obj:getContourCount()
+    local contourCt = obj:getStrokeCount()
     print("Got ", contourCt, " strokes.")
 
     -- TODO: This could be much, much faster.
     for i = 0,contourCt-1,1 do
-        local pointCt = obj:getContourLength(i)
+        local pointCt = obj:getStrokeLength(i)
         -- We have no use for strokes that are less than two points---we can't do
         -- anything with them.
         if pointCt >= 3 then
-            local x_points, y_points = obj:getContour(i, scaling_factor)
+            local x_points, y_points = obj:getStroke(i, scaling_factor)
             app.addStrokes({
                 ["strokes"] = {
                     {

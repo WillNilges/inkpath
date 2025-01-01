@@ -1,11 +1,11 @@
-#ifndef IPCV_OBJ
-#define IPCV_OBJ
+#ifndef INKPATH
+#define INKPATH
 
 #ifdef _WIN32
 #define WINEXPORT __declspec(dllexport)
 #else
 #define WINEXPORT
-#endif
+#endif //_WIN32
 
 /*
  * This is a barebones interface for allowing Lua to get data directly™ from
@@ -22,37 +22,37 @@
 
 using namespace inkp;
 
-typedef std::vector<std::vector<cv::Point>> ContourList;
+typedef std::vector<std::vector<cv::Point>> StrokeList;
 
-// inkpath as C++ class
+// Plugin class
 class Inkpath {
   private:
-    ContourList contours;
+    StrokeList strokes;
 
   public:
     Inkpath() {}
-    void set(ContourList contours) { this->contours = contours; }
-    ContourList get() const { return this->contours; }
+    void set(StrokeList strokes) { this->strokes = strokes; }
+    StrokeList get() const { return this->strokes; }
 };
 
-// XXX (wdn): Make CV object and make a new function for it
-int cv_perform_processing(const char* image_path, Inkpath* data);
 
 // inkpath identifier for the Lua metatable
 #define LUA_INKPATH "Inkpath"
 
+static void registerInkpath(lua_State* L);
+extern "C" WINEXPORT int luaopen_loadInkpath(lua_State* L);
+
 static int inkpath_new(lua_State* L);
+
+// For managing metadata about our strokes
+static int inkpath_getStrokeCount(lua_State* L);
+static int inkpath_getStrokeLength(lua_State* L);
+static int inkpath_getStroke(lua_State* L);
 
 // Free inkpath instance by Lua garbage collection
 static int inkpath_delete(lua_State* L);
 
-// For managing metadata about our strokes
-static int inkpath_getContourCount(lua_State* L);
-static int inkpath_getContourLength(lua_State* L);
+// XXX (wdn): Make CV object and make a new function for it
+int cv_perform_processing(const char* image_path, Inkpath* data);
 
-// Receiving stroke data
-static int inkpath_getContour(lua_State* L);
-
-extern "C" WINEXPORT int luaopen_loadInkpath(lua_State* L);
-
-#endif
+#endif //INKPATH
