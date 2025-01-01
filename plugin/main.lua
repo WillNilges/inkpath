@@ -6,24 +6,20 @@ end
 
 -- Callback if the menu item is executed
 function drawStroke()
-    print("Inkpath Activated. Transcribing image....")
+    print("Inkpath Activated.")
     -- Inkpath is installed differently depending on Windows vs Unix platforms
     local library_path = package.config:sub(1,1) == "\\" and [[C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription\libinkpath.dll]] or "/usr/share/xournalpp/plugins/ImageTranscription/libinkpath.so"
-    print("Loading Library...")
     local inkpath = assert(package.loadlib(library_path, "luaopen_ipcvobj"))
-    print("Initializing inkpath()")
     inkpath()
-    print("Initialized inkpath()")
     local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
     -- Floating point value to scale stroke data coordinates. 0.1x is usually
     -- necessary to cleanly map strokes to the document
     local scaling_factor = 0.1
     local obj = IPCVObj(path, 1)
-    print("Strokes retrieved.")
     local contourCt = obj:getLength()
     print("Got ", contourCt, " strokes.")
 
-    -- TODO: This could be much, MUCH faster.
+    -- TODO: This could be much, much faster.
     for i = 0,contourCt-1,1 do
         local pointCt = obj:getContourLength(i)
         -- We have no use for strokes that are less than two points---we can't do
@@ -35,7 +31,7 @@ function drawStroke()
                     {
                         ["x"] = x_points,
                         ["y"] = y_points,
-                        ["tool"] = "pen", -- Default to pen to silence warnings. TODO: Delete in the future.
+                        ["tool"] = "pen", -- Default to pen to silence warnings.
                     },
                 },
                 ["allowUndoRedoAction"] = "grouped",
