@@ -9,14 +9,14 @@ function drawStroke()
     print("Inkpath Activated.")
     -- Inkpath is installed differently depending on Windows vs Unix platforms
     local library_path = package.config:sub(1,1) == "\\" and [[C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription\libinkpath.dll]] or "/usr/share/xournalpp/plugins/ImageTranscription/libinkpath.so"
-    local inkpath = assert(package.loadlib(library_path, "luaopen_ipcvobj"))
-    inkpath()
+    local load_inkpath = assert(package.loadlib(library_path, "luaopen_loadInkpath"))
+    load_inkpath()
     local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
     -- Floating point value to scale stroke data coordinates. 0.1x is usually
     -- necessary to cleanly map strokes to the document
     local scaling_factor = 0.1
-    local obj = IPCVObj(path, 1)
-    local contourCt = obj:getLength()
+    local obj = Inkpath(path, 1)
+    local contourCt = obj:getContourCount()
     print("Got ", contourCt, " strokes.")
 
     -- TODO: This could be much, much faster.

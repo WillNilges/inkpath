@@ -1,7 +1,7 @@
-#include "ipcv_obj.h"
+#include "plugin.h"
 
 // Do OpenCV stuff
-int cv_perform_processing(const char* image_path, IPCVObj* data) {
+int cv_perform_processing(const char* image_path, Inkpath* data) {
     cv::Mat img = cv::imread(image_path, cv::IMREAD_COLOR);
     if (img.empty()) {
         std::cout << "Could not read the image: " << image_path << std::endl;
@@ -26,16 +26,16 @@ int cv_perform_processing(const char* image_path, IPCVObj* data) {
     return 0;
 }
 
-// Create & return IPCVObj instance to Lua
-static int ipcvobj_new(lua_State* L) {
+// Create & return inkpath instance to Lua
+static int inkpath_new(lua_State* L) {
     const char* image_path = luaL_checkstring(L, 1);
     int tracing_scale = luaL_checkinteger(L, 2);
 
-    IPCVObj* object;        // Declare pointer
-    object = new IPCVObj(); // Initialize pointer
-    *reinterpret_cast<IPCVObj**>(lua_newuserdata(L, sizeof(IPCVObj*))) =
+    Inkpath* object;        // Declare pointer
+    object = new Inkpath(); // Initialize pointer
+    *reinterpret_cast<Inkpath**>(lua_newuserdata(L, sizeof(Inkpath*))) =
         object;                        // Make Lua aware of it
-    luaL_setmetatable(L, LUA_IPCVOBJ); // Metatable magic
+    luaL_setmetatable(L, LUA_INKPATH); // Metatable magic
 
     cv_perform_processing(image_path, object); // do CV stuff
 
@@ -43,36 +43,36 @@ static int ipcvobj_new(lua_State* L) {
     return 1;
 }
 
-// Free IPCVObj instance by Lua garbage collection
-static int ipcvobj_delete(lua_State* L) {
-    delete *reinterpret_cast<IPCVObj**>(lua_touserdata(L, 1));
+// Free inkpath instance by Lua garbage collection
+static int inkpath_delete(lua_State* L) {
+    delete *reinterpret_cast<Inkpath**>(lua_touserdata(L, 1));
     return 0;
 }
 
 // Length stuff
-static int ipcvobj_getLength(lua_State* L) {
+static int inkpath_getContourCount(lua_State* L) {
     lua_pushinteger(
-        L, (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
+        L, (*reinterpret_cast<Inkpath**>(luaL_checkudata(L, 1, LUA_INKPATH)))
                ->get()
                .size());
     return 1;
 }
 
-static int ipcvobj_getContourLength(lua_State* L) {
+static int inkpath_getContourLength(lua_State* L) {
     lua_pushinteger(
-        L, (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
+        L, (*reinterpret_cast<Inkpath**>(luaL_checkudata(L, 1, LUA_INKPATH)))
                ->get()[luaL_checkinteger(L, 2)]
                .size());
     return 1;
 }
 
 // Receiving data
-static int ipcvobj_getContour(lua_State* L) {
+static int inkpath_getContour(lua_State* L) {
     int contourIdx = luaL_checkinteger(L, 2);
     double scalingFactor = luaL_checknumber(L, 3);
 
     std::vector<cv::Point> selectedContour =
-        (*reinterpret_cast<IPCVObj**>(luaL_checkudata(L, 1, LUA_IPCVOBJ)))
+        (*reinterpret_cast<Inkpath**>(luaL_checkudata(L, 1, LUA_INKPATH)))
             ->get()[contourIdx];
 
     // Push all the X coords to the stack
@@ -92,29 +92,29 @@ static int ipcvobj_getContour(lua_State* L) {
     return 2; // Returning two tables
 }
 
-// Register IPCVObj to Lua
-static void register_ipcvobj(lua_State* L) {
-    lua_register(L, LUA_IPCVOBJ, ipcvobj_new);
-    luaL_newmetatable(L, LUA_IPCVOBJ);
-    lua_pushcfunction(L, ipcvobj_delete);
+// Register inkpath to Lua
+static void register_inkpath(lua_State* L) {
+    lua_register(L, LUA_INKPATH, inkpath_new);
+    luaL_newmetatable(L, LUA_INKPATH);
+    lua_pushcfunction(L, inkpath_delete);
     lua_setfield(L, -2, "__gc");
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, ipcvobj_getLength);
-    lua_setfield(L, -2, "getLength");
-    lua_pushcfunction(L, ipcvobj_getContourLength);
+    lua_pushcfunction(L, inkpath_getContourCount);
+    lua_setfield(L, -2, "getContourCount");
+    lua_pushcfunction(L, inkpath_getContourLength);
     lua_setfield(L, -2, "getContourLength");
-    lua_pushcfunction(L, ipcvobj_getContour);
+    lua_pushcfunction(L, inkpath_getContour);
     lua_setfield(L, -2, "getContour");
     lua_pop(L, 1);
 }
 
 extern "C" {
 // Program entry
-WINEXPORT int luaopen_ipcvobj(lua_State* L) {
+WINEXPORT int luaopen_loadInkpath(lua_State* L) {
     printf("Entered Inkpath.");
     luaL_openlibs(L);
-    register_ipcvobj(L);
+    register_inkpath(L);
     return 1;
 }
 }

@@ -19,7 +19,7 @@ ENDIF()
 
 # Define our sources
 file(GLOB CV_SOURCES src/cv/*.cpp)
-file(GLOB PLUGIN_SOURCES src/ipcv_obj/*.cpp)
+file(GLOB PLUGIN_SOURCES src/plugin/*.cpp)
 file(GLOB DEBUG_SOURCES src/cv/debug/*.cpp)
 
 # Locate dependent packages
