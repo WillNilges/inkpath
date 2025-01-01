@@ -95,8 +95,8 @@ std::vector<std::vector<cv::Point>> filterQuadrangles(cv::Mat image,
     if (output_dir != "") {
         // Clone the image to ensure we don't soil the original one
         cv::Mat draw_image = image.clone();
-        draw_squares(draw_image, squares, cv::Scalar(0, 0, 255));
-        draw_squares(draw_image, goodSquares, cv::Scalar(0, 255, 0));
+        drawSquares(draw_image, squares, cv::Scalar(0, 0, 255));
+        drawSquares(draw_image, goodSquares, cv::Scalar(0, 255, 0));
 
         std::string opath = output_dir + "squars.jpg";
         cv::imwrite(opath, draw_image);

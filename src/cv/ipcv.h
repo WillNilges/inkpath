@@ -18,7 +18,7 @@ typedef struct Shapes {
 // ipcv.cpp
 cv::Mat thresholdWithPrep(cv::Mat img, std::string output_dir);
 cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir);
-Shapes findStrokes(cv::Mat img, std::string output_dir);
+std::vector<std::vector<cv::Point>> findStrokes(cv::Mat img, std::string output_dir);
 
 // quadrangle.cpp
 cv::Mat getWhiteboard(cv::Mat image, std::string output_dir);

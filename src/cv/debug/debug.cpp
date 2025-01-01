@@ -105,17 +105,17 @@ int main(int argc, char* argv[]) {
     std::cout << "Using: " << path_string << file_title << "\n";
 
     // Detect a whiteboard in the image, crop, and straighten
-    cv::Mat whiteboard_img = get_whiteboard(color_img, output_path);
+    cv::Mat whiteboard_img = getWhiteboard(color_img, output_path);
 
     // Do it again --- this should solve the "projector problem" where you have
     // content on a projector framed by the border of the photo. Nominally this
     // should find no more squares.
-    cv::Mat whiteboard_img_2 = get_whiteboard(whiteboard_img, output_path);
+    cv::Mat whiteboard_img_2 = getWhiteboard(whiteboard_img, output_path);
 
     // Run stroke detection algorithms
-    cv::Mat otsu_img = otsu(whiteboard_img_2, path_string);
+    cv::Mat otsu_img = thresholdWithPrep(whiteboard_img_2, path_string);
     cv::Mat skel_img = skeletonize(otsu_img, "");
-    Shapes shapes = find_strokes(skel_img, path_string);
+    std::vector<std::vector<cv::Point>> shapes = findStrokes(skel_img, path_string);
 
     // print_points(shapes);
 

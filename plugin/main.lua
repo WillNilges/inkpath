@@ -14,7 +14,7 @@ function drawStroke()
     local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
     -- Floating point value to scale stroke data coordinates. 0.1x is usually
     -- necessary to cleanly map strokes to the document
-    local scaling_factor = 0.1
+    local scaling_factor = 0.125
     local obj = Inkpath(path, 1)
     local contourCt = obj:getStrokeCount()
     print("Got ", contourCt, " strokes.")

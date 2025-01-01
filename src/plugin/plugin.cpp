@@ -114,8 +114,8 @@ int cv_perform_processing(const char* image_path, Inkpath* data) {
     std::cout << "Performing otsu filtering...\n";
     cv::Mat skel_img = skeletonize(otsu_img, "");
     std::cout << "Performing Skeletonization...\n";
-    Shapes shapes = findStrokes(skel_img, "");
+    std::vector<std::vector<cv::Point>> shapes = findStrokes(skel_img, "");
     std::cout << "Looking for shapes...\n";
-    data->set(shapes.contours);
+    data->set(shapes);
     return 0;
 }

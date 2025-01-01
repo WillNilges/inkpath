@@ -7,7 +7,7 @@ RUN apt-get -y update && apt-get install -y make liblua5.4-dev build-essential \
   pkg-config libglib2.0-dev libpng-dev cmake libgtk-3-dev libpoppler-glib-dev \
   portaudio19-dev libsndfile-dev dvipng texlive libxml2-dev libzip-dev \
   librsvg2-dev gettext lua-lgi libgtksourceview-4-dev unzip git wget tmux gdb \
-  vim x11-apps tree nautilus eog clang-format
+  vim x11-apps tree nautilus eog clang-format clang-tidy
 
 # Build and install OpenCV into the container
 COPY ./build-opencv.sh .
