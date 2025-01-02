@@ -30,8 +30,11 @@ cv::Mat thresholdWithPrep(cv::Mat img, std::string output_dir) {
     // https://stackoverflow.com/questions/65891315/opencv-adaptive-thresholding-effective-noise-reduction
     // I was getting a lot of Rice Krispies in the image. This SO post told me
     // to increase C, and that made it mostly acceptable.
+
+    // I also increased the blockSize from 11 -> 51, because typically I'm dealing with images
+    // that are pretty high resolution (cellphone cameras)
     adaptiveThreshold(blur, gauss_thresh, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C,
-                      cv::THRESH_BINARY, 11, 12);
+                      cv::THRESH_BINARY, 51, 12);
 
 #ifdef INKPATH_DEBUG
     if (output_dir != "") {
