@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
 
     // Run stroke detection algorithms
     cv::Mat otsu_img = thresholdWithPrep(whiteboard_img_2, path_string);
-    cv::Mat skel_img = skeletonize(otsu_img, "");
+    cv::Mat skel_img = skeletonize(otsu_img, path_string);
     std::vector<std::vector<cv::Point>> shapes =
         findStrokes(skel_img, path_string);
 

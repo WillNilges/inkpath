@@ -83,18 +83,21 @@ cv::Mat skeletonize(cv::Mat img_inv, std::string output_dir) {
     return skel_invert;
 }
 
-// PErform contour detection
+// Perform contour detection
 // Prereqs: Must be binary color image, target must be black
 std::vector<std::vector<cv::Point>> findStrokes(cv::Mat img,
                                                 std::string output_dir) {
     // XXX (wdn): Does this bitwise not matter?
+    // From the docs, object to be found should be white, and background
+    // should be black. Maybe I should check if there's more black than
+    // white in the image and flip if necessary
     cv::Mat src;
     bitwise_not(img, src);
 
     cv::Mat dst = cv::Mat::zeros(src.rows, src.cols, CV_8UC3);
     src = src > 1;
     std::vector<std::vector<cv::Point>> strokes;
-    findContours(src, strokes, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+    findContours(src, strokes, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
     // Remove strokes that are too small in order to "de-noise" the image
     // a little
