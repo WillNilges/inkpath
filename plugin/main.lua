@@ -8,7 +8,10 @@ end
 function drawStroke()
     print("Inkpath Activated.")
     -- Inkpath is installed differently depending on Windows vs Unix platforms
-    local library_path = package.config:sub(1,1) == "\\" and [[C:\Program Files\Xournal++\share\xournalpp\plugins\ImageTranscription\libinkpath.dll]] or "/usr/share/xournalpp/plugins/ImageTranscription/libinkpath.so"
+    local is_windows = package.config:sub(1,1) == "\\"
+    local plugin_dir = debug.getinfo(1, "S").source:sub(2):match(is_windows and "(.*\\)" or "(.*/)")
+    local library_path = plugin_dir .. "libinkpath." .. (is_windows and "dll" or "so")
+    print("Loading Library...", is_windows, plugin_dir, library_path)
     local load_inkpath = assert(package.loadlib(library_path, "luaopen_loadInkpath"))
     load_inkpath()
     local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
