@@ -1,6 +1,12 @@
 -- Register all Toolbar actions and intialize all UI stuff
 function initUi()
-  ref = app.registerUi({["menu"] = "Transcribe Image", ["callback"] = "drawStroke", ["accelerator"] = "<Control><Alt>t"});
+  ref = app.registerUi({
+    ["menu"] = "Transcribe Image",
+    ["callback"] = "drawStroke",
+    ["accelerator"] = "<Control><Alt>t",
+    ["toolbarId"] = "TRANSCRIBE_IMAGE",
+    ["iconName"] = "xopp-tool-transcribe-image"
+  });
   print("ImageTranscription registered\n");
 end
 
