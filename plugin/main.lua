@@ -20,23 +20,25 @@ function drawStroke()
     print("Got ", contourCt, " strokes.")
 
     -- TODO: This could be much, much faster.
+    local strokes = {}  -- Collect all strokes before calling `app.addStrokes`
     for i = 0,contourCt-1,1 do
         local pointCt = obj:getStrokeLength(i)
         -- We have no use for strokes that are less than two points---we can't do
         -- anything with them.
         if pointCt >= 3 then
             local x_points, y_points = obj:getStroke(i, scaling_factor)
-            app.addStrokes({
-                ["strokes"] = {
-                    {
-                        ["x"] = x_points,
-                        ["y"] = y_points,
-                        ["tool"] = "pen", -- Default to pen to silence warnings.
-                    },
-                },
-                ["allowUndoRedoAction"] = "grouped",
+            table.insert(strokes, {
+                ["x"] = x_points,
+                ["y"] = y_points,
+                ["tool"] = "pen", -- Default to pen to silence warnings. TODO: Delete in the future.
             })
         end
+    end
+    if #strokes > 0 then
+        app.addStrokes({
+            ["strokes"] = strokes,
+            ["allowUndoRedoAction"] = "grouped",
+        })
     end
     app.refreshPage() -- Refreshes the page after inserting the strokes.
     print("Image Transcription Complete. Exiting Inkpath.")
