@@ -12,6 +12,10 @@ function drawStroke()
     local load_inkpath = assert(package.loadlib(library_path, "luaopen_loadInkpath"))
     load_inkpath()
     local path = app.getFilePath({'*.jpg', '*.png', '*.bmp'})
+    if path == nil then
+        -- Exit if no file was selected
+        return
+    end
     -- Floating point value to scale stroke data coordinates. 0.1x is usually
     -- necessary to cleanly map strokes to the document
     local scaling_factor = 0.125
