@@ -23,21 +23,30 @@ file(GLOB PLUGIN_SOURCES src/plugin/*.cpp)
 file(GLOB DEBUG_SOURCES src/cv/debug/*.cpp)
 
 # Locate dependent packages
-FIND_PACKAGE(OpenCV REQUIRED)
+option(USE_EXTERNAL_OPENCV_STATIC "Link OpenCV statically (from subdirectory)" OFF)
+IF(NOT WIN32 AND USE_EXTERNAL_OPENCV_STATIC)
+	add_subdirectory(external/opencv_static)
+	IF(EXISTS "${OpenCV_DIR}")
+		# Require that the package is only being detected using the provided path from external project
+		FIND_PACKAGE(OpenCV 4.5.1 REQUIRED COMPONENTS core imgproc imgcodecs calib3d NO_DEFAULT_PATH)
+	ENDIF()
+ELSE()
+	FIND_PACKAGE(OpenCV 4.5.1 REQUIRED COMPONENTS core imgproc imgcodecs calib3d)
+ENDIF()
+message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_LIBRARIES: ${OpenCV_LIBRARIES}")
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-                            
+
 FIND_PACKAGE(Lua 5.4 REQUIRED)
+message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
 # We link OpenCV statically in Linux,
 # but link totally dynamically and redistribute dlls in Windows
 IF(WIN32)
-	# FIXME (wdn): Fix FIND_PACKAGE behavior for Lua on Windows
-	set(LUA_INCLUDE_DIR "C:/msys64/mingw64/include")
-	set(LUA_LIBRARIES "C:/msys64/mingw64/lib")
-
 	ADD_LIBRARY(inkpath SHARED ${CV_SOURCES} ${PLUGIN_SOURCES})
-	target_link_libraries(inkpath ${LUA_LIBRARIES}/liblua.a)
+	target_link_libraries(inkpath ${LUA_LIBRARIES})
 ELSE()
 	# Compile the CV component of Inkpath separately. This is mostly so that we
 	# can build our debug program and such.
@@ -48,6 +57,12 @@ ELSE()
 	ADD_LIBRARY(inkpath SHARED ${PLUGIN_SOURCES})
 	target_compile_options(inkpath PRIVATE)
 	target_link_libraries(inkpath ipcv)
+
+	# Add project dependency if it should be linked against the static OpenCV libraries
+	IF(USE_EXTERNAL_OPENCV_STATIC)
+		add_dependencies(ipcv ExternalOpenCVStatic)
+		add_dependencies(${PROJECT_NAME} ExternalOpenCVStatic)
+	ENDIF()
 ENDIF()
 
 # OpenCV Gets linked the same way for both platforms

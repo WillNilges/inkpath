@@ -1,0 +1,140 @@
+name: Deploy
+
+on:
+  # Run CI when a new branch or tag is created
+  create:
+    # only run if the tag is a supported version tag
+    tags:
+      - "v*.*.*"
+  # Run CI when a new commit is pushed
+  push:
+    branches:
+      - master
+  # Run CI on pull requests to any branch
+  pull_request:
+  # Run CI on manual request
+  workflow_dispatch:
+
+env:
+  PLUGIN_NAME: ImageTranscription
+
+jobs:
+  push-deploy:
+    strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      OS_NAME: ${{ startsWith(matrix.os, 'windows') && 'win' || 'linux' }}
+      APT_PACKAGES: |
+        build-essential
+        cmake
+        git
+        liblua5.4-dev
+        lua-lgi
+        make
+        pkg-config
+        sudo
+      MSYS2_PACKAGES: |
+        base-devel
+        git
+        libxml2
+        mingw-w64-x86_64-cmake
+        mingw-w64-x86_64-gtk3
+        mingw-w64-x86_64-gtksourceview4
+        mingw-w64-x86_64-libsndfile
+        mingw-w64-x86_64-libzip
+        mingw-w64-x86_64-lua
+        mingw-w64-x86_64-lua-lgi
+        mingw-w64-x86_64-opencv
+        mingw-w64-x86_64-poppler
+        mingw-w64-x86_64-portaudio
+        mingw-w64-x86_64-toolchain
+        tmux
+        unzip
+        wget
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt update
+          echo "$APT_PACKAGES" | xargs sudo apt install -y
+
+      - name: Set up MSYS2
+        if: startsWith(matrix.os, 'windows')
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: ${{ env.MSYS2_PACKAGES }}
+
+      - name: Build using CMake [MSYS2]
+        if: startsWith(matrix.os, 'windows')
+        shell: msys2 {0}
+        run: |
+          cmake -B build -S . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j$(nproc)
+
+      - name: Copy DLLs [MSYS2]
+        if: startsWith(matrix.os, 'windows')
+        shell: msys2 {0}
+        run: |
+          cd build
+          bash ../scripts/copy_dlls.sh
+        continue-on-error: true
+
+      - name: Build using CMake
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DUSE_EXTERNAL_OPENCV_STATIC=ON
+          cmake --build build -j$(nproc)
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLUGIN_NAME }}-${{ env.OS_NAME }}
+          path: build/${{ env.PLUGIN_NAME }}
+        continue-on-error: true
+
+  create-github-release:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    # Only create a GitHub release if a new tag was pushed that starts with v
+    # and if the build step was successful
+    needs: push-deploy
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+    # This downloads all build steps artifacts into the directory 'artifacts':
+    # - ${{ env.PLUGIN_NAME }}-${{ env.OS_NAME }}
+    # - ...
+    - name: Create ZIP files for directories
+      run: |
+        zip -r ./${{ env.PLUGIN_NAME }}-linux.zip ./${{ env.PLUGIN_NAME }}-linux
+        zip -r ./${{ env.PLUGIN_NAME }}-win.zip ./${{ env.PLUGIN_NAME }}-win
+      working-directory: ./artifacts
+    - name: Generate Changelog
+      run: |
+        echo "Unzip the archive for your operating system and copy the directory '${{ env.PLUGIN_NAME }}' to the ['plugins' directory of your xournal++ installation](https://xournalpp.github.io/guide/plugins/plugins/#installation-folder)." > ${{ github.workspace }}-CHANGELOG.txt
+        echo "Windows additionally requires adding this copied directory ('...\plugins\${{ env.PLUGIN_NAME }}') to the PATH environment variable so that the contained DLL files can be found when loading the inkpath DLL file." >> ${{ github.workspace }}-CHANGELOG.txt
+        echo "To do this search for 'Environment Variables' in the Windows search, select User Environment Variables, click the existing table entry 'PATH', add a new entry with the plugin directory (e.g. 'C:\Program Files\Xournal++\share\xournalpp\plugins\${{ env.PLUGIN_NAME }}')." >> ${{ github.workspace }}-CHANGELOG.txt
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: ${{ github.workspace }}-CHANGELOG.txt
+        generate_release_notes: true
+        files: ./artifacts/*.zip
+    # This creates a release for the current (new) version tag that includes:
+    # - all created plugin directories as .zip files
+    # - ...
