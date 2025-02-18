@@ -23,9 +23,21 @@ file(GLOB PLUGIN_SOURCES src/plugin/*.cpp)
 file(GLOB DEBUG_SOURCES src/cv/debug/*.cpp)
 
 # Locate dependent packages
-FIND_PACKAGE(OpenCV REQUIRED)
-INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-                            
+option(USE_EXTERNAL_OPENCV_STATIC "Link OpenCV statically (from subdirectory)" OFF)
+IF(USE_EXTERNAL_OPENCV_STATIC)
+	add_subdirectory(external/opencv_static)
+	IF(EXISTS "${OpenCV_DIR}")
+		# Require that the package is only being detected using the provided path from external project
+		FIND_PACKAGE(OpenCV 4.5.1 REQUIRED COMPONENTS core imgproc imgcodecs calib3d NO_DEFAULT_PATH)
+	ENDIF()
+ELSE()
+	FIND_PACKAGE(OpenCV 4.5.1 REQUIRED COMPONENTS core imgproc imgcodecs calib3d)
+ENDIF()
+IF(OpenCV_FOUND)
+	message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+	message(STATUS "OpenCV_LIBRARIES: ${OpenCV_LIBRARIES}")
+ENDIF()
+
 FIND_PACKAGE(Lua 5.4 REQUIRED)
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
@@ -43,15 +55,22 @@ ELSE()
 	# can build our debug program and such.
 	ADD_LIBRARY(ipcv STATIC ${CV_SOURCES})
 	target_link_libraries(ipcv ${OpenCV_LIBRARIES})
+	target_include_directories(ipcv PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 	# Compile plugin component of Inkpath.
 	ADD_LIBRARY(inkpath SHARED ${PLUGIN_SOURCES})
 	target_compile_options(inkpath PRIVATE)
 	target_link_libraries(inkpath ipcv)
+
+	# Add dependencies if required by given options
+	IF(USE_EXTERNAL_OPENCV_STATIC)
+		add_dependencies(ipcv ExternalOpenCVStatic)
+	ENDIF()
 ENDIF()
 
 # OpenCV Gets linked the same way for both platforms
 target_link_libraries(inkpath ${OpenCV_LIBRARIES})
+target_include_directories(inkpath PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 
 # Copy the script and manifest into the build artifact
@@ -68,8 +87,15 @@ add_executable(inkpath-debug EXCLUDE_FROM_ALL ${CV_SOURCES} ${DEBUG_SOURCES})
 target_compile_definitions(inkpath-debug PRIVATE INKPATH_DEBUG)
 
 target_link_libraries(inkpath-debug ${OpenCV_LIBRARIES})
+target_include_directories(inkpath-debug PRIVATE ${OpenCV_INCLUDE_DIRS})
 set_target_properties(inkpath-debug PROPERTIES OUTPUT_NAME "inkpath-debug")
 set_target_properties(inkpath-debug PROPERTIES RUNTIME_OUTPUT_DIRECTORY "debug")
+
+# Add dependencies if required by given options
+IF(USE_EXTERNAL_OPENCV_STATIC)
+	add_dependencies(${PROJECT_NAME} ExternalOpenCVStatic)
+	add_dependencies(${PROJECT_NAME}-debug ExternalOpenCVStatic)
+ENDIF()
 
 # If cross compiling on Windows copy dependent DLLs
 if(CMAKE_GENERATOR STREQUAL "MinGW Makefiles")

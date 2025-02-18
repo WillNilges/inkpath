@@ -71,11 +71,15 @@ _Inkpath is coming to a package manager near you soon™!_
 
 ### Linux
 
-```
-mkdir build
-cd build
-cmake ..
-make
+```sh
+# Configure
+# > with shared libraries
+cmake -B build -S .
+# > with OpenCV statically linked
+cmake -B build -S . -DUSE_EXTERNAL_OPENCV_STATIC=ON
+# Build and Install
+cmake --build build -j$(nproc)
+cmake --install build
 ```
 
 ### Arch
