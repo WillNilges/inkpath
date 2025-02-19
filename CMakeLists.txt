@@ -27,17 +27,15 @@ FIND_PACKAGE(OpenCV REQUIRED)
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
                             
 FIND_PACKAGE(Lua 5.4 REQUIRED)
+message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
+message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
 # We link OpenCV statically in Linux,
 # but link totally dynamically and redistribute dlls in Windows
 IF(WIN32)
-	# FIXME (wdn): Fix FIND_PACKAGE behavior for Lua on Windows
-	set(LUA_INCLUDE_DIR "C:/msys64/mingw64/include")
-	set(LUA_LIBRARIES "C:/msys64/mingw64/lib")
-
 	ADD_LIBRARY(inkpath SHARED ${CV_SOURCES} ${PLUGIN_SOURCES})
-	target_link_libraries(inkpath ${LUA_LIBRARIES}/liblua.a)
+	target_link_libraries(inkpath ${LUA_LIBRARIES})
 ELSE()
 	# Compile the CV component of Inkpath separately. This is mostly so that we
 	# can build our debug program and such.
