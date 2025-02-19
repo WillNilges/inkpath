@@ -1,0 +1,122 @@
+name: Deploy
+
+on:
+  # Run CI when a new branch or tag is created
+  create:
+    # only run if the tag is a supported version tag
+    tags:
+      - "v*.*.*"
+  # Run CI when a new commit is pushed
+  push:
+    branches:
+      - master
+  # Run CI on pull requests to any branch
+  pull_request:
+  # Run CI on manual request
+  workflow_dispatch:
+
+env:
+  PLUGIN_NAME: ImageTranscription
+
+jobs:
+  push-deploy:
+    strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      OS_NAME: ${{ startsWith(matrix.os, 'windows') && 'win' || 'linux' }}
+      APT_PACKAGES: |
+        build-essential
+        cmake
+        git
+        liblua5.4-dev
+        pkg-config
+      MSYS2_PACKAGES: |
+        base-devel
+        git
+        mingw-w64-x86_64-cmake
+        mingw-w64-x86_64-lua
+        mingw-w64-x86_64-opencv
+        mingw-w64-x86_64-toolchain
+        pkg-config
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt update
+          echo "$APT_PACKAGES" | xargs sudo apt install -y
+
+      - name: Set up MSYS2
+        if: startsWith(matrix.os, 'windows')
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: ${{ env.MSYS2_PACKAGES }}
+
+      - name: Build using CMake [MSYS2]
+        if: startsWith(matrix.os, 'windows')
+        shell: msys2 {0}
+        run: |
+          cmake -B build -S .
+          cmake --build build -j$(nproc)
+          cmake --install build
+
+      - name: Build using CMake
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          cmake -B build -S . -DUSE_EXTERNAL_OPENCV_STATIC=ON
+          cmake --build build -j$(nproc)
+          cmake --install build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PLUGIN_NAME }}-${{ env.OS_NAME }}
+          path: build/${{ env.PLUGIN_NAME }}
+        continue-on-error: true
+
+  create-github-release:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    # Only create a GitHub release if a new tag was pushed that starts with v
+    # and if the build step was successful
+    needs: push-deploy
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+    # This downloads all build steps artifacts into the directory 'artifacts':
+    # - ${{ env.PLUGIN_NAME }}-${{ env.OS_NAME }}
+    # - ...
+    - name: Copy Windows scripts to Windows artifact
+      run: |
+        cp ./scripts/win_configure_path.ps1 ./artifacts/${{ env.PLUGIN_NAME }}-win
+    - name: Create ZIP files for directories
+      run: |
+        zip -r ./${{ env.PLUGIN_NAME }}-linux.zip ./${{ env.PLUGIN_NAME }}-linux
+        zip -r ./${{ env.PLUGIN_NAME }}-win.zip ./${{ env.PLUGIN_NAME }}-win
+      working-directory: ./artifacts
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        body_path: RELEASE_NOTES_TEMPLATE.md
+        generate_release_notes: true
+        # Mark as prerelease if tag ends with b
+        prerelease: ${{ endsWith(github.ref_name, 'b') }}
+        files: |
+          ./artifacts/*.zip
+    # This creates a release for the current (new) version tag that includes:
+    # - all created plugin directories as .zip files
+    # - ...
