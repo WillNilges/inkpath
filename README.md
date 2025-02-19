@@ -78,6 +78,12 @@ cmake ..
 make
 ```
 
+To install the plugin to the local `dist` directory instead of the system specific Xournal++ User directory:
+
+```sh
+cmake -B build -S . -DCMAKE_INSTALL_PREFIX="dist"
+```
+
 ### Arch
 
 ```BASH
