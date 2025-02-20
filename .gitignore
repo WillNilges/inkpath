@@ -4,6 +4,7 @@ out*
 *.out
 build/
 *.svg
+dist
 do.sh
 ImageTranscription/inkpath.so
 ImageTranscription/ipcvobj.so

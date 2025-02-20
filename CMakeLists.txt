@@ -2,20 +2,24 @@ cmake_minimum_required(VERSION 3.22.1)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 PROJECT(inkpath)
 
+set(PLUGIN_NAME "ImageTranscription")
+set(PLUGIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/plugin")
+set(CMAKE_INSTALL_PREFIX_PLUGIN "${CMAKE_INSTALL_PREFIX}")
+
+# Options
+set(CMAKE_INSTALL_PREFIX_ICONS "" CACHE PATH "Installation path for icons")
+
 # Send artifacts to /build/ImageTranscription. That will be the final artifact.
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/ImageTranscription)
 
 # Things work a little differently on Windows vs Linux.
-IF(WIN32)
-	message("Building for Windows")
-	set(INSTALL_DESTINATION "C:/Program Files/Xournal++/share/xournalpp/plugins")
-ELSE()
-	# Need position-independent code flag enabled to make Lua work
-	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-	set(INSTALL_DESTINATION /usr/share/xournalpp/plugins)
-ENDIF()
+if(UNIX AND NOT APPLE)
+    # For dynamic libraries enabling a -fPIC (Position-Independent Code) flag is
+    # required when compiling code into shared libraries
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
 
 # Define our sources
 file(GLOB CV_SOURCES src/cv/*.cpp)
@@ -25,7 +29,7 @@ file(GLOB DEBUG_SOURCES src/cv/debug/*.cpp)
 # Locate dependent packages
 FIND_PACKAGE(OpenCV REQUIRED)
 INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-                            
+
 FIND_PACKAGE(Lua 5.4 REQUIRED)
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 
@@ -54,14 +58,27 @@ ENDIF()
 target_link_libraries(inkpath ${OpenCV_LIBRARIES})
 
 
-# Copy the script and manifest into the build artifact
-file(GLOB PLUGIN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/plugin/*")
-FOREACH(FILE ${PLUGIN_FILES})
-	file(COPY ${FILE} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-ENDFOREACH()
-
 # Finally, set an install target.
-install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} DESTINATION ${INSTALL_DESTINATION})
+install(
+    DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    DESTINATION ${CMAKE_INSTALL_PREFIX_PLUGIN}
+)
+# Copy plugin directory files to the install prefix
+install(
+    DIRECTORY ${PLUGIN_DIR}/
+    DESTINATION ${CMAKE_INSTALL_PREFIX_PLUGIN}/${PLUGIN_NAME}
+    FILES_MATCHING
+    PATTERN "*"
+)
+# Copy icon files to the install prefix for icons
+if(CMAKE_INSTALL_PREFIX_ICONS)
+    install(
+        DIRECTORY ${PLUGIN_DIR}/
+        DESTINATION ${CMAKE_INSTALL_PREFIX_ICONS}
+        FILES_MATCHING
+        PATTERN "*.svg"
+    )
+endif()
 
 # Also set up debugging target
 add_executable(inkpath-debug EXCLUDE_FROM_ALL ${CV_SOURCES} ${DEBUG_SOURCES})
